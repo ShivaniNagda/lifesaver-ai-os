@@ -32,6 +32,45 @@ function getGeminiClient(): GoogleGenAI {
   return aiClient;
 }
 
+// Resilient model-routing and retry mechanism
+async function generateContentWithRetry(prompt: string, responseSchema: any): Promise<string> {
+  const ai = getGeminiClient();
+  const modelsToTry = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-flash-latest"];
+  let lastError: any = null;
+
+  for (let i = 0; i < modelsToTry.length; i++) {
+    const currentModel = modelsToTry[i];
+    try {
+      const response = await ai.models.generateContent({
+        model: currentModel,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: responseSchema,
+        },
+      });
+      if (response && response.text) {
+        return response.text;
+      }
+    } catch (err: any) {
+      lastError = err;
+      const isTransient = err.status === 503 || 
+                          err.message?.includes("503") || 
+                          err.message?.includes("UNAVAILABLE") || 
+                          err.message?.includes("high demand") ||
+                          err.status === 429;
+      
+      if (isTransient && i < modelsToTry.length - 1) {
+        console.warn(`[LifeSaver OS Core] Model ${currentModel} temporary traffic peak (503/Transient). Retrying on alternative core ${modelsToTry[i + 1]}...`);
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastError || new Error("Failed to generate content with any model.");
+}
+
 // -----------------------------------------------------------------
 // REST API ROUTES
 // -----------------------------------------------------------------
@@ -73,73 +112,68 @@ Make sure that:
 - Simulate the dialog exchange between the Agents in "agentLogs" to demonstrate their active communication (e.g. "Priority Agent analyzed task X...", "Burnout Prevention Agent warned...").
 - Generate a dialogue with their "Future Self" (Future Self Simulator) demonstrating both a positive path (if they succeed) and a negative path (if they skip things).`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          required: [
-            "successProbability",
-            "burnoutRisk",
-            "failurePrediction",
-            "rescueModeActive",
-            "timeline",
-            "agentLogs",
-            "aiCoachAdvice",
-            "futureSelfDialog"
-          ],
-          properties: {
-            successProbability: {
-              type: Type.INTEGER,
-              description: "Estimated success probability score (0-100) based on schedule friction."
-            },
-            burnoutRisk: {
-              type: Type.INTEGER,
-              description: "Burnout vulnerability risk percentage (0-100) based on task density."
-            },
-            failurePrediction: {
-              type: Type.STRING,
-              description: "A stark, clear prediction of what will fail first (e.g. missing bill, exam failure) if action is not taken immediately."
-            },
-            rescueModeActive: {
-              type: Type.BOOLEAN,
-              description: "Whether a critical commitment is within immediate danger requiring emergency Deadline Rescue Mode."
-            },
-            aiCoachAdvice: {
-              type: Type.STRING,
-              description: "A powerful, concise, hyper-customized chief-of-staff strategic advice statement."
-            },
-            timeline: {
-              type: Type.ARRAY,
-              description: "Proactive time slots and action tasks prepared by the agents.",
-              items: {
-                type: Type.OBJECT,
-                required: ["id", "time", "type", "title", "description", "status"],
-                properties: {
-                  id: { type: Type.STRING },
-                  time: { type: Type.STRING, description: "E.g., '09:00 AM', '02:30 PM', 'Tomorrow 10:00 AM'" },
-                  type: { 
-                    type: Type.STRING, 
-                    description: "Category: 'deep_work', 'rescue_action', 'rest_break', 'milestone', 'habit', 'prep_block'" 
-                  },
-                  title: { type: Type.STRING },
-                  description: { type: Type.STRING },
-                  status: { type: Type.STRING, description: "'completed', 'active', 'scheduled', 'high_risk'" }
-                }
-              }
-            },
-            agentLogs: {
-              type: Type.ARRAY,
-              description: "The autonomous agent-to-agent communication transcript.",
-              items: {
-                type: Type.OBJECT,
-                required: ["agent", "message", "timestamp"],
-                properties: {
-                  agent: { type: Type.STRING },
-                  message: { type: Type.STRING },
-                  timestamp: { type: Type.STRING }
+    const responseText = await generateContentWithRetry(prompt, {
+      type: Type.OBJECT,
+      required: [
+        "successProbability",
+        "burnoutRisk",
+        "failurePrediction",
+        "rescueModeActive",
+        "timeline",
+        "agentLogs",
+        "aiCoachAdvice",
+        "futureSelfDialog"
+      ],
+      properties: {
+        successProbability: {
+          type: Type.INTEGER,
+          description: "Estimated success probability score (0-100) based on schedule friction."
+        },
+        burnoutRisk: {
+          type: Type.INTEGER,
+          description: "Burnout vulnerability risk percentage (0-100) based on task density."
+        },
+        failurePrediction: {
+          type: Type.STRING,
+          description: "A stark, clear prediction of what will fail first (e.g. missing bill, exam failure) if action is not taken immediately."
+        },
+        rescueModeActive: {
+          type: Type.BOOLEAN,
+          description: "Whether a critical commitment is within immediate danger requiring emergency Deadline Rescue Mode."
+        },
+        aiCoachAdvice: {
+          type: Type.STRING,
+          description: "A powerful, concise, hyper-customized chief-of-staff strategic advice statement."
+        },
+        timeline: {
+          type: Type.ARRAY,
+          description: "Proactive time slots and action tasks prepared by the agents.",
+          items: {
+            type: Type.OBJECT,
+            required: ["id", "time", "type", "title", "description", "status"],
+            properties: {
+              id: { type: Type.STRING },
+              time: { type: Type.STRING, description: "E.g., '09:00 AM', '02:30 PM', 'Tomorrow 10:00 AM'" },
+              type: { 
+                type: Type.STRING, 
+                description: "Category: 'deep_work', 'rescue_action', 'rest_break', 'milestone', 'habit', 'prep_block'" 
+              },
+              title: { type: Type.STRING },
+              description: { type: Type.STRING },
+              status: { type: Type.STRING, description: "'completed', 'active', 'scheduled', 'high_risk'" }
+            }
+          }
+        },
+        agentLogs: {
+          type: Type.ARRAY,
+          description: "The autonomous agent-to-agent communication transcript.",
+          items: {
+            type: Type.OBJECT,
+            required: ["agent", "message", "timestamp"],
+            properties: {
+              agent: { type: Type.STRING },
+              message: { type: Type.STRING },
+              timestamp: { type: Type.STRING }
                 }
               }
             },
@@ -158,14 +192,12 @@ Make sure that:
               }
             }
           }
-        }
-      }
     });
 
-    const parsedData = JSON.parse(response.text || "{}");
+    const parsedData = JSON.parse(responseText || "{}");
     res.json(parsedData);
   } catch (err: any) {
-    console.error("Error in /api/agent/process (falling back to Local Cognitive Cache):", err);
+    console.warn("Deploying Local Cognitive Cache fallback due to transient API state: ", err.message || err);
     
     // Dynamically build a custom fallback response based on the tasks provided
     const userTasks = req.body.tasks && Array.isArray(req.body.tasks) ? req.body.tasks : [];
@@ -256,27 +288,20 @@ Format your output as JSON matching the schema:
   "tacticalTip": "string"
 }`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          required: ["subject", "body", "tacticalTip"],
-          properties: {
-            subject: { type: Type.STRING },
-            body: { type: Type.STRING },
-            tacticalTip: { type: Type.STRING }
-          }
-        }
+    const responseText = await generateContentWithRetry(prompt, {
+      type: Type.OBJECT,
+      required: ["subject", "body", "tacticalTip"],
+      properties: {
+        subject: { type: Type.STRING },
+        body: { type: Type.STRING },
+        tacticalTip: { type: Type.STRING }
       }
     });
 
-    const result = JSON.parse(response.text || "{}");
+    const result = JSON.parse(responseText || "{}");
     res.json(result);
   } catch (err: any) {
-    console.error("Error in /api/agent/negotiate (falling back to Local Negotiator templates):", err);
+    console.warn("Deploying Local Negotiator template fallback due to transient API state: ", err.message || err);
     const { deadlineTitle = "SaaS Cloud Hosting Payment", recipientName = "Support Vendor", reason = "funds clearing delays", tone = "professional" } = req.body;
     
     const fallbackNego = {
@@ -316,26 +341,19 @@ Respond as a JSON object:
   "immediateMicroAction": "One single immediate micro-action of 5 minutes they can do right now to build momentum"
 }`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          required: ["reply", "immediateMicroAction"],
-          properties: {
-            reply: { type: Type.STRING },
-            immediateMicroAction: { type: Type.STRING }
-          }
-        }
+    const responseText = await generateContentWithRetry(prompt, {
+      type: Type.OBJECT,
+      required: ["reply", "immediateMicroAction"],
+      properties: {
+        reply: { type: Type.STRING },
+        immediateMicroAction: { type: Type.STRING }
       }
     });
 
-    const result = JSON.parse(response.text || "{}");
+    const result = JSON.parse(responseText || "{}");
     res.json(result);
   } catch (err: any) {
-    console.error("Error in /api/agent/twin-chat (falling back to Local Mirror Engine):", err);
+    console.warn("Deploying Local Mirror Engine fallback due to transient API state: ", err.message || err);
     const { userMessage = "What should I do?" } = req.body;
     
     const fallbackChat = {
@@ -372,42 +390,35 @@ Format your output as JSON matching the schema:
   "stressRemedy": "string"
 }`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          required: ["schedulePhases", "highYieldTopics", "stressRemedy"],
-          properties: {
-            schedulePhases: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                required: ["phase", "duration", "focus", "method"],
-                properties: {
-                  phase: { type: Type.STRING },
-                  duration: { type: Type.STRING },
-                  focus: { type: Type.STRING },
-                  method: { type: Type.STRING }
-                }
-              }
-            },
-            highYieldTopics: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
-            },
-            stressRemedy: { type: Type.STRING }
+    const responseText = await generateContentWithRetry(prompt, {
+      type: Type.OBJECT,
+      required: ["schedulePhases", "highYieldTopics", "stressRemedy"],
+      properties: {
+        schedulePhases: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            required: ["phase", "duration", "focus", "method"],
+            properties: {
+              phase: { type: Type.STRING },
+              duration: { type: Type.STRING },
+              focus: { type: Type.STRING },
+              method: { type: Type.STRING }
+            }
           }
-        }
+        },
+        highYieldTopics: {
+          type: Type.ARRAY,
+          items: { type: Type.STRING }
+        },
+        stressRemedy: { type: Type.STRING }
       }
     });
 
-    const result = JSON.parse(response.text || "{}");
+    const result = JSON.parse(responseText || "{}");
     res.json(result);
   } catch (err: any) {
-    console.error("Error in /api/agent/prepare (falling back to Local Prep Phase generator):", err);
+    console.warn("Deploying Local Prep Phase generator fallback due to transient API state: ", err.message || err);
     const { examOrInterviewTitle = "Chemistry Exam", timeRemaining = "3 Days", topicsToCover = ["Core Concepts"] } = req.body;
     
     const fallbackPrep = {

@@ -11,6 +11,11 @@ import {
   Task, TimelineNode, AgentLog, FutureSelfDialog, AgentOSResponse, 
   NegotiationResult, PreparationPlan, TwinChatResponse, ChatMessage 
 } from "./types";
+import AuthScreen from "./components/AuthScreen";
+import GoalTracker from "./components/GoalTracker";
+import HabitTracker from "./components/HabitTracker";
+import CalendarModule from "./components/CalendarModule";
+import SettingsPanel from "./components/SettingsPanel";
 
 const INITIAL_TASKS: Task[] = [
   { id: "1", title: "Chemistry Midterm Exam Preparation", dueDate: "2026-06-28", urgency: "critical", status: "pending" },
@@ -22,7 +27,18 @@ const INITIAL_TASKS: Task[] = [
 export default function App() {
   // Navigation & View control
   const [view, setView] = useState<"landing" | "dashboard">("landing");
-  const [activeTab, setActiveTab] = useState<"overview" | "twin" | "rescue" | "negotiate" | "prep">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "twin" | "rescue" | "negotiate" | "prep" | "calendar" | "goals" | "habits" | "settings">("overview");
+
+  // User Auth & Session state
+  const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem("lifeos_email") || "shivanifs.1786145@gmail.com");
+  const [userRole, setUserRole] = useState<string>(() => localStorage.getItem("lifeos_role") || "Executive Officer");
+
+  const handleLogout = () => {
+    localStorage.removeItem("lifeos_email");
+    localStorage.removeItem("lifeos_role");
+    setUserEmail(null);
+    setView("landing");
+  };
 
   // Core App State
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
@@ -227,6 +243,35 @@ export default function App() {
     }
   };
 
+  // If no user email, enforce secure login flow
+  if (!userEmail) {
+    return (
+      <div className="relative min-h-screen bg-[#050505] text-zinc-100 flex items-center justify-center overflow-hidden select-none">
+        <div className="absolute inset-0 moving-grid pointer-events-none opacity-20" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/[0.02] blur-[150px] pointer-events-none" />
+        <div className="w-full max-w-md p-4 relative z-10">
+          <div className="flex items-center gap-3 justify-center mb-6">
+            <div className="w-8 h-8 rounded bg-white flex items-center justify-center font-mono font-bold text-black text-sm tracking-tighter">
+              L⚡
+            </div>
+            <span className="font-display font-medium tracking-wide text-lg text-white">
+              LifeSaver <span className="font-mono text-zinc-500 text-xs tracking-widest uppercase ml-1.5 border border-zinc-800 px-1.5 py-0.5 rounded">AI OS</span>
+            </span>
+          </div>
+          <AuthScreen 
+            onAuthSuccess={(email, role) => {
+              setUserEmail(email);
+              setUserRole(role);
+              setView("dashboard");
+            }} 
+            currentEmail={undefined}
+            onLogout={() => {}}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // Render Landing Page
   if (view === "landing") {
     return (
@@ -410,7 +455,7 @@ export default function App() {
                 System Active
               </span>
             </div>
-            <p className="text-[10px] text-zinc-500 font-mono tracking-tight mt-0.5">user: {navigator.userAgent.includes("Chrome") ? "shivanifs.1786145@gmail.com" : "admin_session"}</p>
+            <p className="text-[10px] text-zinc-500 font-mono tracking-tight mt-0.5">user: {userEmail}</p>
           </div>
         </div>
 
@@ -431,14 +476,20 @@ export default function App() {
         {/* Global actions */}
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => setView("landing")} 
-            className="text-xs text-zinc-400 hover:text-white border border-zinc-900 hover:border-zinc-800 bg-zinc-950 px-3 py-1.5 rounded-lg transition-colors"
+            onClick={handleLogout} 
+            className="text-xs text-zinc-400 hover:text-white border border-zinc-900 hover:border-zinc-800 bg-zinc-950 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
           >
-            Terminal Shutdown
+            Terminal Shutdown (Logout)
           </button>
-          <div className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-zinc-400">
-            <User className="w-4 h-4 text-white" />
-          </div>
+          <button 
+            onClick={() => setActiveTab("settings")}
+            className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+              activeTab === "settings" ? "bg-white border-white text-black font-semibold" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
+            }`}
+            title="Open Settings Console"
+          >
+            <User className="w-4 h-4" />
+          </button>
         </div>
       </header>
 
@@ -583,13 +634,16 @@ export default function App() {
         <div className="lg:col-span-8 flex flex-col gap-6">
           
           {/* High-End Sub-Navigation for Advanced OS Modes */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-950 border border-zinc-900 max-w-full overflow-x-auto">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-950 border border-zinc-900 max-w-full overflow-x-auto scrollbar-thin">
             {[
               { id: "overview", label: "Executive Workspace", icon: Activity },
-              { id: "rescue", label: "Deadline Rescue Mode", icon: Zap },
+              { id: "calendar", label: "Interactive Calendar", icon: Calendar },
+              { id: "goals", label: "Strategic Goal Engine", icon: Target },
+              { id: "habits", label: "Habit Matrix", icon: Hourglass },
               { id: "twin", label: "Productivity Twin Simulator", icon: MessageSquare },
               { id: "negotiate", label: "AI Extension Negotiator", icon: Mail },
-              { id: "prep", label: "Exam & Interview Prep", icon: BookOpen }
+              { id: "prep", label: "Exam & Interview Prep", icon: BookOpen },
+              { id: "settings", label: "Settings & Profile Console", icon: Settings }
             ].map((tab) => {
               const Icon = tab.icon;
               const isSelected = activeTab === tab.id;
@@ -599,7 +653,7 @@ export default function App() {
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
                     isSelected 
-                      ? "bg-white text-black" 
+                      ? "bg-white text-black font-semibold" 
                       : "text-zinc-400 hover:text-white hover:bg-zinc-900"
                   }`}
                 >
@@ -1181,6 +1235,44 @@ export default function App() {
                 )}
               </div>
 
+            </div>
+          )}
+
+          {/* TAB CONTENT 6: Calendar Module */}
+          {activeTab === "calendar" && (
+            <CalendarModule tasks={tasks} />
+          )}
+
+          {/* TAB CONTENT 7: Goals Tracker */}
+          {activeTab === "goals" && (
+            <GoalTracker />
+          )}
+
+          {/* TAB CONTENT 8: Habit Tracker */}
+          {activeTab === "habits" && (
+            <HabitTracker />
+          )}
+
+          {/* TAB CONTENT 9: Settings Panel */}
+          {activeTab === "settings" && (
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              <div className="md:col-span-8">
+                <SettingsPanel 
+                  userEmail={userEmail || ""} 
+                  userRole={userRole} 
+                  onUpdateRole={(role) => setUserRole(role)} 
+                />
+              </div>
+              <div className="md:col-span-4">
+                <AuthScreen 
+                  onAuthSuccess={(email, role) => {
+                    setUserEmail(email);
+                    setUserRole(role);
+                  }} 
+                  currentEmail={userEmail || undefined}
+                  onLogout={handleLogout}
+                />
+              </div>
             </div>
           )}
 
