@@ -1,0 +1,6 @@
+{
+  "name": "LifeSaver AI OS",
+  "description": "The Autonomous AI Productivity Operating System. A premium multi-agent companion that proactively plans, schedules, and executes tasks to prevent missed deadlines and burnout.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
