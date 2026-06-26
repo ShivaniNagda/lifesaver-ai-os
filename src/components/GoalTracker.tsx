@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Target, CheckCircle, Plus, Trash2, Sparkles, TrendingUp, Calendar, Zap, AlertCircle } from "lucide-react";
+import { Target, CheckCircle, Plus, Trash2, Sparkles, Calendar } from "lucide-react";
 
 interface Milestone {
   id: string;
@@ -8,12 +8,13 @@ interface Milestone {
 }
 
 interface Goal {
-  id: string;
+  id?: string;
+  _id?: string;
   title: string;
   category: string;
-  deadline: string;
+  targetDate: string;
   milestones: Milestone[];
-  progress: number; // calculated completion percentage
+  progress: number;
   status: "active" | "completed" | "delayed";
 }
 
@@ -39,7 +40,7 @@ const AI_GOAL_SUGGESTIONS = [
     ]
   },
   {
-    title: "Optimize SaaS Server Infrastructure SLA",
+    title: "Optimize SaaS Server SLA",
     category: "Engineering",
     deadline: "2026-07-05",
     milestones: [
@@ -56,57 +57,38 @@ export default function GoalTracker() {
   const [newCategory, setNewCategory] = useState("Startup");
   const [newDeadline, setNewDeadline] = useState("2026-06-30");
   const [newMilestonesText, setNewMilestonesText] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Load from local storage if exists
-  useEffect(() => {
-    const saved = localStorage.getItem("lifeos_goals");
-    if (saved) {
-      try {
-        setGoals(JSON.parse(saved));
-      } catch (e) {
-        console.error(e);
-      }
-    } else {
-      // Seed default goals matching initial app commitments
-      const defaultGoals: Goal[] = [
-        {
-          id: "g1",
-          title: "Prep Chemistry Midterm Examination",
-          category: "Academics",
-          deadline: "2026-06-28",
-          milestones: [
-            { id: "m1-1", title: "Organic Synthesis routes summary sheet", completed: true },
-            { id: "m1-2", title: "Syllabus practice problems set B", completed: false },
-            { id: "m1-3", title: "Active Recall mock test evaluation", completed: false }
-          ],
-          progress: 33,
-          status: "active"
-        },
-        {
-          id: "g2",
-          title: "Venture Pitch Deck Delivery",
-          category: "Startup Funding",
-          deadline: "2026-06-30",
-          milestones: [
-            { id: "m2-1", title: "Complete total addressable market analysis", completed: true },
-            { id: "m2-2", title: "Prepare financial 3-year margin forecast", completed: true },
-            { id: "m2-3", title: "Format visual monochrome typography layout", completed: false }
-          ],
-          progress: 66,
-          status: "active"
-        }
-      ];
-      setGoals(defaultGoals);
-      localStorage.setItem("lifeos_goals", JSON.stringify(defaultGoals));
-    }
-  }, []);
-
-  const saveGoals = (updatedGoals: Goal[]) => {
-    setGoals(updatedGoals);
-    localStorage.setItem("lifeos_goals", JSON.stringify(updatedGoals));
+  const getHeaders = () => {
+    const token = localStorage.getItem("lifeos_token");
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {})
+    };
   };
 
-  const handleCreateGoal = (e: React.FormEvent) => {
+  const fetchGoals = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/goals", {
+        headers: getHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setGoals(data);
+      }
+    } catch (e) {
+      console.error("Failed to load goals from backend:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGoals();
+  }, []);
+
+  const handleCreateGoal = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
@@ -119,62 +101,104 @@ export default function GoalTracker() {
         completed: false
       }));
 
-    const added: Goal = {
-      id: `g-${Date.now()}`,
-      title: newTitle,
-      category: newCategory,
-      deadline: newDeadline,
-      milestones: milestonesList,
-      progress: 0,
-      status: "active"
-    };
-
-    const next = [added, ...goals];
-    saveGoals(next);
-    setNewTitle("");
-    setNewMilestonesText("");
+    try {
+      const res = await fetch("/api/goals", {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({
+          title: newTitle,
+          category: newCategory,
+          targetDate: newDeadline,
+          milestones: milestonesList,
+          progress: 0,
+          status: "active"
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setGoals(prev => [data, ...prev]);
+        setNewTitle("");
+        setNewMilestonesText("");
+      }
+    } catch (err) {
+      console.error("Failed to save goal:", err);
+    }
   };
 
-  const toggleMilestone = (goalId: string, milestoneId: string) => {
-    const updated = goals.map(g => {
-      if (g.id !== goalId) return g;
-      const nextMilestones = g.milestones.map(m => 
-        m.id === milestoneId ? { ...m, completed: !m.completed } : m
-      );
-      const completedCount = nextMilestones.filter(m => m.completed).length;
-      const progress = nextMilestones.length > 0 
-        ? Math.round((completedCount / nextMilestones.length) * 100) 
-        : 100;
-      return {
-        ...g,
-        milestones: nextMilestones,
-        progress,
-        status: (progress === 100 ? "completed" : "active") as any
-      };
-    });
-    saveGoals(updated);
+  const toggleMilestone = async (goal: Goal, milestoneId: string) => {
+    const goalId = goal.id || goal._id;
+    if (!goalId) return;
+
+    const nextMilestones = goal.milestones.map(m => 
+      m.id === milestoneId ? { ...m, completed: !m.completed } : m
+    );
+    const completedCount = nextMilestones.filter(m => m.completed).length;
+    const progress = nextMilestones.length > 0 
+      ? Math.round((completedCount / nextMilestones.length) * 100) 
+      : 100;
+    const nextStatus = progress === 100 ? "completed" : "active";
+
+    try {
+      const res = await fetch(`/api/goals/${goalId}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({
+          milestones: nextMilestones,
+          progress,
+          status: nextStatus
+        })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setGoals(prev => prev.map(g => (g.id === goalId || g._id === goalId) ? updated : g));
+      }
+    } catch (err) {
+      console.error("Failed to update milestone:", err);
+    }
   };
 
-  const removeGoal = (id: string) => {
-    const next = goals.filter(g => g.id !== id);
-    saveGoals(next);
+  const removeGoal = async (goal: Goal) => {
+    const goalId = goal.id || goal._id;
+    if (!goalId) return;
+
+    try {
+      const res = await fetch(`/api/goals/${goalId}`, {
+        method: "DELETE",
+        headers: getHeaders()
+      });
+      if (res.ok) {
+        setGoals(prev => prev.filter(g => g.id !== goalId && g._id !== goalId));
+      }
+    } catch (err) {
+      console.error("Failed to delete goal:", err);
+    }
   };
 
-  const injectAiSuggestion = (sug: typeof AI_GOAL_SUGGESTIONS[0]) => {
-    const added: Goal = {
-      id: `g-${Date.now()}`,
-      title: sug.title,
-      category: sug.category,
-      deadline: sug.deadline,
-      milestones: sug.milestones.map((m, i) => ({
-        id: `m-ai-${Date.now()}-${i}`,
-        title: m,
-        completed: false
-      })),
-      progress: 0,
-      status: "active"
-    };
-    saveGoals([added, ...goals]);
+  const injectAiSuggestion = async (sug: typeof AI_GOAL_SUGGESTIONS[0]) => {
+    try {
+      const res = await fetch("/api/goals", {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({
+          title: sug.title,
+          category: sug.category,
+          targetDate: sug.deadline,
+          milestones: sug.milestones.map((m, i) => ({
+            id: `m-ai-${Date.now()}-${i}`,
+            title: m,
+            completed: false
+          })),
+          progress: 0,
+          status: "active"
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setGoals(prev => [data, ...prev]);
+      }
+    } catch (err) {
+      console.error("Failed to inject AI suggestion:", err);
+    }
   };
 
   return (
@@ -277,13 +301,15 @@ export default function GoalTracker() {
 
           {/* Goal List Cards */}
           <div className="space-y-3 flex-1 overflow-y-auto max-h-[350px] pr-1">
-            {goals.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-10 font-mono text-xs text-zinc-500 animate-pulse">Syncing tactical objectives...</div>
+            ) : goals.length === 0 ? (
               <div className="glass-panel p-8 text-center rounded-2xl border border-zinc-800/40 text-xs text-zinc-500">
                 No active strategic goals mapped in current operational profile. Add an objective above or deploy an AI suggestion.
               </div>
             ) : (
               goals.map((goal) => (
-                <div key={goal.id} className="glass-panel p-4.5 rounded-xl border border-zinc-800/80 space-y-3.5">
+                <div key={goal.id || goal._id} className="glass-panel p-4.5 rounded-xl border border-zinc-800/80 space-y-3.5">
                   <div className="flex justify-between items-start gap-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -291,7 +317,7 @@ export default function GoalTracker() {
                           {goal.category}
                         </span>
                         <span className="text-[10px] font-mono text-zinc-500 flex items-center gap-1">
-                          <Calendar className="w-3 h-3" /> Due {goal.deadline}
+                          <Calendar className="w-3 h-3" /> Due {goal.targetDate}
                         </span>
                       </div>
                       <h4 className="text-xs font-semibold text-white tracking-wide">{goal.title}</h4>
@@ -303,22 +329,22 @@ export default function GoalTracker() {
                         <span className="text-[9px] text-zinc-500 block">COMPLETED</span>
                       </div>
                       <button
-                        onClick={() => removeGoal(goal.id)}
-                        className="text-zinc-600 hover:text-red-400 p-1 transition-colors"
+                        onClick={() => removeGoal(goal)}
+                        className="text-zinc-600 hover:text-red-400 p-1 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
 
-                  {/* Milestones dynamic list */}
+                  {/* Milestones list */}
                   <div className="space-y-2 pt-1 border-t border-zinc-900/60">
                     <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest block mb-2">Milestone Breakdown</span>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {goal.milestones.map((milestone) => (
+                      {goal.milestones && goal.milestones.map((milestone) => (
                         <div 
                           key={milestone.id}
-                          onClick={() => toggleMilestone(goal.id, milestone.id)}
+                          onClick={() => toggleMilestone(goal, milestone.id)}
                           className="flex items-center gap-2.5 p-2 rounded bg-black/30 border border-zinc-900 hover:border-zinc-800 transition-colors cursor-pointer select-none"
                         >
                           <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 transition-all ${

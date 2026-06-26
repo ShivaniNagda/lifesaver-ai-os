@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Settings, Shield, User, Bell, Cpu, Calendar, Lock, Sparkles, Check } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Settings, Shield, User, Bell, Cpu, Lock, Sparkles, Check } from "lucide-react";
 
 interface SettingsPanelProps {
   userEmail: string;
@@ -29,13 +29,78 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
 
   // Save indication
   const [saveIndication, setSaveIndication] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const triggerSave = (e: React.FormEvent) => {
+  const getHeaders = () => {
+    const token = localStorage.getItem("lifeos_token");
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {})
+    };
+  };
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/settings", {
+          headers: getHeaders()
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data) {
+            if (data.workHoursStart) setWorkHoursStart(data.workHoursStart);
+            if (data.workHoursEnd) setWorkHoursEnd(data.workHoursEnd);
+            if (data.focusLevel) setFocusLevel(data.focusLevel);
+            if (data.modelType) setModelType(data.modelType);
+            if (data.disruptionGrade) setDisruptionGrade(data.disruptionGrade);
+            if (data.pacingInterval) setPacingInterval(data.pacingInterval);
+            if (data.name) setName(data.name);
+            setPushEnabled(data.pushEnabled !== false);
+            setEmailAlerts(data.emailAlerts !== false);
+            setBurnoutTriggers(data.burnoutTriggers !== false);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load systems settings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const triggerSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveIndication(true);
-    setTimeout(() => {
-      setSaveIndication(false);
-    }, 1200);
+
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({
+          workHoursStart,
+          workHoursEnd,
+          focusLevel,
+          pushEnabled,
+          emailAlerts,
+          burnoutTriggers,
+          modelType,
+          disruptionGrade,
+          pacingInterval,
+          name
+        })
+      });
+      if (res.ok) {
+        setSaveIndication(true);
+      }
+    } catch (err) {
+      console.error("Failed to persist systems settings:", err);
+    } finally {
+      setTimeout(() => {
+        setSaveIndication(false);
+      }, 1200);
+    }
   };
 
   return (
@@ -74,6 +139,7 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
               <button
                 key={sec.id}
                 onClick={() => setActiveSection(sec.id as any)}
+                type="button"
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-left text-xs font-medium transition-all cursor-pointer ${
                   isSelected 
                     ? "bg-white text-black font-semibold" 
@@ -301,6 +367,7 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer"
             >
               Apply System Parameters

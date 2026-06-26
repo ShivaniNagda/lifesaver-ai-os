@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Plus, Trash2, AlertTriangle, Sparkles, RefreshCw, Layers, Check, Clock } from "lucide-react";
+import { Calendar, Trash2, AlertTriangle, Sparkles, RefreshCw, Clock } from "lucide-react";
 import { Task } from "../types";
 
 interface CalendarEvent {
-  id: string;
+  id?: string;
+  _id?: string;
   title: string;
   date: string; // YYYY-MM-DD
   startTime: string; // HH:MM
@@ -17,40 +18,8 @@ interface CalendarModuleProps {
   onAutoScheduleTasks?: (scheduledTimeline: any[]) => void;
 }
 
-const DEFAULT_EVENTS: CalendarEvent[] = [
-  {
-    id: "e1",
-    title: "Venture Capital Seed Briefing",
-    date: "2026-06-30",
-    startTime: "10:00",
-    endTime: "11:30",
-    category: "work",
-    description: "Submit pitch deck and respond to financial margin questions."
-  },
-  {
-    id: "e2",
-    title: "Chemistry Midterm Exam Slot",
-    date: "2026-06-28",
-    startTime: "13:00",
-    endTime: "15:00",
-    category: "study",
-    description: "Proctored online evaluation of all midterm chemistry modules."
-  },
-  {
-    id: "e3",
-    title: "Server Deployment & Upgrade",
-    date: "2026-06-27",
-    startTime: "09:00",
-    endTime: "10:30",
-    category: "work",
-    description: "Rotating cluster instances to new high-performance nodes."
-  }
-];
-
-// Generates calendar month days
 const getMonthDays = () => {
   const dates = [];
-  // Hardcoded to current cycle around June 2026
   const startDay = 21; // Sun
   for (let i = 0; i < 14; i++) {
     const dayNum = startDay + i;
@@ -63,6 +32,7 @@ const getMonthDays = () => {
 export default function CalendarModule({ tasks }: CalendarModuleProps) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState("2026-06-28");
+  const [loading, setLoading] = useState(false);
   
   // Create Event Form state
   const [evtTitle, setEvtTitle] = useState("");
@@ -75,32 +45,40 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
   const [syncStatus, setSyncStatus] = useState("idle");
   const [conflicts, setConflicts] = useState<{ id: string; msg: string; event1: string; event2: string }[]>([]);
 
-  // Initialize and load
-  useEffect(() => {
-    const saved = localStorage.getItem("lifeos_calendar_events");
-    if (saved) {
-      try {
-        setEvents(JSON.parse(saved));
-      } catch (e) {
-        setEvents(DEFAULT_EVENTS);
-      }
-    } else {
-      setEvents(DEFAULT_EVENTS);
-      localStorage.setItem("lifeos_calendar_events", JSON.stringify(DEFAULT_EVENTS));
-    }
-  }, []);
-
-  const saveEvents = (updated: CalendarEvent[]) => {
-    setEvents(updated);
-    localStorage.setItem("lifeos_calendar_events", JSON.stringify(updated));
+  const getHeaders = () => {
+    const token = localStorage.getItem("lifeos_token");
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {})
+    };
   };
+
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/calendar", {
+        headers: getHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setEvents(data);
+      }
+    } catch (e) {
+      console.error("Failed to load calendar events:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   // Conflict Detection
   useEffect(() => {
     const foundConflicts: typeof conflicts = [];
-    
-    // Group events by date
     const dateGroups: { [date: string]: CalendarEvent[] } = {};
+    
     events.forEach(e => {
       if (!dateGroups[e.date]) dateGroups[e.date] = [];
       dateGroups[e.date].push(e);
@@ -113,8 +91,6 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
           const e1 = dayEvts[i];
           const e2 = dayEvts[j];
           
-          // Check overlap
-          // Convert times to minutes for simpler checks
           const start1 = timeToMinutes(e1.startTime);
           const end1 = timeToMinutes(e1.endTime);
           const start2 = timeToMinutes(e2.startTime);
@@ -123,7 +99,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
           const hasOverlap = (start1 < end2 && start2 < end1);
           if (hasOverlap) {
             foundConflicts.push({
-              id: `${e1.id}-${e2.id}`,
+              id: `${e1.id || e1._id}-${e2.id || e2._id}`,
               msg: `Schedule Overlap detected on ${date}: "${e1.title}" and "${e2.title}" conflict.`,
               event1: e1.title,
               event2: e2.title
@@ -141,48 +117,62 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
     return h * 60 + m;
   };
 
-  const handleAddEvent = (e: React.FormEvent) => {
+  const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!evtTitle.trim()) return;
 
-    const newEvt: CalendarEvent = {
-      id: `e-${Date.now()}`,
-      title: evtTitle,
-      date: evtDate,
-      startTime: evtStart,
-      endTime: evtEnd,
-      category: evtCategory,
-      description: evtDesc
-    };
-
-    saveEvents([...events, newEvt]);
-    setEvtTitle("");
-    setEvtDesc("");
+    try {
+      const res = await fetch("/api/calendar", {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({
+          title: evtTitle,
+          date: evtDate,
+          startTime: evtStart,
+          endTime: evtEnd,
+          category: evtCategory,
+          description: evtDesc
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setEvents(prev => [...prev, data]);
+        setEvtTitle("");
+        setEvtDesc("");
+      }
+    } catch (err) {
+      console.error("Failed to add calendar event:", err);
+    }
   };
 
-  const removeEvent = (id: string) => {
-    const next = events.filter(e => e.id !== id);
-    saveEvents(next);
+  const removeEvent = async (id: string) => {
+    try {
+      const res = await fetch(`/api/calendar/${id}`, {
+        method: "DELETE",
+        headers: getHeaders()
+      });
+      if (res.ok) {
+        setEvents(prev => prev.filter(e => e.id !== id && e._id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to remove calendar event:", err);
+    }
   };
 
-  const handleAutoSchedule = () => {
-    // Schedule all non-completed tasks into available blocks automatically
+  const handleAutoSchedule = async () => {
     const pendingTasks = tasks.filter(t => t.status !== "completed");
     if (pendingTasks.length === 0) return;
 
     let targetDate = new Date();
-    const newScheduledEvents: CalendarEvent[] = [];
+    const newScheduledEvents: any[] = [];
 
     pendingTasks.forEach((task, idx) => {
-      // Create study or focus blocks
-      const slotHour = 9 + (idx * 2) % 6; // disperse between 09:00, 11:00, 13:00, 15:00
+      const slotHour = 9 + (idx * 2) % 6;
       const startStr = `${slotHour < 10 ? '0' + slotHour : slotHour}:00`;
       const endStr = `${slotHour + 1 < 10 ? '0' + (slotHour + 1) : slotHour + 1}:30`;
-      
       const targetDateStr = targetDate.toISOString().split("T")[0];
 
       newScheduledEvents.push({
-        id: `auto-e-${task.id}-${Date.now()}`,
         title: `Auto Focus Block: ${task.title}`,
         date: task.dueDate || targetDateStr,
         startTime: startStr,
@@ -191,15 +181,29 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
         description: `Autonomous time allocation created by the Planning Agent to secure ${task.title}.`
       });
 
-      // advance target date every 2 tasks
       if (idx % 2 === 1) {
         targetDate.setDate(targetDate.getDate() + 1);
       }
     });
 
-    saveEvents([...events, ...newScheduledEvents]);
-    setSyncStatus("autoscheduled");
-    setTimeout(() => setSyncStatus("idle"), 2000);
+    setSyncStatus("syncing");
+    try {
+      // Post all auto-scheduled events
+      const promises = newScheduledEvents.map(evt => 
+        fetch("/api/calendar", {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(evt)
+        }).then(res => res.json())
+      );
+      const results = await Promise.all(promises);
+      setEvents(prev => [...prev, ...results]);
+      setSyncStatus("autoscheduled");
+    } catch (e) {
+      console.error("Auto scheduling failed:", e);
+    } finally {
+      setTimeout(() => setSyncStatus("idle"), 2000);
+    }
   };
 
   const syncWithGoogleSim = () => {
@@ -246,7 +250,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
             
             <button 
               onClick={syncWithGoogleSim}
-              className="text-[10px] font-mono border border-zinc-800 bg-zinc-950 px-2 py-1 rounded hover:border-zinc-700 text-zinc-400 flex items-center gap-1"
+              className="text-[10px] font-mono border border-zinc-800 bg-zinc-950 px-2 py-1 rounded hover:border-zinc-700 text-zinc-400 flex items-center gap-1 cursor-pointer"
             >
               <RefreshCw className={`w-3 h-3 ${syncStatus === "syncing" ? "animate-spin" : ""}`} />
               {syncStatus === "syncing" ? "Pushing Handshake..." : syncStatus === "synced" ? "Handshake Completed" : "Simulate Cloud Sync"}
@@ -318,7 +322,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
                 <button
                   type="button"
                   onClick={handleAutoSchedule}
-                  className="w-full h-[34px] border border-dashed border-zinc-800 bg-zinc-950/40 text-emerald-400 hover:border-emerald-900/50 hover:bg-emerald-950/10 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all"
+                  className="w-full h-[34px] border border-dashed border-zinc-800 bg-zinc-950/40 text-emerald-400 hover:border-emerald-900/50 hover:bg-emerald-950/10 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   Auto-Schedule Tasks
@@ -338,7 +342,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
 
             <button
               type="submit"
-              className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors"
+              className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer"
             >
               Add Calendar Event Node
             </button>
@@ -374,7 +378,6 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
                     <span className="text-[10px] font-bold block">{day.dayNum}</span>
                     <span className="text-[8px] font-mono opacity-60 block mt-0.5">Jun</span>
                     
-                    {/* Visual markers */}
                     <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
                       {dailyEvts.length > 0 && (
                         <span className={`w-1 h-1 rounded-full ${isSelected ? "bg-black" : hasStudy ? "bg-amber-400" : hasBilling ? "bg-red-500" : "bg-zinc-400"}`} />
@@ -393,13 +396,15 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
               <span className="text-[9px] font-mono text-zinc-500">{selectedDateEvents.length} BLOCKS</span>
             </div>
 
-            {selectedDateEvents.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12 font-mono text-xs text-zinc-500 animate-pulse">Syncing calendar corridor...</div>
+            ) : selectedDateEvents.length === 0 ? (
               <div className="text-center py-12 bg-black/20 border border-zinc-900 border-dashed rounded-xl text-xs text-zinc-600">
                 No cognitive blockages mapped on this corridor. Create a focus block or click "Auto-Schedule".
               </div>
             ) : (
               selectedDateEvents.map((evt) => (
-                <div key={evt.id} className="glass-panel p-3.5 rounded-xl border border-zinc-850 flex items-center justify-between gap-4">
+                <div key={evt.id || evt._id} className="glass-panel p-3.5 rounded-xl border border-zinc-850 flex items-center justify-between gap-4">
                   <div className="space-y-1.5 min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className={`text-[8px] font-mono uppercase px-1.5 py-0.2 rounded border ${
@@ -419,8 +424,8 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
                   </div>
 
                   <button
-                    onClick={() => removeEvent(evt.id)}
-                    className="text-zinc-600 hover:text-red-400 p-1 transition-colors shrink-0"
+                    onClick={() => removeEvent(evt.id || evt._id || "")}
+                    className="text-zinc-600 hover:text-red-400 p-1 transition-colors shrink-0 cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

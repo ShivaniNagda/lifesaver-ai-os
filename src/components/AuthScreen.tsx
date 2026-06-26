@@ -17,26 +17,20 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // JWT simulator state
   const [jwtToken, setJwtToken] = useState("");
-  const [refreshToken, setRefreshToken] = useState("");
   const [tokenExp, setTokenExp] = useState<number | null>(null);
 
   useEffect(() => {
-    // Generate simulated tokens if logged in
-    if (currentEmail) {
-      const mockPayload = btoa(JSON.stringify({ email: currentEmail, role, exp: Date.now() + 3600000 }));
-      setJwtToken(`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${mockPayload}.signature_verification`);
-      setRefreshToken(`refresh_token_${btoa(currentEmail).substring(0, 16)}_${Date.now()}`);
-      setTokenExp(3600); // 1 hour in seconds
+    const storedToken = localStorage.getItem("lifeos_token");
+    if (storedToken) {
+      setJwtToken(storedToken);
+      setTokenExp(3600); // simulated expiry display
     } else {
       setJwtToken("");
-      setRefreshToken("");
       setTokenExp(null);
     }
-  }, [currentEmail, role]);
+  }, [currentEmail]);
 
-  // Handle countdown for session expiration
   useEffect(() => {
     if (!tokenExp) return;
     const interval = setInterval(() => {
@@ -54,17 +48,37 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      // Persist in localStorage
-      localStorage.setItem("lifeos_email", email);
-      localStorage.setItem("lifeos_role", role);
-      onAuthSuccess(email, role);
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Authentication handshake failed.");
+      }
+
+      localStorage.setItem("lifeos_token", data.token);
+      localStorage.setItem("lifeos_email", data.user.email);
+      localStorage.setItem("lifeos_role", data.user.role);
+      
+      setJwtToken(data.token);
+      setTokenExp(3600);
       setSuccess("Authenticated successfully under LifeSaver Secure Protocol.");
-    }, 800);
+      
+      setTimeout(() => {
+        onAuthSuccess(data.user.email, data.user.role);
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || "Connection refused by secure core.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -73,16 +87,37 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      localStorage.setItem("lifeos_email", email);
-      localStorage.setItem("lifeos_role", role);
-      onAuthSuccess(email, role);
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: name, email, password, role })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to register operator.");
+      }
+
+      localStorage.setItem("lifeos_token", data.token);
+      localStorage.setItem("lifeos_email", data.user.email);
+      localStorage.setItem("lifeos_role", data.user.role);
+
+      setJwtToken(data.token);
+      setTokenExp(3600);
       setSuccess("Account registered and locked with AES-256 schema.");
-    }, 900);
+      
+      setTimeout(() => {
+        onAuthSuccess(data.user.email, data.user.role);
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || "Failed to establish operator envelope.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleForgot = (e: React.FormEvent) => {
+  const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -91,23 +126,82 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to issue password recovery link.");
+      }
+
+      setSuccess(`Reset link generated: ${data.resetLink}. Token expires in 15m.`);
+    } catch (err: any) {
+      setError(err.message || "Secure reset dispatch failed.");
+    } finally {
       setLoading(false);
-      setSuccess("Secure password reset link dispatched to your email corridor.");
-    }, 700);
+    }
   };
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     setLoading(true);
     setError("");
-    setTimeout(() => {
-      setLoading(false);
-      const googleEmail = "shivanifs.1786145@gmail.com";
-      localStorage.setItem("lifeos_email", googleEmail);
-      localStorage.setItem("lifeos_role", "Executive Officer");
-      onAuthSuccess(googleEmail, "Executive Officer");
+    setSuccess("");
+
+    try {
+      // Direct fast oauth/google registration simulation using real backend endpoints to maintain true full-stack persistence
+      const defaultGoogleName = "Shivani Shinde";
+      const defaultGoogleEmail = "shivanifs.1786145@gmail.com";
+      const defaultGooglePassword = "oauth_auto_secure_password_1867145";
+
+      // Attempt to register first, if fails then login
+      const regRes = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: defaultGoogleName,
+          email: defaultGoogleEmail,
+          password: defaultGooglePassword,
+          role: "Executive Officer"
+        })
+      });
+
+      let data = await regRes.json();
+      if (!regRes.ok) {
+        // Try logging in instead
+        const loginRes = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: defaultGoogleEmail,
+            password: defaultGooglePassword
+          })
+        });
+        data = await loginRes.json();
+        if (!loginRes.ok) {
+          throw new Error(data.error || "OAuth login synchronization failed.");
+        }
+      }
+
+      localStorage.setItem("lifeos_token", data.token);
+      localStorage.setItem("lifeos_email", data.user.email);
+      localStorage.setItem("lifeos_role", data.user.role);
+
+      setJwtToken(data.token);
+      setTokenExp(3600);
       setSuccess("OAuth 2.0 handshake verified. Welcome Back.");
-    }, 650);
+      
+      setTimeout(() => {
+        onAuthSuccess(data.user.email, data.user.role);
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || "Google OAuth handshake error.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const triggerRefreshToken = () => {
@@ -116,8 +210,6 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
     setTimeout(() => {
       setLoading(false);
       setTokenExp(3600);
-      const newPayload = btoa(JSON.stringify({ email: currentEmail, role, exp: Date.now() + 3600000 }));
-      setJwtToken(`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${newPayload}.signature_rotated_${Math.random().toString(36).substring(4, 8)}`);
       setSuccess("Access token rotated and cryptographically validated.");
     }, 400);
   };
@@ -144,7 +236,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
             </div>
             <button
               onClick={onLogout}
-              className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
               title="Logout session"
             >
               <LogOut className="w-4 h-4" />
@@ -166,7 +258,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
                 {tokenExp ? `${Math.floor(tokenExp / 60)}m ${tokenExp % 60}s` : "0s"}
               </span>
             </div>
-            <div className="mt-2 text-zinc-600 truncate border-t border-zinc-900 pt-2 select-all cursor-pointer hover:text-zinc-400" title="Click to copy mock JWT token">
+            <div className="mt-2 text-zinc-600 truncate border-t border-zinc-900 pt-2 select-all cursor-pointer hover:text-zinc-400" title="Click to copy JWT token">
               {jwtToken}
             </div>
           </div>
@@ -175,7 +267,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
             <button
               onClick={triggerRefreshToken}
               disabled={loading}
-              className="flex-1 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-medium text-[10px] flex items-center justify-center gap-1.5 transition-colors font-mono uppercase"
+              className="flex-1 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-medium text-[10px] flex items-center justify-center gap-1.5 transition-colors font-mono uppercase cursor-pointer"
             >
               <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
               Rotate Crypt Key
@@ -248,7 +340,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center gap-1.5"
+              className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               {loading ? "Authenticating..." : "Synchronize Session Key"}
             </button>
@@ -264,7 +356,6 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               onClick={handleGoogleSignIn}
               className="w-full py-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-900 text-zinc-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
-              {/* Modern Minimalist Google Graphic */}
               <svg className="w-3.5 h-3.5 fill-current text-white" viewBox="0 0 24 24">
                 <path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-6.887 4.114-4.694 0-8.503-3.809-8.503-8.503s3.809-8.503 8.503-8.503c2.202 0 4.212.827 5.755 2.185l3.143-3.143C18.665.98 15.603 0 12.24 0 5.513 0 0 5.513 0 12.24s5.513 12.24 12.24 12.24c6.8 0 12.24-5.44 12.24-12.24 0-.82-.097-1.425-.245-1.955H12.24z" />
               </svg>
@@ -316,7 +407,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center"
+              className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center cursor-pointer"
             >
               {loading ? "Creating..." : "Establish AES-256 Workspace"}
             </button>
@@ -347,7 +438,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center"
+              className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center cursor-pointer"
             >
               {loading ? "Dispatched Key..." : "Issue Reset Corridor"}
             </button>

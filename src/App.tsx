@@ -3,7 +3,7 @@ import {
   Sparkles, Shield, AlertTriangle, CheckCircle, Brain, Terminal, 
   Calendar, Clock, User, Settings, ArrowRight, Play, ExternalLink, 
   Send, HelpCircle, Activity, ChevronRight, Zap, Target, BookOpen, 
-  Hourglass, MessageSquare, Briefcase, Plus, Trash2, Mail
+  Hourglass, MessageSquare, Briefcase, Plus, Trash2, Mail, Mic
 } from "lucide-react";
 import AICoreCanvas from "./components/AICoreCanvas";
 import AgentLogsTerminal from "./components/AgentLogsTerminal";
@@ -16,6 +16,7 @@ import GoalTracker from "./components/GoalTracker";
 import HabitTracker from "./components/HabitTracker";
 import CalendarModule from "./components/CalendarModule";
 import SettingsPanel from "./components/SettingsPanel";
+import VoiceAssistant from "./components/VoiceAssistant";
 
 const INITIAL_TASKS: Task[] = [
   { id: "1", title: "Chemistry Midterm Exam Preparation", dueDate: "2026-06-28", urgency: "critical", status: "pending" },
@@ -24,24 +25,44 @@ const INITIAL_TASKS: Task[] = [
   { id: "4", title: "Draft SaaS API Documentation", dueDate: "2026-07-02", urgency: "medium", status: "pending" }
 ];
 
+export const fetchWithAuth = async (url: string, options: RequestInit = {}, retries = 3, delay = 1500): Promise<Response> => {
+  const token = localStorage.getItem("lifeos_token");
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    ...options.headers,
+  };
+  try {
+    return await fetch(url, { ...options, headers });
+  } catch (err) {
+    if (retries > 0) {
+      console.warn(`[Network Retry] Fetch failed. Retrying in ${delay}ms... (${retries} attempts left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return fetchWithAuth(url, options, retries - 1, delay);
+    }
+    throw err;
+  }
+};
+
 export default function App() {
   // Navigation & View control
   const [view, setView] = useState<"landing" | "dashboard">("landing");
-  const [activeTab, setActiveTab] = useState<"overview" | "twin" | "rescue" | "negotiate" | "prep" | "calendar" | "goals" | "habits" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "twin" | "rescue" | "negotiate" | "prep" | "calendar" | "goals" | "habits" | "settings" | "voice">("overview");
 
   // User Auth & Session state
-  const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem("lifeos_email") || "shivanifs.1786145@gmail.com");
+  const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem("lifeos_email") || null);
   const [userRole, setUserRole] = useState<string>(() => localStorage.getItem("lifeos_role") || "Executive Officer");
 
   const handleLogout = () => {
     localStorage.removeItem("lifeos_email");
     localStorage.removeItem("lifeos_role");
+    localStorage.removeItem("lifeos_token");
     setUserEmail(null);
     setView("landing");
   };
 
   // Core App State
-  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskUrgency, setNewTaskUrgency] = useState<"low" | "medium" | "high" | "critical">("medium");
   const [newTaskDueDate, setNewTaskDueDate] = useState("2026-06-29");
@@ -82,13 +103,35 @@ export default function App() {
   const [prepPlan, setPrepPlan] = useState<PreparationPlan | null>(null);
   const [isPrepLoading, setIsPrepLoading] = useState(false);
 
+  // Sync tasks on auth
+  useEffect(() => {
+    if (!userEmail) return;
+    const syncTasks = async () => {
+      try {
+        const res = await fetchWithAuth("/api/tasks");
+        if (res.ok) {
+          const data = await res.json();
+          setTasks(data);
+        } else if (res.status === 401) {
+          console.warn("Session token expired or missing. Clearing local session.");
+          handleLogout();
+        } else {
+          setTasks(INITIAL_TASKS);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user tasks:", err);
+        setTasks(INITIAL_TASKS);
+      }
+    };
+    syncTasks();
+  }, [userEmail]);
+
   // Trigger main OS cognitive alignment engine
   const runLifeOSEngine = async () => {
     setIsProcessing(true);
     try {
-      const res = await fetch("/api/agent/process", {
+      const res = await fetchWithAuth("/api/agent/process", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           context: userContext,
           tasks: tasks,
@@ -100,6 +143,9 @@ export default function App() {
         setOsResponse(data);
       } else {
         console.error("OS Engine failed:", data.error);
+        if (res.status === 401) {
+          handleLogout();
+        }
       }
     } catch (err) {
       console.error("Network error running OS engine:", err);
@@ -110,34 +156,102 @@ export default function App() {
 
   // Trigger initial process automatically on dashboard load
   useEffect(() => {
-    if (view === "dashboard" && !osResponse) {
+    if (view === "dashboard" && !osResponse && userEmail) {
       runLifeOSEngine();
     }
-  }, [view]);
+  }, [view, osResponse, userEmail]);
 
   // Handle adding new custom task
-  const handleAddTask = (e: React.FormEvent) => {
+  const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
-    const added: Task = {
-      id: Date.now().toString(),
-      title: newTaskTitle,
-      dueDate: newTaskDueDate,
-      urgency: newTaskUrgency,
-      status: "pending"
-    };
-    setTasks(prev => [added, ...prev]);
-    setNewTaskTitle("");
+    
+    try {
+      const res = await fetchWithAuth("/api/tasks", {
+        method: "POST",
+        body: JSON.stringify({
+          title: newTaskTitle,
+          dueDate: newTaskDueDate,
+          urgency: newTaskUrgency,
+          status: "pending"
+        })
+      });
+      if (res.ok) {
+        const added = await res.json();
+        setTasks(prev => [added, ...prev]);
+        setNewTaskTitle("");
+      }
+    } catch (err) {
+      console.error("Failed to add task:", err);
+    }
   };
 
   // Toggle task status
-  const toggleTaskStatus = (id: string) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: t.status === "completed" ? "pending" : "completed" } : t));
+  const toggleTaskStatus = async (id: string) => {
+    const task = tasks.find(t => t.id === id || (t as any)._id === id);
+    if (!task) return;
+    const newStatus = task.status === "completed" ? "pending" : "completed";
+    
+    try {
+      const res = await fetchWithAuth(`/api/tasks/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        setTasks(prev => prev.map(t => (t.id === id || (t as any)._id === id) ? { ...t, status: newStatus } : t));
+      }
+    } catch (err) {
+      console.error("Failed to toggle task:", err);
+    }
   };
 
   // Remove task
-  const removeTask = (id: string) => {
-    setTasks(prev => prev.filter(t => t.id !== id));
+  const removeTask = async (id: string) => {
+    try {
+      const res = await fetchWithAuth(`/api/tasks/${id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setTasks(prev => prev.filter(t => t.id !== id && (t as any)._id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to delete task:", err);
+    }
+  };
+
+  const programmaticAddTask = async (title: string, urgency: "low" | "medium" | "high" | "critical", dueDate: string) => {
+    try {
+      const res = await fetchWithAuth("/api/tasks", {
+        method: "POST",
+        body: JSON.stringify({
+          title,
+          dueDate,
+          urgency,
+          status: "pending"
+        })
+      });
+      if (res.ok) {
+        const added = await res.json();
+        setTasks(prev => [added, ...prev]);
+      } else {
+        throw new Error("Failed to save task");
+      }
+    } catch (err) {
+      console.error("Programmatic add task failed:", err);
+      throw err;
+    }
+  };
+
+  const handleRefreshTasks = async () => {
+    try {
+      const res = await fetchWithAuth("/api/tasks");
+      if (res.ok) {
+        const data = await res.json();
+        setTasks(data);
+      }
+    } catch (err) {
+      console.error("Failed to refresh tasks:", err);
+    }
   };
 
   // Handle Twin Chat Submission
@@ -151,9 +265,8 @@ export default function App() {
     setIsTwinChatting(true);
 
     try {
-      const res = await fetch("/api/agent/twin-chat", {
+      const res = await fetchWithAuth("/api/agent/twin-chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userMessage: userMsg,
           chatHistory: chatMessages.map(m => ({ role: m.role, content: m.content })),
@@ -180,9 +293,8 @@ export default function App() {
     e.preventDefault();
     setIsNegoLoading(true);
     try {
-      const res = await fetch("/api/agent/negotiate", {
+      const res = await fetchWithAuth("/api/agent/negotiate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           deadlineTitle: negoTitle,
           recipientName: negoRecipient,
@@ -206,9 +318,8 @@ export default function App() {
     e.preventDefault();
     setIsPrepLoading(true);
     try {
-      const res = await fetch("/api/agent/prepare", {
+      const res = await fetchWithAuth("/api/agent/prepare", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           examOrInterviewTitle: prepEvent,
           timeRemaining: prepTimeLeft,
@@ -640,6 +751,7 @@ export default function App() {
               { id: "calendar", label: "Interactive Calendar", icon: Calendar },
               { id: "goals", label: "Strategic Goal Engine", icon: Target },
               { id: "habits", label: "Habit Matrix", icon: Hourglass },
+              { id: "voice", label: "AI Voice Assistant", icon: Mic },
               { id: "twin", label: "Productivity Twin Simulator", icon: MessageSquare },
               { id: "negotiate", label: "AI Extension Negotiator", icon: Mail },
               { id: "prep", label: "Exam & Interview Prep", icon: BookOpen },
@@ -1251,6 +1363,16 @@ export default function App() {
           {/* TAB CONTENT 8: Habit Tracker */}
           {activeTab === "habits" && (
             <HabitTracker />
+          )}
+
+          {/* TAB CONTENT 8.5: Voice Assistant */}
+          {activeTab === "voice" && (
+            <VoiceAssistant 
+              tasks={tasks} 
+              onAddTask={programmaticAddTask} 
+              onRefreshTasks={handleRefreshTasks} 
+              runLifeOSEngine={runLifeOSEngine} 
+            />
           )}
 
           {/* TAB CONTENT 9: Settings Panel */}
