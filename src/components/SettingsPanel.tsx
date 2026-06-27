@@ -110,15 +110,15 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
       <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
         <div className="flex items-center gap-2">
           <Settings className="w-4.5 h-4.5 text-white" />
-          <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">OS Systems Configuration</h3>
+          <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">System Settings</h3>
         </div>
         {saveIndication ? (
           <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/20 px-2 py-0.5 rounded border border-emerald-900/20 flex items-center gap-1 animate-pulse">
-            <Check className="w-3 h-3" /> APPLIED AT SYSTEM CORE
+            <Check className="w-3 h-3" /> Settings Saved
           </span>
         ) : (
           <span className="text-[9px] font-mono text-zinc-500">
-            SECURE SHA-256 MATRIX
+            Secure Connection
           </span>
         )}
       </div>
@@ -128,10 +128,10 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
         {/* Sub Menu side tabs */}
         <div className="md:col-span-3 flex flex-col gap-1.5">
           {[
-            { id: "profile", label: "Principal Profile", icon: User },
-            { id: "notifications", label: "Notification Corridors", icon: Bell },
-            { id: "ai", label: "AI Agent Settings", icon: Cpu },
-            { id: "security", label: "Key Encryption & SSL", icon: Lock }
+            { id: "profile", label: "Profile Settings", icon: User },
+            { id: "notifications", label: "Notifications", icon: Bell },
+            { id: "ai", label: "AI Assistant Settings", icon: Cpu },
+            { id: "security", label: "Security & Encryption", icon: Lock }
           ].map((sec) => {
             const Icon = sec.icon;
             const isSelected = activeSection === sec.id;
@@ -168,15 +168,15 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
                     className="w-12 h-12 rounded-full border border-zinc-700 object-cover" 
                   />
                   <div>
-                    <span className="text-[8px] font-mono text-emerald-400 uppercase tracking-widest block font-bold">SYSTEM ACTIVE OPERATOR</span>
+                    <span className="text-[8px] font-mono text-emerald-400 uppercase tracking-widest block font-bold">Active User Session</span>
                     <h4 className="text-sm font-semibold text-white mt-0.5">{userEmail}</h4>
-                    <p className="text-[10px] text-zinc-500 font-mono">Role Node: {userRole}</p>
+                    <p className="text-[10px] text-zinc-500 font-mono">Account Role: {userRole}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Principal Initials</label>
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Display Name</label>
                     <input
                       type="text"
                       value={name}
@@ -185,7 +185,7 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">System Security Clearance Role</label>
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Access Level</label>
                     <select
                       value={userRole}
                       onChange={(e) => onUpdateRole(e.target.value)}
@@ -218,15 +218,15 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Cognitive Focus level</label>
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Focus Level</label>
                     <select
                       value={focusLevel}
                       onChange={(e) => setFocusLevel(e.target.value)}
                       className="w-full bg-zinc-950 border border-zinc-900 rounded-lg px-2.5 py-2 text-xs text-zinc-400 focus:outline-none"
                     >
-                      <option value="max">Max Concentration (98%)</option>
-                      <option value="balanced">Balanced Sync (80%)</option>
-                      <option value="mild">Relaxed Corridor (50%)</option>
+                      <option value="max">High Focus (95%)</option>
+                      <option value="balanced">Balanced Focus (80%)</option>
+                      <option value="mild">Relaxed Focus (50%)</option>
                     </select>
                   </div>
                 </div>
@@ -236,13 +236,13 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
 
             {activeSection === "notifications" && (
               <div className="space-y-4">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">SaaS Push Corridors</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">Notification Options</span>
                 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-950/40 border border-zinc-900">
                     <div>
-                      <span className="text-xs font-semibold text-white block">Inter-Agent Audio alerts</span>
-                      <p className="text-[10px] text-zinc-500 leading-normal">Transmit automated verbal alerts when failure forecasts exceed 30%</p>
+                      <span className="text-xs font-semibold text-white block">AI Voice Alerts</span>
+                      <p className="text-[10px] text-zinc-500 leading-normal">Speak reminders when task deadlines approach</p>
                     </div>
                     <input 
                       type="checkbox" 
@@ -254,8 +254,8 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
 
                   <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-950/40 border border-zinc-900">
                     <div>
-                      <span className="text-xs font-semibold text-white block">Email Dispatch Corridor</span>
-                      <p className="text-[10px] text-zinc-500 leading-normal">Dispatch fallback text alerts to {userEmail}</p>
+                      <span className="text-xs font-semibold text-white block">Email Alerts</span>
+                      <p className="text-[10px] text-zinc-500 leading-normal">Send digest alerts to your email address: {userEmail}</p>
                     </div>
                     <input 
                       type="checkbox" 
@@ -267,8 +267,8 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
 
                   <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-950/40 border border-zinc-900">
                     <div>
-                      <span className="text-xs font-semibold text-white block">Burnout triggers override</span>
-                      <p className="text-[10px] text-zinc-500 leading-normal">Inject micro-breaks forcibly during intense cramming sessions</p>
+                      <span className="text-xs font-semibold text-white block">Burnout Prevention Suggestions</span>
+                      <p className="text-[10px] text-zinc-500 leading-normal">Suggest breaks during long, intense work sessions</p>
                     </div>
                     <input 
                       type="checkbox" 
@@ -286,49 +286,49 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Target Cognitive Model Core</label>
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">AI Assistant Model</label>
                     <select
                       value={modelType}
                       onChange={(e) => setModelType(e.target.value)}
                       className="w-full bg-zinc-950 border border-zinc-900 rounded-lg px-2.5 py-2 text-xs text-zinc-400 focus:outline-none"
                     >
-                      <option value="gemini-1.5-pro">Gemini 1.5 Pro (Analytical heavy)</option>
-                      <option value="gemini-1.5-flash">Gemini 1.5 Flash (Sub-45ms speed)</option>
-                      <option value="gemini-ultra">Gemini 1.0 Ultra Corridor</option>
+                      <option value="gemini-1.5-pro">Gemini 1.5 Pro (Analytical)</option>
+                      <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast response)</option>
+                      <option value="gemini-ultra">Gemini Ultra (High quality)</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Disruption Grade Authority</label>
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Alert Frequency</label>
                     <select
                       value={disruptionGrade}
                       onChange={(e) => setDisruptionGrade(e.target.value)}
                       className="w-full bg-zinc-950 border border-zinc-900 rounded-lg px-2.5 py-2 text-xs text-zinc-400 focus:outline-none"
                     >
-                      <option value="high">High Disruptive Override (Forced lockouts)</option>
-                      <option value="moderate">Moderate Suggestions (Sidebar alerts)</option>
-                      <option value="silent">Passive Monitored Corridor (No UI popups)</option>
+                      <option value="high">High (Show alerts often)</option>
+                      <option value="moderate">Medium (Normal alerts)</option>
+                      <option value="silent">Low (Silent, no alerts)</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Pacing Scan frequency</label>
+                  <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Sync Frequency</label>
                   <select
                     value={pacingInterval}
                     onChange={(e) => setPacingInterval(e.target.value)}
                     className="w-full bg-zinc-950 border border-zinc-900 rounded-lg px-2.5 py-2 text-xs text-zinc-400 focus:outline-none"
                   >
-                    <option value="30m">Synchronize every 30 minutes</option>
-                    <option value="45m">Synchronize every 45 minutes</option>
-                    <option value="90m">Synchronize every 90 minutes</option>
+                    <option value="30m">Every 30 minutes</option>
+                    <option value="45m">Every 45 minutes</option>
+                    <option value="90m">Every 90 minutes</option>
                   </select>
                 </div>
 
                 <div className="p-3 bg-white/[0.02] border border-zinc-900 rounded-lg flex items-start gap-2.5">
                   <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                   <p className="text-[10px] text-zinc-500 leading-normal font-sans">
-                    These parameters regulate how actively the 10-Agent network analyzes your context and intervenes on commitments.
+                    These parameters customize how active the AI helper is in scheduling your tasks and managing priorities.
                   </p>
                 </div>
 
@@ -337,30 +337,30 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
 
             {activeSection === "security" && (
               <div className="space-y-4">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">Crypto parameters</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">Security Protocols</span>
                 
                 <div className="p-4 bg-zinc-950 border border-zinc-900 rounded-lg space-y-3 font-mono text-[10px] text-zinc-400">
                   <div className="flex justify-between border-b border-zinc-900 pb-2">
-                    <span>TLS TRANSPORT PROTOCOL:</span>
-                    <span className="text-emerald-400 font-bold">TLS v1.3 OVER GCM</span>
+                    <span>CONNECTION SECURITY:</span>
+                    <span className="text-emerald-400 font-bold">TLS v1.3 OVER HTTPS</span>
                   </div>
                   <div className="flex justify-between border-b border-zinc-900 pb-2">
-                    <span>DATABASE CORRIDOR CRYPTO:</span>
-                    <span className="text-white">AES-256 GCM PRE-FLIGHT</span>
+                    <span>DATABASE ENCRYPTION:</span>
+                    <span className="text-white">AES-256 GCM SECURED</span>
                   </div>
                   <div className="flex justify-between border-b border-zinc-900 pb-2">
-                    <span>SECURITY COGNIZANT ENGINE:</span>
+                    <span>SECURITY MONITOR:</span>
                     <span className="text-emerald-400 font-bold">ACTIVE</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>RENEW KEYS ROTATION SECTOR:</span>
-                    <span className="text-white">AUTOMATIC ROTATE (24H)</span>
+                    <span>AUTOMATIC KEY ROTATION:</span>
+                    <span className="text-white">ENABLED (EVERY 24H)</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 text-xs text-zinc-500 font-sans italic">
                   <Shield className="w-4 h-4 text-zinc-600" />
-                  Your local workspace session remains cryptographically sealed in secure cache nodes.
+                  Your session is protected and encrypted securely.
                 </div>
               </div>
             )}
@@ -370,7 +370,7 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
               disabled={loading}
               className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer"
             >
-              Apply System Parameters
+              Save Settings
             </button>
           </form>
         </div>

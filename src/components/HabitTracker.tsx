@@ -198,7 +198,7 @@ export default function HabitTracker() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="glass-panel p-4 rounded-xl border border-zinc-900 flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[9px] font-mono text-zinc-500 uppercase">Daily Alignment Score</span>
+            <span className="text-[9px] font-mono text-zinc-500 uppercase">Daily Completion Rate</span>
             <span className="text-xl font-bold text-white block">{completionRate}%</span>
           </div>
           <Percent className="w-8 h-8 text-zinc-600" />
@@ -206,9 +206,9 @@ export default function HabitTracker() {
 
         <div className="glass-panel p-4 rounded-xl border border-zinc-900 flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[9px] font-mono text-zinc-500 uppercase">Active Streaks Armed</span>
+            <span className="text-[9px] font-mono text-zinc-500 uppercase">Longest Streak</span>
             <span className="text-xl font-bold text-white block">
-              {habits.reduce((acc, h) => Math.max(acc, h.streak || 0), 0)} Consecutive Days
+              {habits.reduce((acc, h) => Math.max(acc, h.streak || 0), 0)} Days
             </span>
           </div>
           <Flame className="w-8 h-8 text-amber-500 animate-pulse" />
@@ -216,8 +216,8 @@ export default function HabitTracker() {
 
         <div className="glass-panel p-4 rounded-xl border border-zinc-900 flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[9px] font-mono text-zinc-500 uppercase">Habits Monitored</span>
-            <span className="text-xl font-bold text-white block">{totalHabitsCount} disciplines</span>
+            <span className="text-[9px] font-mono text-zinc-500 uppercase">Total Habits</span>
+            <span className="text-xl font-bold text-white block">{totalHabitsCount} habits</span>
           </div>
           <BarChart2 className="w-8 h-8 text-zinc-600" />
         </div>
@@ -229,12 +229,12 @@ export default function HabitTracker() {
         <div className="lg:col-span-4 glass-panel p-5 rounded-2xl border border-zinc-800 space-y-4">
           <div className="flex items-center gap-2">
             <Activity className="w-4.5 h-4.5 text-white" />
-            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Habit Anchor</h3>
+            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Habit Tracker</h3>
           </div>
 
           <form onSubmit={handleCreateHabit} className="space-y-4">
             <div>
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Anchor Phrase</label>
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Habit Name</label>
               <input
                 type="text"
                 placeholder="E.g., Practice active recall"
@@ -278,7 +278,7 @@ export default function HabitTracker() {
               type="submit"
               className="w-full py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-colors cursor-pointer"
             >
-              Anchor Core Discipline
+              Add Habit
             </button>
           </form>
 
@@ -286,7 +286,7 @@ export default function HabitTracker() {
           <div className="pt-4 border-t border-zinc-900 space-y-2.5">
             <div className="flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">AI suggested anchors</span>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">AI Suggested Habits</span>
             </div>
             <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
               {AI_HABIT_SUGGESTIONS.map((sug, i) => (
@@ -311,15 +311,15 @@ export default function HabitTracker() {
         {/* Right: Active habits calendar view */}
         <div className="lg:col-span-8 space-y-3 max-h-[420px] overflow-y-auto pr-1">
           {loading ? (
-            <div className="text-center py-10 font-mono text-xs text-zinc-500 animate-pulse">Synchronizing habit loops...</div>
+            <div className="text-center py-10 font-mono text-xs text-zinc-500 animate-pulse">Syncing habits...</div>
           ) : habits.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center p-12 bg-zinc-950/40 rounded-2xl border border-dashed border-zinc-800">
               <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-500 mb-3.5">
                 <Hourglass className="w-5 h-5 text-zinc-400" />
               </div>
-              <p className="text-xs font-semibold text-zinc-200">⌛ Habit Loops Unanchored</p>
+              <p className="text-xs font-semibold text-zinc-200">⌛ No Habits Tracked</p>
               <p className="text-[11px] text-zinc-500 mt-1 max-w-[320px] leading-relaxed">
-                No active disciplines are anchored in the system. Establish daily studies or startup tracking loops to configure your consistency matrix.
+                No active habits are being tracked. Create a habit on the left or use an AI suggested habit to start tracking your daily progress.
               </p>
             </div>
           ) : (

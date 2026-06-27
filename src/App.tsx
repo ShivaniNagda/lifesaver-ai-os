@@ -132,13 +132,13 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [osResponse, setOsResponse] = useState<AgentOSResponse | null>(null);
 
-  // Twin Chat State
+  // AI Assistant Chat State
   const [twinInput, setTwinInput] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "I am your Productivity Twin. I represent your highest-potential future self who successfully conquered these deadlines, avoided burnout, and executed flawlessly. Tell me: what's currently blocking your flow?",
-      microAction: "Open your planner and declare your #1 focus block."
+      content: "I am your AI productivity assistant. I am here to help you conquer your deadlines, avoid burnout, and structure your schedule. Tell me: what's currently blocking your flow?",
+      microAction: "Share your main goal or what is currently blocking your progress."
     }
   ]);
   const [isTwinChatting, setIsTwinChatting] = useState(false);
@@ -422,7 +422,7 @@ export default function App() {
               L⚡
             </div>
             <span className="font-display font-medium tracking-wide text-lg text-white">
-              LifeSaver <span className="font-mono text-zinc-500 text-xs tracking-widest uppercase ml-1.5 border border-zinc-800 px-1.5 py-0.5 rounded">AI OS</span>
+              LifeSaver <span className="font-mono text-zinc-500 text-xs tracking-widest uppercase ml-1.5 border border-zinc-800 px-1.5 py-0.5 rounded">AI Assistant</span>
             </span>
           </div>
           <AuthScreen 
@@ -456,22 +456,23 @@ export default function App() {
               L⚡
             </div>
             <span className="font-display font-medium tracking-wide text-lg text-white">
-              LifeSaver <span className="font-mono text-zinc-500 text-xs tracking-widest uppercase ml-1.5 border border-zinc-800 px-1.5 py-0.5 rounded">AI OS</span>
+              LifeSaver <span className="font-mono text-zinc-500 text-xs tracking-widest uppercase ml-1.5 border border-zinc-800 px-1.5 py-0.5 rounded">AI Assistant</span>
             </span>
           </div>
 
           <div className="hidden md:flex items-center gap-8 text-sm text-zinc-400">
-            <a href="#features" className="hover:text-white transition-colors">OS Architecture</a>
-            <a href="#agents" className="hover:text-white transition-colors">Specialized Agents</a>
-            <a href="#preview" className="hover:text-white transition-colors">SaaS Dashboard</a>
-            <a href="#mission" className="hover:text-white transition-colors">Mission Core</a>
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <a href="#features" className="hover:text-white transition-colors">How It Works</a>
+            <button onClick={() => setView("dashboard")} className="hover:text-white text-left transition-colors cursor-pointer">Dashboard</button>
+            <button onClick={() => setView("dashboard")} className="hover:text-white text-left transition-colors cursor-pointer">AI Assistant</button>
+            <a href="#about" className="hover:text-white transition-colors">About</a>
           </div>
 
           <button 
             onClick={() => setView("dashboard")} 
-            className="group relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white hover:bg-zinc-200 text-black text-sm font-medium transition-all"
+            className="group relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white hover:bg-zinc-200 text-black text-sm font-medium transition-all cursor-pointer"
           >
-            Launch OS
+            Get Started
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </button>
         </header>
@@ -484,7 +485,7 @@ export default function App() {
             <div className="lg:col-span-7 flex flex-col items-start text-left space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                AUTONOMOUS SYSTEM ONLINE
+                Powered by Google Gemini
               </div>
 
               <h1 className="font-display text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.05] max-w-2xl">
@@ -492,7 +493,7 @@ export default function App() {
               </h1>
 
               <p className="text-zinc-400 text-lg md:text-xl font-light leading-relaxed max-w-lg">
-                The world's first autonomous AI productivity operating system. While typical tools request updates, LifeSaver thinks, plans, adapts, and executes to rescue your commitments before failure occurs.
+                LifeSaver is an intelligent productivity platform designed for students and professionals. Powered by advanced AI, it automatically prioritizes your tasks, schedules balanced work sessions, and predicts workload risks so you can meet every deadline without burning out.
               </p>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto pt-4">
@@ -501,29 +502,29 @@ export default function App() {
                   className="px-8 py-4 bg-white text-black font-semibold rounded-xl flex items-center justify-center gap-2.5 transition-transform hover:scale-[1.02] shadow-xl hover:shadow-white/5 cursor-pointer"
                 >
                   <Play className="w-5 h-5 fill-black" />
-                  Boot LifeSaver OS Free
+                  Start Free
                 </button>
                 <a 
                   href="#features" 
                   className="px-6 py-4 bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-medium rounded-xl hover:bg-zinc-900 flex items-center justify-center gap-2"
                 >
-                  Explore Neural Agents
+                  Explore AI Features
                 </a>
               </div>
 
-              {/* Dynamic status widgets */}
-              <div className="grid grid-cols-3 gap-6 w-full pt-8 border-t border-zinc-900/80">
+              {/* Dynamic real metrics */}
+              <div className="grid grid-cols-2 gap-6 w-full pt-8 border-t border-zinc-900/80">
                 <div>
-                  <div className="text-2xl font-mono font-semibold text-white">99.4%</div>
-                  <div className="text-[11px] text-zinc-500 uppercase tracking-wider mt-1">Deadline Rescue Rate</div>
+                  <div className="text-2xl font-mono font-semibold text-white">
+                    {tasks.filter(t => t.status === "completed").length}
+                  </div>
+                  <div className="text-[11px] text-zinc-500 uppercase tracking-wider mt-1">Tasks Completed</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-mono font-semibold text-white">10</div>
-                  <div className="text-[11px] text-zinc-500 uppercase tracking-wider mt-1">Active Neural Agents</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-mono font-semibold text-white">&lt; 42ms</div>
-                  <div className="text-[11px] text-zinc-500 uppercase tracking-wider mt-1">Context Sync Delay</div>
+                  <div className="text-2xl font-mono font-semibold text-white">
+                    {tasks.filter(t => t.status === "pending").length}
+                  </div>
+                  <div className="text-[11px] text-zinc-500 uppercase tracking-wider mt-1">Active Deadlines</div>
                 </div>
               </div>
             </div>
@@ -537,10 +538,10 @@ export default function App() {
                 <div className="mt-4 p-4 rounded-xl bg-black/40 border border-zinc-900">
                   <div className="flex items-center gap-2 mb-2">
                     <Activity className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Autonomous Sync Engine</span>
+                    <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">AI Scheduling Engine</span>
                   </div>
                   <p className="text-xs text-zinc-500 leading-relaxed">
-                    Analyzing active timeline. LifeSaver continuously coordinates constraints across a 10-Agent network to prevent cognitive blockades.
+                    Analyzing active timelines. LifeSaver continuously coordinates constraints to prevent scheduling conflicts.
                   </p>
                 </div>
               </div>
@@ -553,23 +554,23 @@ export default function App() {
         <section id="features" className="relative z-10 border-t border-zinc-900/80 py-24 bg-[#080808]/50">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-              <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase">Multi-Agent Cognitive Framework</span>
+              <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase">AI Productivity Platform</span>
               <h2 className="text-3xl md:text-4xl font-display font-semibold tracking-tight text-white">
-                Coordinated Autonomy. Zero Interruption.
+                Stay Organized. Meet Every Deadline.
               </h2>
               <p className="text-zinc-400 text-sm leading-relaxed">
-                LifeSaver deploys a collaborative squad of ten highly specialized autonomous agents working concurrently. Instead of pestering you with reminders, they negotiate, restructure, and prepare you for actual performance.
+                LifeSaver runs dynamic analysis on your schedule. Instead of annoying notifications, it builds clear outlines, suggests helpful habits, and prepares drafts to optimize your daily focus.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                { title: "Priority Agent", icon: Shield, desc: "Evaluates systemic urgency matrices dynamically. Instantly recognizes bill payments and high-yield milestones vs static noise." },
-                { title: "Planning Agent", icon: Brain, desc: "Slices highly complex, multi-week deliverables into bite-sized deep focus nodes complete with dynamic context parameters." },
-                { title: "Risk Prediction & Recovery", icon: AlertTriangle, desc: "Analyzes early friction signatures to forecast failure probabilities. Rebuilds calendar timelines automatically when clashes are found." },
-                { title: "Focus & Habit Agents", icon: Hourglass, desc: "Locks down distraction environments, curates targeted mental micro-drills, and anchors core disciplines into existing workflows." },
-                { title: "Productivity Twin Simulator", icon: MessageSquare, desc: "Generates real-time conversational alignment with your ideal, high-performance future self to instill intrinsic motivation." },
-                { title: "Burnout Predictor", icon: Zap, desc: "Tracks workload density and psychological reserves continuously to inject mandatory recovery buffers before exhaustion sets in." }
+                { title: "Smart Task Prioritization", icon: Shield, desc: "Automatically ranks your active commitments and deadlines based on urgency so you always know what to tackle first." },
+                { title: "AI Schedule Planner", icon: Brain, desc: "Drives your daily calendar by building custom study slots, deep focus blocks, and rest intervals personalized to your timeline." },
+                { title: "Deadline Risk Detection", icon: AlertTriangle, desc: "Identifies scheduling conflicts and overlapping milestones in advance to recommend proactive remedies before you fall behind." },
+                { title: "Habit Tracker", icon: Hourglass, desc: "Encourages daily consistency by logging routines, calculating streak statistics, and integrating habits into your scheduled day." },
+                { title: "AI Chat Assistant", icon: MessageSquare, desc: "Interact directly with an intelligent companion to brainstorm study tactics, request feedback, or ask questions about your goals." },
+                { title: "Workload Insights", icon: Zap, desc: "Calculates dynamic burnout risk and schedule density metrics, advising you exactly when to take a rest to maintain peak focus." }
               ].map((f, i) => {
                 const Icon = f.icon;
                 return (
@@ -587,16 +588,49 @@ export default function App() {
         </section>
 
         {/* Footer */}
-        <footer className="relative z-10 border-t border-zinc-900 bg-black py-12 text-center text-xs text-zinc-600">
+        <footer id="about" className="relative z-10 border-t border-zinc-900 bg-black py-12 text-center text-xs text-zinc-600">
           <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
-              <span className="font-display font-medium tracking-wide text-zinc-400">LifeSaver AI OS</span>
+              <span className="font-display font-medium tracking-wide text-zinc-400">LifeSaver AI Assistant</span>
             </div>
-            <p>© 2026 LifeSaver OS Inc. Empowered by Google Gemini & Firebase. All rights reserved.</p>
+            <p>© 2026 LifeSaver. Created by Shivani Nagda. Powered by Google Gemini & Firebase. All rights reserved.</p>
             <div className="flex items-center gap-4">
-              <span className="hover:text-zinc-400 cursor-pointer">Security Protocol</span>
-              <span className="hover:text-zinc-400 cursor-pointer">SLA Core</span>
-            </div>
+  <a
+    href="https://github.com/ShivaniNagda"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="hover:text-white transition-colors"
+  >
+    GitHub
+  </a>
+
+  <a
+    href="https://www.linkedin.com/in/shivaninagda"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="hover:text-white transition-colors"
+  >
+    LinkedIn
+  </a>
+
+  <a
+    href="https://ShivaniNagda.vercel.app"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="hover:text-white transition-colors"
+  >
+    Portfolio
+  </a>
+
+  <a
+    href="https://github.com/ShivaniNagda/LifeSaver-AI-OS/blob/main/LICENSE"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="hover:text-white transition-colors"
+  >
+    License
+  </a>
+</div>
           </div>
         </footer>
       </div>
@@ -617,12 +651,12 @@ export default function App() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-display font-semibold text-sm text-white tracking-wide">LifeSaver AI OS</span>
+              <span className="font-display font-semibold text-sm text-white tracking-wide">LifeSaver AI Assistant</span>
               <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-emerald-400 px-1.5 py-0.2 rounded uppercase tracking-widest">
-                System Active
+                Active
               </span>
             </div>
-            <p className="text-[10px] text-zinc-500 font-mono tracking-tight mt-0.5">user: {userEmail}</p>
+            <p className="text-[10px] text-zinc-500 font-mono tracking-tight mt-0.5">Account: {userEmail}</p>
           </div>
         </div>
 
@@ -630,13 +664,13 @@ export default function App() {
         <div className="hidden lg:flex items-center gap-8 text-xs font-mono">
           <div className="flex items-center gap-2">
             <Activity className="w-3.5 h-3.5 text-zinc-500 animate-pulse" />
-            <span className="text-zinc-400">ALIGNED COGNITION SPEED:</span>
-            <span className="text-white font-medium">99.2%</span>
+            <span className="text-zinc-400">TASKS COMPLETED:</span>
+            <span className="text-white font-medium">{tasks.filter(t => t.status === "completed").length}</span>
           </div>
           <div className="flex items-center gap-2">
             <Shield className="w-3.5 h-3.5 text-emerald-500" />
-            <span className="text-zinc-400">RESCUE DRILLS ARMED:</span>
-            <span className="text-white font-medium">TRUE</span>
+            <span className="text-zinc-400">SYSTEM STATUS:</span>
+            <span className="text-white font-medium">ONLINE</span>
           </div>
         </div>
 
@@ -653,7 +687,7 @@ export default function App() {
             onClick={handleLogout} 
             className="text-xs text-zinc-400 hover:text-white border border-zinc-900 hover:border-zinc-800 bg-zinc-950 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
           >
-            Terminal Shutdown (Logout)
+            Sign Out
           </button>
           <button 
             onClick={() => setActiveTab("settings")}
@@ -678,13 +712,13 @@ export default function App() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Brain className="w-4 h-4 text-white" />
-                <h2 className="text-xs font-mono tracking-wider uppercase text-zinc-300">Cognitive Context Window</h2>
+                <h2 className="text-xs font-mono tracking-wider uppercase text-zinc-300">Describe Your Situation</h2>
               </div>
               <span className="text-[10px] font-mono text-zinc-500">DYNAMIC SYNC</span>
             </div>
             
             <p className="text-xs text-zinc-500 leading-relaxed mb-3">
-              Describe your current life situation, stress triggers, exams, or active tasks. The 10 specialized AI Agents digest this input to formulate an automated execution schedule.
+              Describe your current situation, upcoming exams, or active tasks. The AI analyzes this input to formulate your personalized execution schedule.
             </p>
 
             <div className="space-y-3">
@@ -702,12 +736,12 @@ export default function App() {
                 {isProcessing ? (
                   <>
                     <Activity className="w-3.5 h-3.5 animate-spin" />
-                    Re-aligning Neural Agents...
+                    Generating AI Plan...
                   </>
                 ) : (
                   <>
                     <Play className="w-3 h-3 fill-black" />
-                    Synchronize Life OS Engine
+                    Generate AI Plan
                   </>
                 )}
               </button>
@@ -720,7 +754,7 @@ export default function App() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-white" />
-                  <h2 className="text-xs font-mono tracking-wider uppercase text-zinc-300">Commitments &amp; Deadlines</h2>
+                  <h2 className="text-xs font-mono tracking-wider uppercase text-zinc-300">Tasks &amp; Deadlines</h2>
                 </div>
                 <span className="text-[10px] font-mono text-zinc-500">TOTAL: {tasks.length}</span>
               </div>
@@ -761,7 +795,7 @@ export default function App() {
                     </div>
                     <p className="text-xs font-semibold text-zinc-200">🚀 Ready to organize your day?</p>
                     <p className="text-[11px] text-zinc-500 mt-1 max-w-[240px] leading-relaxed">
-                      Add your first commitment above and let the AI automatically build your personalized execution schedule.
+                      Add your first task above and let the AI automatically build your personalized execution schedule.
                     </p>
                   </div>
                 ) : (
@@ -804,9 +838,9 @@ export default function App() {
             {/* Static System Indicators */}
             <div className="mt-4 pt-4 border-t border-zinc-900 flex items-center justify-between text-[10px] font-mono text-zinc-500">
               <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> LOCAL PERSISTENCE RUNNING
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> LOCAL DATA SYNCHRONIZED
               </span>
-              <span>100% OFFLINE REPLICA</span>
+              <span>SECURE LOCAL STORAGE</span>
             </div>
           </div>
 
@@ -818,15 +852,15 @@ export default function App() {
           {/* High-End Sub-Navigation for Advanced OS Modes */}
           <div className="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-950 border border-zinc-900 max-w-full overflow-x-auto scrollbar-thin">
             {[
-              { id: "overview", label: "Executive Workspace", icon: Activity },
-              { id: "calendar", label: "Interactive Calendar", icon: Calendar },
-              { id: "goals", label: "Strategic Goal Engine", icon: Target },
-              { id: "habits", label: "Habit Matrix", icon: Hourglass },
+              { id: "overview", label: "Dashboard", icon: Activity },
+              { id: "calendar", label: "Calendar", icon: Calendar },
+              { id: "goals", label: "Goals", icon: Target },
+              { id: "habits", label: "Habit Tracker", icon: Hourglass },
               { id: "voice", label: "AI Voice Assistant", icon: Mic },
-              { id: "twin", label: "Productivity Twin Simulator", icon: MessageSquare },
-              { id: "negotiate", label: "AI Extension Negotiator", icon: Mail },
+              { id: "twin", label: "AI Chat", icon: MessageSquare },
+              { id: "negotiate", label: "AI Negotiator", icon: Mail },
               { id: "prep", label: "Exam & Interview Prep", icon: BookOpen },
-              { id: "settings", label: "Settings & Profile Console", icon: Settings }
+              { id: "settings", label: "Settings", icon: Settings }
             ].map((tab) => {
               const Icon = tab.icon;
               const isSelected = activeTab === tab.id;
@@ -847,11 +881,11 @@ export default function App() {
             })}
           </div>
 
-          {/* TAB CONTENT 1: Executive Workspace (Primary UI Overview with AI prediction widgets) */}
+          {/* TAB CONTENT 1: Dashboard (Primary UI Overview with AI prediction widgets) */}
           {activeTab === "overview" && (
             <div className="space-y-6">
               
-              {/* Strategic Analytics Summary Dashboard Grid */}
+              {/* Analytics Summary Dashboard Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 
                 {/* Score Widget 1: Success Probability */}
@@ -864,7 +898,7 @@ export default function App() {
                     <span className="text-4xl font-display font-semibold text-white">
                       {osResponse ? `${osResponse.successProbability}%` : "84%"}
                     </span>
-                    <p className="text-[10px] text-zinc-500 font-mono mt-1">Based on dynamic schedule density</p>
+                    <p className="text-[10px] text-zinc-500 font-mono mt-1">Based on schedule density</p>
                   </div>
                   {/* Subtle progress bar */}
                   <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
@@ -875,17 +909,17 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Score Widget 2: Burnout Predictor Risk */}
+                {/* Score Widget 2: Burnout Risk */}
                 <div className="glass-panel p-5 rounded-2xl border border-zinc-800 relative overflow-hidden flex flex-col justify-between h-40">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono tracking-widest text-zinc-400 uppercase">Burnout Predictor</span>
+                    <span className="text-[10px] font-mono tracking-widest text-zinc-400 uppercase">Burnout Risk</span>
                     <Zap className="w-4 h-4 text-zinc-400" />
                   </div>
                   <div className="my-3">
                     <span className="text-4xl font-display font-semibold text-white">
                       {osResponse ? `${osResponse.burnoutRisk}%` : "18%"}
                     </span>
-                    <p className="text-[10px] text-zinc-500 font-mono mt-1">Mental stamina &amp; sleep projection</p>
+                    <p className="text-[10px] text-zinc-500 font-mono mt-1">Mental stamina &amp; rest projection</p>
                   </div>
                   {/* Subtle warning bar */}
                   <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
@@ -901,29 +935,29 @@ export default function App() {
                 {/* Score Widget 3: Failure Prediction & Warnings */}
                 <div className="glass-panel p-5 rounded-2xl border border-zinc-800 relative overflow-hidden flex flex-col justify-between h-40">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono tracking-widest text-zinc-400 uppercase">Risk Forecasting Engine</span>
+                    <span className="text-[10px] font-mono tracking-widest text-zinc-400 uppercase">Risk Assessment</span>
                     <AlertTriangle className="w-4 h-4 text-amber-500" />
                   </div>
                   <div className="my-2">
                     <span className="text-xs font-mono font-medium text-amber-400 block tracking-tight">ALERT: FAILURE PROBABILITY DETECTED</span>
                     <p className="text-xs text-zinc-300 leading-snug mt-1 font-sans line-clamp-2">
-                      {osResponse ? osResponse.failurePrediction : "No extreme threats. Maintain chemistry mid-term study velocity."}
+                      {osResponse ? osResponse.failurePrediction : "No extreme threats. Maintain study schedule."}
                     </p>
                   </div>
-                  <div className="text-[9px] font-mono text-zinc-500">REMEDY SYSTEM: ACTIVE</div>
+                  <div className="text-[9px] font-mono text-zinc-500">AI STATUS: ACTIVE</div>
                 </div>
 
               </div>
 
-              {/* AI Chief of Staff Strategy Advice Block */}
+              {/* AI Strategy Advice Block */}
               <div className="p-4 rounded-xl bg-white/[0.02] border border-zinc-800/80 flex items-start gap-3.5">
                 <div className="w-8 h-8 rounded-lg bg-white/5 border border-zinc-800 flex items-center justify-center shrink-0 mt-0.5">
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400">Chief of Staff Strategic Advice</h4>
+                  <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400">AI Recommendation</h4>
                   <p className="text-xs text-zinc-300 font-sans leading-relaxed mt-1">
-                    {osResponse ? osResponse.aiCoachAdvice : "Awaiting initial context sync. Click 'Synchronize Life OS Engine' to engage the autonomous agents and receive elite productivity strategies."}
+                    {osResponse ? osResponse.aiCoachAdvice : "Awaiting context. Enter details on the left and click 'Generate AI Plan' to receive tailored productivity advice."}
                   </p>
                 </div>
               </div>
@@ -933,9 +967,9 @@ export default function App() {
                 <div className="flex items-center justify-between mb-4 border-b border-zinc-900 pb-3">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-zinc-400" />
-                    <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Autonomous Restructured Daily Timeline</h3>
+                    <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Recommended Daily Schedule</h3>
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-500">GENERATED BY PLANNING AGENT</span>
+                  <span className="text-[10px] font-mono text-zinc-500">AI PLANNER</span>
                 </div>
 
                 <div className="relative border-l border-zinc-800 ml-4 pl-6 space-y-6">
@@ -972,19 +1006,19 @@ export default function App() {
                         <div className="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full border-2 border-zinc-950 bg-white" />
                         <span className="text-[10px] font-mono text-zinc-500 mr-2 uppercase tracking-wide">[09:00 AM]</span>
                         <span className="text-xs font-medium text-white">Active Recall Session (Chemistry Midterm)</span>
-                        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Focus Agent allocates 45 minutes on electrochemistry equations with distractions restricted.</p>
+                        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Focus time allocated for studying electrochemistry equations.</p>
                       </div>
                       <div className="relative">
                         <div className="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full border-2 border-zinc-950 bg-red-400 ring-4 ring-red-500/20" />
                         <span className="text-[10px] font-mono text-zinc-500 mr-2 uppercase tracking-wide">[02:30 PM]</span>
                         <span className="text-xs font-medium text-white">Critical Bill &amp; Infrastructure Payment Block</span>
-                        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Urgent priority task. Priority Agent bypasses notification silencers to settle hosting billing.</p>
+                        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Urgent priority task. Complete pending SaaS server hosting payments.</p>
                       </div>
                       <div className="relative">
                         <div className="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full border-2 border-zinc-950 bg-zinc-700" />
                         <span className="text-[10px] font-mono text-zinc-500 mr-2 uppercase tracking-wide">[04:30 PM]</span>
                         <span className="text-xs font-medium text-white">Mandatory Mental Recharging Reserve</span>
-                        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Burnout Predictor predicts psychological capacity strain. Allocate 15 minutes of device-free physical rest.</p>
+                        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Schedule indicates high mental strain. Rest and take a 15-minute break.</p>
                       </div>
                     </>
                   )}
@@ -994,8 +1028,8 @@ export default function App() {
               {/* Coordinated Live Agent Terminal Output */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">Collaborative Agent Communications</span>
-                  <span className="text-[10px] font-mono text-emerald-400 animate-pulse">● LIVE INTER-AGENT AUDIOSTREAM</span>
+                  <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">AI Activity Logs</span>
+                  <span className="text-[10px] font-mono text-emerald-400 animate-pulse">● LIVE STATUS MONITOR</span>
                 </div>
                 <AgentLogsTerminal logs={osResponse?.agentLogs} isProcessing={isProcessing} />
               </div>
@@ -1014,48 +1048,48 @@ export default function App() {
 
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
-                  <span className="text-[10px] font-mono text-red-400 uppercase tracking-widest font-semibold">Emergency Action System</span>
+                  <span className="text-[10px] font-mono text-red-400 uppercase tracking-widest font-semibold">Emergency Plan</span>
                 </div>
 
-                <h3 className="text-2xl font-display font-bold text-white tracking-tight">Deadline Rescue Mode Active</h3>
+                <h3 className="text-2xl font-display font-bold text-white tracking-tight">Task Rescue Active</h3>
                 <p className="text-xs text-zinc-400 leading-relaxed max-w-xl mt-1.5">
-                  The agents have detected extremely critical timelines (Chemistry exam and utility bill settlements are clashing). Focus silencers have been initiated. Dynamic extension negotiation draft is prepared.
+                  We have detected tight timelines (Chemistry exam and pending tasks). Your personalized emergency action plan and negotiation draft are ready below.
                 </p>
 
                 {/* Tactical checklists */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                   <div className="p-4 rounded-xl bg-red-950/10 border border-red-900/30">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-red-400 block mb-2">Actionable Defense Plan</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-red-400 block mb-2">Immediate Action Plan</span>
                     <ul className="space-y-2 text-xs text-zinc-300">
                       <li className="flex items-start gap-2">
                         <span className="text-red-500 font-mono shrink-0">1.</span>
-                        <span>Mute Slack, Discord, and messaging apps instantly to secure a 90-minute focus window.</span>
+                        <span>Mute social media and messaging apps to secure a 90-minute focus window.</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-red-500 font-mono shrink-0">2.</span>
-                        <span>Settle Cloud hosting invoice before platform freezes database nodes (Negotiation assistant ready).</span>
+                        <span>Settle any urgent invoices or deadlines (use Negotiator draft if you need an extension).</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-red-500 font-mono shrink-0">3.</span>
-                        <span>Deploy high-yield active recall mock questions for Chemistry prep.</span>
+                        <span>Complete the high-yield study topics for your upcoming Chemistry test.</span>
                       </li>
                     </ul>
                   </div>
 
                   <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-900">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-2">System Intercept Parameters</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-2">Plan Metrics</span>
                     <div className="space-y-3 font-mono text-[11px] text-zinc-400">
                       <div className="flex justify-between">
-                        <span>DISTRACTION REJECTION:</span>
-                        <span className="text-red-400 font-bold">98% ENFORCED</span>
+                        <span>DISTRACTION REDUCTION:</span>
+                        <span className="text-red-400 font-bold">RECOMMENDED</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>AUTONOMOUS AUTOPILOT:</span>
-                        <span className="text-emerald-400 font-bold">ARMED</span>
+                        <span>AUTO-SCHEDULING:</span>
+                        <span className="text-emerald-400 font-bold">ENABLED</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>SUCCESS RATE PROJECTION:</span>
-                        <span className="text-white font-bold">88.5% MINIMUM</span>
+                        <span>SUCCESS ESTIMATE:</span>
+                        <span className="text-white font-bold">88.5%</span>
                       </div>
                     </div>
                   </div>
@@ -1066,7 +1100,7 @@ export default function App() {
               <div className="glass-panel p-5 rounded-2xl border border-zinc-800">
                 <div className="flex items-center gap-2 mb-4 border-b border-zinc-900 pb-3">
                   <Hourglass className="w-4 h-4 text-zinc-400" />
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Future Self Simulator</h3>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Weekly Scenarios</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1074,10 +1108,10 @@ export default function App() {
                   <div className="space-y-2 p-4 rounded-xl bg-zinc-900/20 border border-zinc-900/60">
                     <div className="flex items-center gap-2 text-emerald-400">
                       <CheckCircle className="w-4 h-4" />
-                      <span className="text-xs font-mono uppercase tracking-wider">Path of Alignment (+7 Days)</span>
+                      <span className="text-xs font-mono uppercase tracking-wider">Optimal Path (+7 Days)</span>
                     </div>
                     <p className="text-xs text-zinc-400 leading-relaxed font-sans italic">
-                      {osResponse ? osResponse.futureSelfDialog.positiveScenario : "You completed your chemistry prep with full clarity, secured investor pitch interest, and cleared all SaaS hosting overhead. Mental stress index dropped by 72%."}
+                      {osResponse ? osResponse.futureSelfDialog.positiveScenario : "You completed your chemistry prep with full clarity, secured key objectives, and cleared all immediate tasks. Mental stress index dropped by 72%."}
                     </p>
                   </div>
 
@@ -1085,10 +1119,10 @@ export default function App() {
                   <div className="space-y-2 p-4 rounded-xl bg-zinc-900/20 border border-zinc-900/60">
                     <div className="flex items-center gap-2 text-red-400">
                       <AlertTriangle className="w-4 h-4 animate-pulse" />
-                      <span className="text-xs font-mono uppercase tracking-wider">Path of Friction (+7 Days)</span>
+                      <span className="text-xs font-mono uppercase tracking-wider">Unplanned Path (+7 Days)</span>
                     </div>
                     <p className="text-xs text-zinc-400 leading-relaxed font-sans italic">
-                      {osResponse ? osResponse.futureSelfDialog.negativeScenario : "Skipped study block and forgot utility invoices. Server database experienced suspension. Midterm exam marks suffered from cognitive cramming. Cognitive fatigue maxed out."}
+                      {osResponse ? osResponse.futureSelfDialog.negativeScenario : "Skipped study blocks and forgot critical deadlines. Suffer from last-minute cramming and study fatigue."}
                     </p>
                   </div>
                 </div>
@@ -1097,7 +1131,7 @@ export default function App() {
             </div>
           )}
 
-          {/* TAB CONTENT 3: Productivity Twin Simulator (Interactive Real AI Twin Chat) */}
+          {/* TAB CONTENT 3: AI Chat (Interactive Real AI Chat) */}
           {activeTab === "twin" && (
             <div className="glass-panel p-5 rounded-2xl border border-zinc-800 flex flex-col justify-between min-h-[460px]">
               
@@ -1106,11 +1140,11 @@ export default function App() {
                   <div className="flex items-center gap-2">
                     <Brain className="w-4.5 h-4.5 text-white" />
                     <div>
-                      <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Productivity Twin Console</h3>
-                      <p className="text-[10px] text-zinc-500 font-mono mt-0.5">TIMELINE: OPTIMAL FUTURE ALIGNMENT (+1 WEEK)</p>
+                      <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">AI Assistant Chat</h3>
+                      <p className="text-[10px] text-zinc-500 font-mono mt-0.5">AI ASSISTANT PERSPECTIVE</p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Cognitive Mirror</span>
+                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">AI Helper</span>
                 </div>
 
                 {/* Chat window viewport */}
@@ -1125,7 +1159,7 @@ export default function App() {
                           ? "bg-zinc-800 border-zinc-700 text-zinc-200" 
                           : "bg-white border-zinc-300 text-black font-semibold text-xs"
                       }`}>
-                        {msg.role === "user" ? "U" : "T"}
+                        {msg.role === "user" ? "U" : "A"}
                       </div>
                       <div className="space-y-2">
                         <div className={`p-3 rounded-2xl text-xs leading-relaxed font-sans ${
@@ -1139,7 +1173,7 @@ export default function App() {
                           <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-900/30 flex items-center gap-2">
                             <Zap className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                             <div>
-                              <span className="text-[9px] font-mono text-emerald-400 block uppercase tracking-wider">Immediate 5-Min Action</span>
+                              <span className="text-[9px] font-mono text-emerald-400 block uppercase tracking-wider">Immediate Action Suggestion</span>
                               <p className="text-[10px] text-zinc-300 font-medium">{msg.microAction}</p>
                             </div>
                           </div>
@@ -1150,7 +1184,7 @@ export default function App() {
                   {isTwinChatting && (
                     <div className="flex gap-2 items-center text-xs text-zinc-500 italic">
                       <span className="w-2 h-2 rounded-full bg-zinc-600 animate-ping mr-1" />
-                      Twin is calculating timeline vectors inside Gemini...
+                      Assistant is typing...
                     </div>
                   )}
                 </div>
@@ -1162,7 +1196,7 @@ export default function App() {
                   type="text"
                   value={twinInput}
                   onChange={(e) => setTwinInput(e.target.value)}
-                  placeholder="Ask your future self: 'How did you handle the Chemistry study stress?'"
+                  placeholder="Ask: 'How should I schedule my Chemistry studying?'"
                   className="flex-1 bg-zinc-950 border border-zinc-900 rounded-xl px-4 py-3 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-800"
                 />
                 <button
@@ -1185,12 +1219,12 @@ export default function App() {
               <div className="md:col-span-5 glass-panel p-5 rounded-2xl border border-zinc-800 space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Mail className="w-4 h-4 text-zinc-400" />
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Negotiator parameters</h3>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Negotiator Settings</h3>
                 </div>
 
                 <form onSubmit={handleNegotiate} className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Commitment Title</label>
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Task Title</label>
                     <input
                       type="text"
                       value={negoTitle}
@@ -1236,7 +1270,7 @@ export default function App() {
                     disabled={isNegoLoading}
                     className="w-full py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 disabled:bg-zinc-800 transition-colors cursor-pointer"
                   >
-                    {isNegoLoading ? "Formulating correspondence..." : "Compose Extension Draft"}
+                    {isNegoLoading ? "Generating email draft..." : "Draft Request"}
                   </button>
                 </form>
               </div>
@@ -1245,9 +1279,9 @@ export default function App() {
               <div className="md:col-span-7 glass-panel p-5 rounded-2xl border border-zinc-800 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between border-b border-zinc-900 pb-3 mb-4">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">Response output</span>
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">Generated Draft</span>
                     <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-emerald-400 px-1.5 py-0.5 rounded">
-                      Negotiation Agent
+                      AI Negotiator
                     </span>
                   </div>
 
@@ -1263,7 +1297,7 @@ export default function App() {
                       </div>
 
                       <div className="p-3 rounded-lg bg-white/[0.02] border border-zinc-900">
-                        <span className="text-[10px] font-mono text-zinc-400 block uppercase tracking-wide">Tactical Negotiator Advice</span>
+                        <span className="text-[10px] font-mono text-zinc-400 block uppercase tracking-wide">Negotiation Strategy</span>
                         <p className="text-xs text-zinc-500 font-sans italic mt-1 leading-relaxed">
                           {negoResult.tacticalTip}
                         </p>
@@ -1274,9 +1308,9 @@ export default function App() {
                       <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-500 mb-3.5">
                         <Mail className="w-5 h-5 text-zinc-400" />
                       </div>
-                      <p className="text-xs font-semibold text-zinc-300">📬 Extension Pipeline Standby</p>
+                      <p className="text-xs font-semibold text-zinc-300">📬 Negotiation Assistant</p>
                       <p className="text-[11px] text-zinc-500 mt-1 max-w-[280px] leading-relaxed">
-                        Configure the parameters on the left and click "Compose" to request extension backing from the Recovery Agent.
+                        Fill out the form on the left and click "Draft Request" to generate a professional email draft.
                       </p>
                     </div>
                   )}
@@ -1294,12 +1328,12 @@ export default function App() {
               <div className="md:col-span-5 glass-panel p-5 rounded-2xl border border-zinc-800 space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                   <BookOpen className="w-4 h-4 text-zinc-400" />
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Exam/Interview metrics</h3>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Exam &amp; Interview Details</h3>
                 </div>
 
                 <form onSubmit={handleGeneratePrep} className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Impending High-Stakes Event</label>
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Exam or Interview Name</label>
                     <input
                       type="text"
                       value={prepEvent}
@@ -1370,9 +1404,9 @@ export default function App() {
               {/* Right Column: AI Formulated custom preparation phase planner */}
               <div className="md:col-span-7 glass-panel p-5 rounded-2xl border border-zinc-800">
                 <div className="flex items-center justify-between border-b border-zinc-900 pb-3 mb-4">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">Restructured cognitive study pipeline</span>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">Optimized Study Strategy</span>
                   <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-emerald-400 px-1.5 py-0.5 rounded">
-                    Learning Agent
+                    AI Tutor
                   </span>
                 </div>
 
@@ -1381,7 +1415,7 @@ export default function App() {
                     
                     {/* Phase schedule */}
                     <div className="space-y-2.5">
-                      <span className="text-[9px] font-mono text-zinc-500 block">OPTIMIZED COGNITIVE PHASES:</span>
+                      <span className="text-[9px] font-mono text-zinc-500 block">STUDY PHASES:</span>
                       {prepPlan.schedulePhases.map((phase, idx) => (
                         <div key={idx} className="p-3 rounded-lg bg-zinc-900/40 border border-zinc-900 flex justify-between gap-3">
                           <div className="space-y-0.5">
@@ -1398,7 +1432,7 @@ export default function App() {
 
                     {/* High-yield check */}
                     <div>
-                      <span className="text-[9px] font-mono text-zinc-500 block mb-1">HIGH-YIELD CORE TOPICS FOR FLASH DRILLS:</span>
+                      <span className="text-[9px] font-mono text-zinc-500 block mb-1">HIGH-YIELD CORE TOPICS:</span>
                       <div className="flex flex-wrap gap-1.5">
                         {prepPlan.highYieldTopics.map((topic, idx) => (
                           <span key={idx} className="px-2 py-1 rounded bg-zinc-950 border border-zinc-900 text-[10px] text-zinc-300">
@@ -1410,7 +1444,7 @@ export default function App() {
 
                     {/* Stress Remedy */}
                     <div className="p-3 rounded-xl bg-white/[0.02] border border-zinc-900">
-                      <span className="text-[10px] font-mono text-zinc-400 block uppercase tracking-wide">Stress &amp; Fatigue Remedy</span>
+                      <span className="text-[10px] font-mono text-zinc-400 block uppercase tracking-wide">Stress &amp; Burnout Tips</span>
                       <p className="text-xs text-zinc-500 font-sans italic mt-1 leading-relaxed">
                         {prepPlan.stressRemedy}
                       </p>
@@ -1422,9 +1456,9 @@ export default function App() {
                     <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-500 mb-3.5">
                       <BookOpen className="w-5 h-5 text-zinc-400" />
                     </div>
-                    <p className="text-xs font-semibold text-zinc-300">📚 Cognitive Study Pipeline Idle</p>
+                    <p className="text-xs font-semibold text-zinc-300">📚 Study Strategy Standby</p>
                     <p className="text-[11px] text-zinc-500 mt-1 max-w-[280px] leading-relaxed">
-                      Input your target event, timing constraints, and study areas on the left. The Learning &amp; Focus Agents will generate an elite active-recall strategy.
+                      Enter your target event, timing constraints, and study topics on the left to generate an active-recall study strategy.
                     </p>
                   </div>
                 )}

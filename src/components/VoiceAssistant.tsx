@@ -12,14 +12,14 @@ interface VoiceAssistantProps {
 export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLifeOSEngine }: VoiceAssistantProps) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const [statusText, setStatusText] = useState("Idle. Click the microphone to activate the Voice Core.");
+  const [statusText, setStatusText] = useState("Idle. Click the microphone to start.");
   const [speechSupported, setSpeechSupported] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [voiceLogs, setVoiceLogs] = useState<{ id: string; sender: "user" | "assistant"; text: string; timestamp: string }[]>([
     {
       id: "init",
       sender: "assistant",
-      text: "Voice Assistant Core initialized. Try saying: 'Add task review electrochemistry' or 'Read my tasks'.",
+      text: "Voice assistant active. Try saying: 'Add task review electrochemistry' or 'Read my tasks'.",
       timestamp: new Date().toLocaleTimeString()
     }
   ]);
@@ -31,7 +31,7 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setSpeechSupported(false);
-      setStatusText("Web Speech Recognition API not fully supported in this browser. Running in text-fallback simulator mode.");
+      setStatusText("Speech recognition is not fully supported in this browser. Running in text-fallback simulator mode.");
       return;
     }
 
@@ -108,7 +108,7 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
     if (cleanCmd.startsWith("add task ") || cleanCmd.startsWith("create task ")) {
       const taskTitle = command.replace(/^(add task |create task )/i, "").trim();
       if (!taskTitle) {
-        const reply = "I heard you wanted to add a task, but I couldn't capture the task name. Try saying: 'Add task review notes'.";
+        const reply = "Could not hear the task title. Try saying: 'Add task review notes'.";
         addLog("assistant", reply);
         speak(reply);
         setStatusText("Task title empty.");
@@ -118,12 +118,12 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
       setStatusText(`Adding task: "${taskTitle}"...`);
       try {
         await onAddTask(taskTitle, "medium", "2026-06-29");
-        const reply = `Task successfully registered. Added: ${taskTitle}.`;
+        const reply = `Task added successfully: ${taskTitle}.`;
         addLog("assistant", reply);
         speak(reply);
         setStatusText(`Task added: "${taskTitle}"`);
       } catch (err) {
-        const reply = "I encountered an error trying to write that task to the database corridor.";
+        const reply = "Failed to save the task. Please try again.";
         addLog("assistant", reply);
         speak(reply);
         setStatusText("Failed to create task.");
@@ -131,34 +131,34 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
     } 
     // 2. Read Tasks: "read my tasks", "list tasks", "what are my tasks"
     else if (cleanCmd.includes("read") && (cleanCmd.includes("task") || cleanCmd.includes("commitment"))) {
-      setStatusText("Reading active commitments...");
+      setStatusText("Reading active tasks...");
       const pendingTasks = tasks.filter(t => t.status !== "completed");
       if (pendingTasks.length === 0) {
-        const reply = "You have no pending commitments currently scheduled in the LifeOS core. Exceptional work!";
+        const reply = "You have no pending tasks. Great job!";
         addLog("assistant", reply);
         speak(reply);
       } else {
         const listText = pendingTasks.slice(0, 4).map(t => t.title).join(". And, ");
-        const countReply = `You have ${pendingTasks.length} pending commitments. Here are the top items: ${listText}.`;
+        const countReply = `You have ${pendingTasks.length} pending tasks. Here are the top items: ${listText}.`;
         addLog("assistant", countReply);
         speak(countReply);
       }
-      setStatusText("Commitments read.");
+      setStatusText("Tasks read.");
     } 
     // 3. Synchronize LifeOS: "synchronize", "sync life os", "align agents"
     else if (cleanCmd.includes("sync") || cleanCmd.includes("align") || cleanCmd.includes("process")) {
-      setStatusText("Invoking Life OS Neural alignment...");
-      const reply = "Synchronizing all ten specialized AI operating agents. Formulating optimal schedule now.";
+      setStatusText("Syncing data...");
+      const reply = "Syncing tasks and optimizing your schedule...";
       addLog("assistant", reply);
       speak(reply);
       try {
         await runLifeOSEngine();
-        const successReply = "Neural alignment completed successfully. Strategic schedule is updated.";
+        const successReply = "Sync complete! Your schedule has been updated.";
         addLog("assistant", successReply);
         speak(successReply);
-        setStatusText("System synchronized successfully.");
+        setStatusText("Sync complete.");
       } catch (e) {
-        const errReply = "System alignment failed. Database corridor is locked.";
+        const errReply = "Sync failed. Please check your connection.";
         addLog("assistant", errReply);
         speak(errReply);
         setStatusText("Sync failed.");
@@ -166,7 +166,7 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
     } 
     // 4. Default: Let Gemini handle or mock assistant response
     else {
-      const reply = `I heard you say: "${command}". I can register commitments, read tasks, or trigger OS neural sync. Try saying: 'Add task read chemistry textbook'.`;
+      const reply = `I heard you say: "${command}". You can add tasks, list tasks, or sync. Try saying: 'Add task read chemistry textbook'.`;
       addLog("assistant", reply);
       speak(reply);
       setStatusText("Command recognized.");
@@ -204,7 +204,7 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
           <BrainCircuit className="w-4.5 h-4.5 text-white animate-pulse" />
           <div>
             <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">AI Voice Assistant</h3>
-            <p className="text-[10px] text-zinc-500 font-mono">AUTONOMOUS NL PROTOCOL</p>
+            <p className="text-[10px] text-zinc-500 font-mono">VOICE COMMANDS</p>
           </div>
         </div>
         
@@ -222,7 +222,7 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
           title={voiceEnabled ? "Mute TTS response" : "Unmute TTS response"}
         >
           {voiceEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-          {voiceEnabled ? "VOICE RESPONSE ACTIVE" : "VOICE RESPONSE MUTED"}
+          {voiceEnabled ? "VOICE OUTPUT ON" : "VOICE OUTPUT MUTED"}
         </button>
       </div>
 
@@ -271,7 +271,7 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
 
         <div className="text-center space-y-1 z-10 px-4">
           <p className="text-xs font-semibold text-white">
-            {isListening ? "Listening..." : "Core Suspended"}
+            {isListening ? "Listening..." : "Inactive"}
           </p>
           <p className="text-[10px] text-zinc-500 font-mono tracking-tight max-w-sm mx-auto leading-relaxed">
             {statusText}
@@ -289,30 +289,30 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
 
       {/* Grid mapping out supported voice actions */}
       <div className="p-3.5 bg-white/[0.01] border border-zinc-900 rounded-xl space-y-2">
-        <span className="text-[10px] font-mono text-zinc-400 block uppercase tracking-wider">COMMAND DIRECTORY MAP</span>
+        <span className="text-[10px] font-mono text-zinc-400 block uppercase tracking-wider">Supported Commands</span>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] text-zinc-500 font-sans">
           <div className="flex items-start gap-1.5">
             <span className="text-white font-mono font-bold">•</span>
-            <span>Say <strong className="text-zinc-300">"Add task [Name]"</strong> to register commitments instantly.</span>
+            <span>Say <strong className="text-zinc-300">"Add task [Name]"</strong> to add a task instantly.</span>
           </div>
           <div className="flex items-start gap-1.5">
             <span className="text-white font-mono font-bold">•</span>
-            <span>Say <strong className="text-zinc-300">"Read tasks"</strong> to let LifeOS speak all active deadlines.</span>
+            <span>Say <strong className="text-zinc-300">"Read tasks"</strong> to listen to your pending tasks.</span>
           </div>
           <div className="flex items-start gap-1.5">
             <span className="text-white font-mono font-bold">•</span>
-            <span>Say <strong className="text-zinc-300">"Sync Life OS"</strong> to align all ten agents dynamically.</span>
+            <span>Say <strong className="text-zinc-300">"Sync tasks"</strong> to optimize your schedule.</span>
           </div>
           <div className="flex items-start gap-1.5">
             <span className="text-white font-mono font-bold">•</span>
-            <span>Or test simulated browser inputs via text-fallback controls.</span>
+            <span>Or use the fallback input popup to simulate command testing.</span>
           </div>
         </div>
       </div>
 
       {/* Voice Assistant interaction Logs/History */}
       <div className="space-y-2.5">
-        <span className="text-[10px] font-mono text-zinc-400 block uppercase tracking-wider">VOICE FEEDBACK LOGS</span>
+        <span className="text-[10px] font-mono text-zinc-400 block uppercase tracking-wider">Voice History</span>
         <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
           {voiceLogs.map((log) => (
             <div 
@@ -324,7 +324,7 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
               }`}
             >
               <div className="flex items-center justify-between gap-2 mb-1 text-[8px] font-mono text-zinc-500">
-                <span className="uppercase">{log.sender === "user" ? "Principal Voice" : "LifeOS Core Voice"}</span>
+                <span className="uppercase">{log.sender === "user" ? "User" : "Assistant"}</span>
                 <span>{log.timestamp}</span>
               </div>
               <p className="text-xs text-zinc-300 font-sans leading-relaxed">{log.text}</p>

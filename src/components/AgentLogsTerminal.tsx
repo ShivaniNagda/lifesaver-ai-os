@@ -8,13 +8,13 @@ interface AgentLogsTerminalProps {
 }
 
 const SIMULATED_IDLE_LOGS: AgentLog[] = [
-  { agent: "Priority Agent", message: "Scanning calendar databases and transaction schedules for structural risks...", timestamp: "00:01" },
-  { agent: "Risk Prediction Agent", message: "Stress threshold alert: Upcoming chemistry exam on Friday clashes with Tuesday night utility bill due date.", timestamp: "00:03" },
-  { agent: "Burnout Prevention Agent", message: "Psychological fatigue projection: User cognitive reserve is predicted at 18% by Thursday. Recommending micro-rests.", timestamp: "00:04" },
-  { agent: "Planning Agent", message: "Assembling preparation pipeline. Deconstructing exam modules into three 45-minute deep work nodes.", timestamp: "00:05" },
-  { agent: "Recovery Agent", message: "Negotiation engine prepared. Pre-drafting extension appeal script for Friday assignment just in case.", timestamp: "00:07" },
-  { agent: "Focus Agent", message: "Locking environment telemetry. Standby to trigger fullscreen focus block and ambient acoustics.", timestamp: "00:08" },
-  { agent: "Goal Agent", message: "Verifying milestone alignment: High-stakes exam completion is mapped directly to academic trajectory GPA goals.", timestamp: "00:10" }
+  { agent: "Priority Agent", message: "Analyzing upcoming tasks and due dates for potential conflicts...", timestamp: "00:01" },
+  { agent: "Risk Prediction Agent", message: "Schedule check: Chemistry exam on Friday is being tracked alongside your active task list.", timestamp: "00:03" },
+  { agent: "Burnout Prevention Agent", message: "Workload check: High density detected near Thursday. Recommending a rest buffer.", timestamp: "00:04" },
+  { agent: "Planning Agent", message: "Structuring study strategy: Dividing chemistry chapters into focused 45-minute blocks.", timestamp: "00:05" },
+  { agent: "Recovery Agent", message: "Negotiator prepared: Ready to generate email drafts for extensions if needed.", timestamp: "00:07" },
+  { agent: "Focus Agent", message: "Focus assist active: Ready to silences distractions and start timers.", timestamp: "00:08" },
+  { agent: "Goal Agent", message: "Checking goals: Exam prep is aligned with academic milestones.", timestamp: "00:10" }
 ];
 
 const AGENT_COLORS: Record<string, { bg: string; text: string; border: string; icon: any }> = {
@@ -45,7 +45,7 @@ export default function AgentLogsTerminal({ logs = EMPTY_LOGS, isProcessing = fa
   useEffect(() => {
     if (isProcessing) {
       setActiveLogs([
-        { agent: "Priority Agent", message: "OS THREAD SPUN: Activating high-performance multi-agent context analysis...", timestamp: "NOW" }
+        { agent: "Priority Agent", message: "Analyzing context and generating optimized schedules...", timestamp: "NOW" }
       ]);
       return;
     }
@@ -59,10 +59,10 @@ export default function AgentLogsTerminal({ logs = EMPTY_LOGS, isProcessing = fa
     setActiveLogs(SIMULATED_IDLE_LOGS);
 
     const extraMessages = [
-      { agent: "Learning Agent", message: "Friction index update: Detected cognitive drag around evening bill tasks. Optimizing timing parameters.", timestamp: "00:12" },
-      { agent: "Reflection Agent", message: "Consolidating 24-hour efficiency metrics. Goal compliance at 92%. Output stable.", timestamp: "00:15" },
-      { agent: "Habit Agent", message: "Habit anchor triggered: Morning chemistry flashcards are tied securely to user's daily coffee routine.", timestamp: "00:18" },
-      { agent: "Burnout Prevention Agent", message: "Heart rate variability proxy checked. Standby for adaptive stress relief buffers.", timestamp: "00:20" }
+      { agent: "Learning Agent", message: "Study tip: Retaining information is highest during morning study blocks.", timestamp: "00:12" },
+      { agent: "Reflection Agent", message: "Weekly summary compiled: Task completion rate is currently at 92%.", timestamp: "00:15" },
+      { agent: "Habit Agent", message: "Habit tracked: 'Morning review' checked and updated successfully.", timestamp: "00:18" },
+      { agent: "Burnout Prevention Agent", message: "Breathing break suggestion: A 2-minute focus breathing session is recommended.", timestamp: "00:20" }
     ];
 
     let currentIdx = 0;
@@ -86,12 +86,12 @@ export default function AgentLogsTerminal({ logs = EMPTY_LOGS, isProcessing = fa
       {/* Header */}
       <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-zinc-400 font-medium tracking-tight">LIFE_OS_AGENT_BUS_v1.0.4</span>
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-zinc-400 font-medium tracking-tight">AI_LOG_SERVICE_v1.0</span>
         </div>
         <div className="flex items-center gap-3 text-zinc-500 text-[10px]">
-          <span>MUTEX_LOCK: OFF</span>
-          <span>STREAMS: ACTIVE</span>
+          <span>STATUS: ONLINE</span>
+          <span>SYNC: ACTIVE</span>
         </div>
       </div>
 
@@ -115,9 +115,9 @@ export default function AgentLogsTerminal({ logs = EMPTY_LOGS, isProcessing = fa
           );
         })}
         {isProcessing && (
-          <div className="flex gap-2 items-center text-zinc-400 italic">
+          <div className="flex gap-2 items-center text-zinc-400 italic font-sans">
             <span className="w-2 h-2 rounded-full bg-zinc-400 animate-ping mr-2" />
-            Coordinating multi-agent consensus inside Google Gemini...
+            Analyzing schedules and prioritizing tasks using Google Gemini...
           </div>
         )}
         <div ref={terminalEndRef} />
@@ -125,8 +125,8 @@ export default function AgentLogsTerminal({ logs = EMPTY_LOGS, isProcessing = fa
 
       {/* Terminal Footer Info */}
       <div className="border-t border-zinc-900 pt-2 mt-2 flex items-center justify-between text-[10px] text-zinc-500">
-        <span>PROACTIVE PROTOCOL STATE: STANDBY</span>
-        <span>LATENCY: 42ms</span>
+        <span>AI ASSISTANT STATE: STANDBY</span>
+        <span>LATENCY: NORMAL</span>
       </div>
     </div>
   );

@@ -238,10 +238,10 @@ export default function AICoreCanvas() {
       <canvas ref={canvasRef} className="w-full h-full block absolute inset-0" />
       <div className="absolute bottom-6 flex flex-col items-center pointer-events-none select-none">
         <span className="font-mono text-[10px] tracking-widest text-zinc-500 uppercase">
-          Autonomous Core
+          AI Core Status
         </span>
         <span className="text-xs text-zinc-300 font-light font-sans mt-1">
-          {isHovered ? "Accelerating Cognitive Sync..." : "Hover to sync core"}
+          {isHovered ? "Optimizing Schedule..." : "Hover to interact"}
         </span>
       </div>
     </div>

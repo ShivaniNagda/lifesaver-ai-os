@@ -178,7 +178,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
         startTime: startStr,
         endTime: endStr,
         category: task.urgency === "critical" || task.urgency === "high" ? "study" : "work",
-        description: `Autonomous time allocation created by the Planning Agent to secure ${task.title}.`
+        description: `Dedicated focus session scheduled to work on: ${task.title}.`
       });
 
       if (idx % 2 === 1) {
@@ -225,7 +225,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
         <div className="p-4 bg-red-950/20 border border-red-900/40 rounded-xl space-y-2">
           <div className="flex items-center gap-2 text-red-400">
             <AlertTriangle className="w-4.5 h-4.5 animate-pulse" />
-            <span className="text-xs font-mono font-bold uppercase tracking-wider">Cognitive Conflicts Forecasted</span>
+            <span className="text-xs font-mono font-bold uppercase tracking-wider">Schedule Overlaps Detected</span>
           </div>
           <div className="space-y-1">
             {conflicts.map((c) => (
@@ -245,7 +245,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Calendar className="w-4.5 h-4.5 text-white" />
-              <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Time Coordinator</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Calendar Settings</h3>
             </div>
             
             <button 
@@ -253,7 +253,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
               className="text-[10px] font-mono border border-zinc-800 bg-zinc-950 px-2 py-1 rounded hover:border-zinc-700 text-zinc-400 flex items-center gap-1 cursor-pointer"
             >
               <RefreshCw className={`w-3 h-3 ${syncStatus === "syncing" ? "animate-spin" : ""}`} />
-              {syncStatus === "syncing" ? "Pushing Handshake..." : syncStatus === "synced" ? "Handshake Completed" : "Simulate Cloud Sync"}
+              {syncStatus === "syncing" ? "Syncing..." : syncStatus === "synced" ? "Synced" : "Sync Calendar"}
             </button>
           </div>
 
@@ -331,11 +331,11 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Strategic Description (Optional)</label>
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Description (Optional)</label>
               <textarea
                 value={evtDesc}
                 onChange={(e) => setEvtDesc(e.target.value)}
-                placeholder="Details of cognitive block..."
+                placeholder="Event details..."
                 className="w-full h-16 bg-zinc-950 border border-zinc-900 rounded-lg p-2.5 text-xs text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-zinc-800 resize-none"
               />
             </div>
@@ -344,7 +344,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
               type="submit"
               className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer"
             >
-              Add Calendar Event Node
+              Add Calendar Event
             </button>
           </form>
         </div>
@@ -354,7 +354,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
           
           {/* Month Day strip visualizer */}
           <div className="glass-panel p-4 rounded-xl border border-zinc-900">
-            <span className="text-[9px] font-mono text-zinc-500 block mb-2 uppercase">June 2026 Grid Matrix</span>
+            <span className="text-[9px] font-mono text-zinc-500 block mb-2 uppercase">June 2026 Calendar Grid</span>
             <div className="grid grid-cols-7 gap-2">
               {monthDays.map((day) => {
                 const isSelected = day.dateStr === selectedDate;
@@ -397,15 +397,15 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
             </div>
 
             {loading ? (
-              <div className="text-center py-12 font-mono text-xs text-zinc-500 animate-pulse">Syncing calendar corridor...</div>
+              <div className="text-center py-12 font-mono text-xs text-zinc-500 animate-pulse">Syncing calendar...</div>
             ) : selectedDateEvents.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center py-10 px-6 bg-zinc-950/20 border border-dashed border-zinc-900 rounded-xl">
                 <div className="p-3 bg-zinc-950 border border-zinc-900 rounded-xl text-zinc-500 mb-3">
                   <Calendar className="w-5 h-5 text-zinc-400" />
                 </div>
-                <p className="text-xs font-semibold text-zinc-200">📅 Clear Scheduling Corridor</p>
+                <p className="text-xs font-semibold text-zinc-200">📅 No Events Scheduled</p>
                 <p className="text-[11px] text-zinc-500 mt-1 max-w-[320px] leading-relaxed">
-                  No cognitive blocks are mapped on this date. Click <strong className="text-emerald-400 font-semibold">Auto-Schedule Tasks</strong> to allocate dedicated study blocks for your commitments.
+                  No events are scheduled for this date. Click <strong className="text-emerald-400 font-semibold">Auto-Schedule Tasks</strong> to allocate dedicated focus blocks for your pending tasks.
                 </p>
               </div>
             ) : (

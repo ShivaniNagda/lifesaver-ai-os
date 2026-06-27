@@ -209,12 +209,12 @@ export default function GoalTracker() {
         <div className="lg:col-span-5 glass-panel p-5 rounded-2xl border border-zinc-800 space-y-4">
           <div className="flex items-center gap-2">
             <Target className="w-4.5 h-4.5 text-white" />
-            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Goal Orchestrator</h3>
+            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Goals</h3>
           </div>
 
           <form onSubmit={handleCreateGoal} className="space-y-4">
             <div>
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Strategic Objective</label>
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-1">Goal Name</label>
               <input
                 type="text"
                 placeholder="E.g., Complete Pitch Deck Polish"
@@ -267,7 +267,7 @@ export default function GoalTracker() {
               type="submit"
               className="w-full py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-colors cursor-pointer"
             >
-              Establish New Strategic Goal
+              Add Goal
             </button>
           </form>
         </div>
@@ -279,7 +279,7 @@ export default function GoalTracker() {
           <div className="p-4 rounded-xl bg-white/[0.02] border border-zinc-900">
             <div className="flex items-center gap-2 mb-2.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">AI Goal Alignment Recommendations</span>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">AI Goal Recommendations</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {AI_GOAL_SUGGESTIONS.map((sug, i) => (
@@ -292,7 +292,7 @@ export default function GoalTracker() {
                   <h4 className="text-[10px] font-semibold text-zinc-300 mt-1 line-clamp-2 group-hover:text-white">{sug.title}</h4>
                   <div className="flex items-center justify-between text-[8px] font-mono text-zinc-600 mt-2">
                     <span>Due: {sug.deadline}</span>
-                    <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-bold">+ INSTALL</span>
+                    <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-bold">+ ADD GOAL</span>
                   </div>
                 </div>
               ))}
@@ -302,15 +302,15 @@ export default function GoalTracker() {
           {/* Goal List Cards */}
           <div className="space-y-3 flex-1 overflow-y-auto max-h-[350px] pr-1">
             {loading ? (
-              <div className="text-center py-10 font-mono text-xs text-zinc-500 animate-pulse">Syncing tactical objectives...</div>
+              <div className="text-center py-10 font-mono text-xs text-zinc-500 animate-pulse">Syncing goals...</div>
             ) : goals.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center p-8 bg-zinc-950/40 rounded-2xl border border-dashed border-zinc-800">
                 <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-500 mb-3.5">
                   <Target className="w-5 h-5 text-zinc-400" />
                 </div>
-                <p className="text-xs font-semibold text-zinc-200">🎯 Zero Strategic Objectives Mapped</p>
+                <p className="text-xs font-semibold text-zinc-200">🎯 No Goals Found</p>
                 <p className="text-[11px] text-zinc-500 mt-1 max-w-[280px] leading-relaxed">
-                  No active strategic goals are mapped in your profile. Add an objective above or deploy an AI suggestion to establish direction.
+                  No active goals are tracked in your profile. Add a goal above or select an AI recommendation to get started.
                 </p>
               </div>
             ) : (

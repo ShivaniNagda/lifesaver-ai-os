@@ -57,7 +57,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Authentication handshake failed.");
+        throw new Error(data.error || "Authentication failed.");
       }
 
       localStorage.setItem("lifeos_token", data.token);
@@ -66,7 +66,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       
       setJwtToken(data.token);
       setTokenExp(3600);
-      setSuccess("Authenticated successfully under LifeSaver Secure Protocol.");
+      setSuccess("Successfully signed in.");
       
       setTimeout(() => {
         onAuthSuccess(data.user.email, data.user.role);
@@ -96,7 +96,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to register operator.");
+        throw new Error(data.error || "Failed to create account.");
       }
 
       localStorage.setItem("lifeos_token", data.token);
@@ -105,13 +105,13 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
 
       setJwtToken(data.token);
       setTokenExp(3600);
-      setSuccess("Account registered and locked with AES-256 schema.");
+      setSuccess("Account created successfully.");
       
       setTimeout(() => {
         onAuthSuccess(data.user.email, data.user.role);
       }, 500);
     } catch (err: any) {
-      setError(err.message || "Failed to establish operator envelope.");
+      setError(err.message || "Could not connect to the authentication server.");
     } finally {
       setLoading(false);
     }
@@ -135,12 +135,12 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to issue password recovery link.");
+        throw new Error(data.error || "Failed to generate password reset link.");
       }
 
-      setSuccess(`Reset link generated: ${data.resetLink}. Token expires in 15m.`);
+      setSuccess(`Reset link generated: ${data.resetLink}. Expires in 15 mins.`);
     } catch (err: any) {
-      setError(err.message || "Secure reset dispatch failed.");
+      setError(err.message || "Failed to send password reset email.");
     } finally {
       setLoading(false);
     }
@@ -182,7 +182,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
         });
         data = await loginRes.json();
         if (!loginRes.ok) {
-          throw new Error(data.error || "OAuth login synchronization failed.");
+          throw new Error(data.error || "Google Sign-In failed.");
         }
       }
 
@@ -192,13 +192,13 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
 
       setJwtToken(data.token);
       setTokenExp(3600);
-      setSuccess("OAuth 2.0 handshake verified. Welcome Back.");
+      setSuccess("Successfully signed in with Google.");
       
       setTimeout(() => {
         onAuthSuccess(data.user.email, data.user.role);
       }, 500);
     } catch (err: any) {
-      setError(err.message || "Google OAuth handshake error.");
+      setError(err.message || "Google Sign-In error.");
     } finally {
       setLoading(false);
     }
@@ -210,7 +210,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
     setTimeout(() => {
       setLoading(false);
       setTokenExp(3600);
-      setSuccess("Access token rotated and cryptographically validated.");
+      setSuccess("Session token renewed.");
     }, 400);
   };
 
@@ -220,24 +220,24 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
         <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
           <div className="flex items-center gap-2">
             <Shield className="w-4.5 h-4.5 text-white" />
-            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Secure Core Guard</h3>
+            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Session Status</h3>
           </div>
           <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-900/20">
-            PROTECTED
+            SECURE
           </span>
         </div>
 
         <div className="space-y-3">
           <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-900 flex justify-between items-center">
             <div>
-              <span className="text-[9px] font-mono text-zinc-500 uppercase">ACTIVE COGNITIVE PRINCIPAL</span>
+              <span className="text-[9px] font-mono text-zinc-500 uppercase font-semibold">Signed In As</span>
               <p className="text-xs font-medium text-zinc-200 truncate max-w-[180px]">{currentEmail}</p>
               <span className="text-[9px] font-mono text-zinc-400 block mt-0.5">Role: {role}</span>
             </div>
             <button
               onClick={onLogout}
               className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              title="Logout session"
+              title="Sign out of your session"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -245,20 +245,20 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
 
           <div className="space-y-1 bg-black/40 p-3 rounded-lg border border-zinc-900 font-mono text-[9px] text-zinc-500">
             <div className="flex justify-between">
-              <span>JWT ISSUER:</span>
-              <span className="text-white">LIFESAVER_OS_OAUTH</span>
+              <span>AUTH PROVIDER:</span>
+              <span className="text-white">LIFESAVER_AUTH</span>
             </div>
             <div className="flex justify-between">
-              <span>ALGORITHM:</span>
-              <span className="text-white">HS256 (HMAC-SHA256)</span>
+              <span>TOKEN TYPE:</span>
+              <span className="text-white">JWT BEARER</span>
             </div>
             <div className="flex justify-between items-center mt-1">
-              <span>ACCESS TOKEN EXPIRY:</span>
+              <span>SESSION TIMEOUT:</span>
               <span className="text-amber-400 font-medium">
                 {tokenExp ? `${Math.floor(tokenExp / 60)}m ${tokenExp % 60}s` : "0s"}
               </span>
             </div>
-            <div className="mt-2 text-zinc-600 truncate border-t border-zinc-900 pt-2 select-all cursor-pointer hover:text-zinc-400" title="Click to copy JWT token">
+            <div className="mt-2 text-zinc-600 truncate border-t border-zinc-900 pt-2 select-all cursor-pointer hover:text-zinc-400" title="Click to copy security token">
               {jwtToken}
             </div>
           </div>
@@ -270,7 +270,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               className="flex-1 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-medium text-[10px] flex items-center justify-center gap-1.5 transition-colors font-mono uppercase cursor-pointer"
             >
               <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
-              Rotate Crypt Key
+              Renew Session Token
             </button>
           </div>
         </div>
@@ -281,8 +281,8 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
   return (
     <div id="auth-panel-inactive" className="glass-panel p-5 rounded-2xl border border-zinc-800 space-y-4">
       <div className="text-center space-y-1">
-        <h3 className="text-sm font-semibold text-white tracking-wide font-display">LifeSaver Secure Node</h3>
-        <p className="text-[10px] text-zinc-500 font-mono">ESTABLISH LIFESAVER ENVELOPE HANDSHAKE</p>
+        <h3 className="text-sm font-semibold text-white tracking-wide font-display">Sign In to LifeSaver</h3>
+        <p className="text-[10px] text-zinc-500 font-mono font-semibold">ENTER YOUR ACCOUNT DETAILS</p>
       </div>
 
       {error && (
@@ -306,7 +306,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               <Mail className="absolute left-3 top-2.5 w-4 h-4 text-zinc-600" />
               <input
                 type="email"
-                placeholder="Secure email"
+                placeholder="Email address"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -317,7 +317,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               <Lock className="absolute left-3 top-2.5 w-4 h-4 text-zinc-600" />
               <input
                 type="password"
-                placeholder="Access credentials"
+                placeholder="Password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -329,10 +329,10 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
           <div className="flex justify-between items-center text-[10px] font-mono">
             <label className="flex items-center gap-1.5 text-zinc-500 cursor-pointer">
               <input type="checkbox" defaultChecked className="w-3 h-3 rounded bg-zinc-950 border-zinc-900" />
-              Keep session lock
+              Remember me
             </label>
             <span onClick={() => setMode("forgot")} className="text-zinc-400 hover:text-white cursor-pointer">
-              Decrypt key?
+              Forgot Password?
             </span>
           </div>
 
@@ -342,12 +342,12 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               disabled={loading}
               className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              {loading ? "Authenticating..." : "Synchronize Session Key"}
+              {loading ? "Signing In..." : "Sign In"}
             </button>
 
             <div className="relative flex py-2 items-center">
               <div className="flex-grow border-t border-zinc-900"></div>
-              <span className="flex-shrink mx-3 text-[9px] font-mono text-zinc-600 uppercase">or connect network</span>
+              <span className="flex-shrink mx-3 text-[9px] font-mono text-zinc-600 uppercase">or sign in with</span>
               <div className="flex-grow border-t border-zinc-900"></div>
             </div>
 
@@ -359,7 +359,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               <svg className="w-3.5 h-3.5 fill-current text-white" viewBox="0 0 24 24">
                 <path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-6.887 4.114-4.694 0-8.503-3.809-8.503-8.503s3.809-8.503 8.503-8.503c2.202 0 4.212.827 5.755 2.185l3.143-3.143C18.665.98 15.603 0 12.24 0 5.513 0 0 5.513 0 12.24s5.513 12.24 12.24 12.24c6.8 0 12.24-5.44 12.24-12.24 0-.82-.097-1.425-.245-1.955H12.24z" />
               </svg>
-              Google Sign-In Autopilot
+              Sign in with Google
             </button>
           </div>
         </form>
@@ -372,7 +372,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               <User className="absolute left-3 top-2.5 w-4 h-4 text-zinc-600" />
               <input
                 type="text"
-                placeholder="Your full name"
+                placeholder="Full name"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -383,7 +383,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               <Mail className="absolute left-3 top-2.5 w-4 h-4 text-zinc-600" />
               <input
                 type="email"
-                placeholder="Secure email"
+                placeholder="Email address"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -394,7 +394,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               <Lock className="absolute left-3 top-2.5 w-4 h-4 text-zinc-600" />
               <input
                 type="password"
-                placeholder="Access credentials"
+                placeholder="Password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -409,7 +409,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               disabled={loading}
               className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center cursor-pointer"
             >
-              {loading ? "Creating..." : "Establish AES-256 Workspace"}
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
           </div>
         </form>
@@ -417,15 +417,15 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
 
       {mode === "forgot" && (
         <form onSubmit={handleForgot} className="space-y-3.5">
-          <p className="text-[11px] text-zinc-500 leading-relaxed text-center">
-            Provide your verified email. LifeSaver agents will deliver a cryptographically signed reset key corridor.
+          <p className="text-[11px] text-zinc-500 leading-relaxed text-center font-sans">
+            Provide your registered email address. We will generate a secure reset link to recover your account.
           </p>
           <div>
             <div className="relative">
               <Mail className="absolute left-3 top-2.5 w-4 h-4 text-zinc-600" />
               <input
                 type="email"
-                placeholder="Your secure email"
+                placeholder="Your email address"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -440,7 +440,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
               disabled={loading}
               className="w-full py-2 bg-white text-black font-semibold text-xs rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center cursor-pointer"
             >
-              {loading ? "Dispatched Key..." : "Issue Reset Corridor"}
+              {loading ? "Sending link..." : "Send Reset Link"}
             </button>
           </div>
         </form>
@@ -449,16 +449,16 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       <div className="text-center pt-2 border-t border-zinc-900/60">
         {mode === "login" ? (
           <span className="text-[10px] font-mono text-zinc-500">
-            First time in the OS?{" "}
+            Don't have an account?{" "}
             <span onClick={() => setMode("register")} className="text-zinc-300 hover:text-white cursor-pointer underline">
-              Provision Node
+              Create Account
             </span>
           </span>
         ) : (
           <span className="text-[10px] font-mono text-zinc-500">
-            Have existing envelopes?{" "}
+            Already have an account?{" "}
             <span onClick={() => setMode("login")} className="text-zinc-300 hover:text-white cursor-pointer underline">
-              Return to Core
+              Sign In
             </span>
           </span>
         )}
