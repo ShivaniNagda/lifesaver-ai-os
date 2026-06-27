@@ -2,6 +2,7 @@ import { Response } from "express";
 import { SettingsRepository, UserRepository } from "../repositories/baseRepository";
 import { SettingsSchema } from "../validators/schemas";
 import { AuthenticatedRequest } from "../middlewares/authMiddleware";
+import { getIsMongoConnected } from "../config/db";
 
 export async function getSettings(req: AuthenticatedRequest, res: Response) {
   try {
@@ -24,7 +25,11 @@ export async function getSettings(req: AuthenticatedRequest, res: Response) {
         pacingInterval: "45m"
       });
     }
-    return res.json(settings);
+    const settingsObj = (settings && typeof settings.toObject === "function") ? settings.toObject() : settings;
+    return res.json({
+      ...settingsObj,
+      isMongoConnected: getIsMongoConnected()
+    });
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Failed to fetch settings." });
   }
@@ -49,7 +54,11 @@ export async function updateSettings(req: AuthenticatedRequest, res: Response) {
     } else {
       settings = await SettingsRepository.findOneAndUpdate({ userId }, parsed.data);
     }
-    return res.json(settings);
+    const settingsObj = (settings && typeof settings.toObject === "function") ? settings.toObject() : settings;
+    return res.json({
+      ...settingsObj,
+      isMongoConnected: getIsMongoConnected()
+    });
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Failed to update settings." });
   }

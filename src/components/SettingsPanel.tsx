@@ -27,6 +27,9 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
   const [disruptionGrade, setDisruptionGrade] = useState("high");
   const [pacingInterval, setPacingInterval] = useState("45m");
 
+  // Database Connection Status
+  const [isMongoConnected, setIsMongoConnected] = useState<boolean | null>(null);
+
   // Save indication
   const [saveIndication, setSaveIndication] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -59,6 +62,9 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
             setPushEnabled(data.pushEnabled !== false);
             setEmailAlerts(data.emailAlerts !== false);
             setBurnoutTriggers(data.burnoutTriggers !== false);
+            if (data.isMongoConnected !== undefined) {
+              setIsMongoConnected(data.isMongoConnected);
+            }
           }
         }
       } catch (err) {
@@ -93,6 +99,10 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
       });
       if (res.ok) {
         setSaveIndication(true);
+        const data = await res.json();
+        if (data && data.isMongoConnected !== undefined) {
+          setIsMongoConnected(data.isMongoConnected);
+        }
       }
     } catch (err) {
       console.error("Failed to persist systems settings:", err);
@@ -356,6 +366,37 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
                     <span>AUTOMATIC KEY ROTATION:</span>
                     <span className="text-white">ENABLED (EVERY 24H)</span>
                   </div>
+                </div>
+
+                {/* Database Connection diagnostics */}
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block mb-1 mt-6">Database Connectivity Status</span>
+                <div className="p-4 bg-zinc-950 border border-zinc-900 rounded-lg space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-zinc-400">DATABASE ENGINE:</span>
+                    {isMongoConnected === true ? (
+                      <span className="text-emerald-400 font-bold font-mono text-xs flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                        MONGODB ATLAS (CONNECTED)
+                      </span>
+                    ) : (
+                      <span className="text-amber-400 font-bold font-mono text-xs flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
+                        LOCAL PERSISTENCE ENGINE (ACTIVE)
+                      </span>
+                    )}
+                  </div>
+
+                  {isMongoConnected !== true && (
+                    <div className="text-[10px] text-zinc-400 leading-relaxed font-sans space-y-2 border-t border-zinc-900 pt-3">
+                      <p className="text-amber-300 font-medium">⚠️ Connection Fallback Alert</p>
+                      <p>
+                        The application is safely running on the <strong className="text-white font-semibold">Local JSON Fallback Database</strong>. All your data, tasks, habits, and sessions are actively saved and preserved locally!
+                      </p>
+                      <p className="text-[9px] text-zinc-500">
+                        <strong>To connect to your MongoDB Atlas cluster:</strong> Make sure your MongoDB IP access is set to allow connections from anywhere (<code className="text-zinc-300">0.0.0.0/0</code>) inside your Atlas Security settings. This is required because Cloud Run hosts execute outbound requests from dynamic IP addresses.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 text-xs text-zinc-500 font-sans italic">
