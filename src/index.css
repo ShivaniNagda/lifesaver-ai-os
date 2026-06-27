@@ -222,104 +222,131 @@ body {
 }
 
 :root.light body {
-  color: #1e293b;
+  background-color: #f8fafc !important; /* Soft Slate-50 background for clean depth */
+  color: #334155 !important; /* Slate-700 for highly readable body copy */
 }
 
-:root.light .text-white,
-:root.light .text-zinc-100,
-:root.light .text-zinc-200,
-:root.light .text-zinc-300 {
-  color: #0f172a !important;
+/* Page Outer Background Wrappers */
+:root.light .bg-brand-bg,
+:root.light .bg-brand-bg\/90 {
+  background-color: #f8fafc !important;
 }
 
-:root.light .text-zinc-400 {
-  color: #475569 !important;
+:root.light .bg-brand-bg\/90 {
+  background-color: rgba(248, 250, 252, 0.9) !important;
+  backdrop-filter: blur(12px) !important;
 }
 
-:root.light .text-zinc-500 {
-  color: #64748b !important;
+/* Primary Surface & Cards (Pure White with subtle elevation) */
+:root.light .bg-zinc-900,
+:root.light .glass-panel,
+:root.light .bg-zinc-950\/40,
+:root.light .bg-zinc-900\/40,
+:root.light .bg-zinc-900\/20,
+:root.light .bg-black\/40,
+:root.light .bg-black\/60 {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
 }
 
-/* Background overrides */
+/* Secondary Surface (Inputs, list details, container backdrops) */
 :root.light .bg-zinc-950,
 :root.light .bg-black,
-:root.light .bg-zinc-900,
-:root.light .bg-black\/40,
-:root.light .bg-black\/60,
-:root.light .bg-zinc-950\/40,
-:root.light .bg-zinc-950\/80,
-:root.light .bg-zinc-950\/60,
-:root.light .bg-zinc-900\/40,
-:root.light .bg-zinc-900\/20 {
-  background-color: #ffffff !important;
-}
-
-:root.light .bg-zinc-900\/60 {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-}
-
+:root.light .bg-zinc-800,
 :root.light .bg-white\/\[0\.02\],
 :root.light .bg-white\/5,
 :root.light .bg-white\/\[0\.01\],
-:root.light .bg-zinc-800 {
+:root.light .bg-zinc-800\/20 {
   background-color: #f1f5f9 !important;
 }
 
-:root.light section#features {
+/* Section-specific backgrounds */
+:root.light section#features,
+:root.light section.bg-\[\#080808\]\/50 {
   background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
 }
 
-/* Status Text High Contrast Overrides */
-:root.light .text-emerald-400 {
-  color: #166534 !important;
+/* Glass Panels with Premium Notion/Linear Shadows */
+:root.light .glass-panel {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.06) !important;
+  box-shadow: 
+    0 1px 3px 0 rgba(15, 23, 42, 0.03), 
+    0 1px 2px -1px rgba(15, 23, 42, 0.03), 
+    0 8px 16px -3px rgba(15, 23, 42, 0.015), 
+    0 4px 6px -4px rgba(15, 23, 42, 0.015) !important;
 }
+
+:root.light .glass-panel-heavy {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 
+    0 10px 30px -5px rgba(15, 23, 42, 0.06), 
+    0 8px 10px -6px rgba(15, 23, 42, 0.06),
+    0 1px 1px 0 rgba(15, 23, 42, 0.02) !important;
+}
+
+/* Premium Typography Colors */
+:root.light .text-white,
+:root.light .text-zinc-100,
+:root.light .text-zinc-200,
+:root.light .text-zinc-300,
+:root.light h1,
+:root.light h2,
+:root.light h3,
+:root.light h4 {
+  color: #0f172a !important; /* Deep Slate 900 for absolute legibility & crisp contrast */
+}
+
+:root.light .text-zinc-400 {
+  color: #475569 !important; /* Slate 600 secondary text */
+}
+
+:root.light .text-zinc-500 {
+  color: #64748b !important; /* Slate 500 tertiary/muted text */
+}
+
+/* Borders & Dividers */
+:root.light .border-zinc-900,
+:root.light .border-zinc-800,
+:root.light .border-zinc-800\/80,
+:root.light .border-zinc-700,
+:root.light .border-zinc-850,
+:root.light .border-white\/5,
+:root.light .border-white\/10 {
+  border-color: #e2e8f0 !important; /* Soft, warm border color like GitHub or Notion */
+}
+
+/* Specific interactive text status */
+:root.light .text-emerald-400,
 :root.light .text-emerald-500 {
-  color: #15803d !important;
+  color: #166534 !important; /* Rich green for success metrics */
 }
-:root.light .text-amber-400 {
-  color: #92400e !important;
-}
+:root.light .text-amber-400,
 :root.light .text-amber-500 {
-  color: #a16207 !important;
+  color: #92400e !important; /* Rich amber for warm alerts */
 }
-:root.light .text-red-400 {
-  color: #991b1b !important;
-}
+:root.light .text-red-400,
 :root.light .text-red-500 {
-  color: #b91c1c !important;
+  color: #b91c1c !important; /* Rich crimson for high priority / risk */
 }
-:root.light .text-blue-400 {
-  color: #1e40af !important;
-}
+:root.light .text-blue-400,
 :root.light .text-blue-500 {
-  color: #1d4ed8 !important;
+  color: #1e40af !important; /* Slate blue */
 }
-:root.light .text-indigo-600 {
-  color: #3730a3 !important;
-}
-:root.light .text-indigo-500 {
-  color: #4f46e5 !important;
-}
-:root.light .text-purple-400 {
+:root.light .text-purple-400,
+:root.light .text-purple-500 {
   color: #6b21a8 !important;
 }
-:root.light .text-purple-500 {
-  color: #7c3aed !important;
-}
-:root.light .text-pink-400 {
-  color: #9d174d !important;
-}
-:root.light .text-pink-500 {
-  color: #db2777 !important;
-}
 
-/* Light Theme Status Alert Backgrounds & Borders */
+/* Status alerts and badges background */
 :root.light .bg-red-500\/10,
 :root.light .bg-red-950\/10,
 :root.light .bg-red-950\/20 {
   background-color: #fef2f2 !important;
-  border-color: #fecaca !important;
+  border-color: #fee2e2 !important;
 }
 :root.light .bg-amber-500\/10,
 :root.light .bg-amber-950\/20 {
@@ -329,27 +356,27 @@ body {
 :root.light .bg-emerald-500\/10,
 :root.light .bg-emerald-950\/20 {
   background-color: #f0fdf4 !important;
-  border-color: #bbf7d0 !important;
+  border-color: #dcfce7 !important;
 }
 :root.light .bg-blue-500\/10 {
   background-color: #eff6ff !important;
-  border-color: #bfdbfe !important;
+  border-color: #dbeafe !important;
 }
 :root.light .bg-purple-500\/10 {
   background-color: #faf5ff !important;
-  border-color: #e9d5ff !important;
+  border-color: #f3e8ff !important;
 }
 :root.light .bg-pink-500\/10 {
   background-color: #fdf2f8 !important;
-  border-color: #fbcfe8 !important;
+  border-color: #fce7f3 !important;
 }
 :root.light .bg-zinc-500\/10,
 :root.light .bg-zinc-800\/20 {
-  background-color: #f1f5f9 !important;
+  background-color: #f8fafc !important;
   border-color: #e2e8f0 !important;
 }
 
-/* Ensure text on primary/status/alert backgrounds remains white for readability & contrast */
+/* Keep white text white inside fully-colored badges/primary CTA buttons */
 :root.light .bg-emerald-500 .text-white,
 :root.light .bg-emerald-600 .text-white,
 :root.light .bg-emerald-500 .text-zinc-100,
@@ -360,18 +387,74 @@ body {
 :root.light .bg-rose-600 .text-white,
 :root.light .bg-amber-500 .text-white,
 :root.light .bg-amber-600 .text-white,
-:root.light .bg-violet-600 .text-white,
-:root.light .bg-violet-500 .text-white,
 :root.light .bg-indigo-600 .text-white,
 :root.light .bg-indigo-500 .text-white,
-:root.light .bg-blue-600 .text-white,
-:root.light .bg-blue-500 .text-white,
 :root.light .keep-white,
 :root.light .keep-white * {
   color: #ffffff !important;
 }
 
-/* Light Theme Hover Overrides to prevent elements turning dark on hover */
+/* Form Controls & Inputs (Crisp & premium focus states) */
+:root.light input,
+:root.light select,
+:root.light textarea {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  transition: all 0.2s ease-in-out !important;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.02) !important;
+}
+
+:root.light input::placeholder,
+:root.light select::placeholder,
+:root.light textarea::placeholder {
+  color: #94a3b8 !important; /* Cool grey placeholder text */
+  opacity: 1 !important;
+}
+
+:root.light input:focus,
+:root.light select:focus,
+:root.light textarea:focus {
+  border-color: #4f46e5 !important; /* Primary Indigo Focus Accent */
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12) !important;
+  outline: none !important;
+}
+
+/* Buttons System */
+/* Primary Action Buttons (convert from white style to solid sleek slate/indigo theme) */
+:root.light button.bg-white {
+  background-color: #0f172a !important; /* Vercel-like solid dark primary button */
+  color: #ffffff !important;
+  border: 1px solid #0f172a !important;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.05) !important;
+  font-weight: 500 !important;
+}
+
+:root.light button.bg-white:hover {
+  background-color: #1e293b !important;
+}
+
+:root.light button.bg-white svg,
+:root.light button.bg-white path {
+  stroke: #ffffff !important;
+  fill: none !important;
+}
+
+/* Sub-navigation and Active Tab Controls inside gray headers/containers */
+:root.light .bg-zinc-950 button.bg-white,
+:root.light .bg-zinc-950 button.bg-white:hover {
+  background-color: #ffffff !important; /* Pure white active pill */
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08) !important;
+}
+
+:root.light .bg-zinc-950 button.bg-white svg,
+:root.light .bg-zinc-950 button.bg-white path {
+  stroke: #0f172a !important;
+}
+
+/* Hover items */
 :root.light .hover\:bg-zinc-900:hover,
 :root.light .hover\:bg-zinc-800:hover,
 :root.light .hover\:bg-zinc-950:hover,
@@ -388,124 +471,57 @@ body {
   color: #0f172a !important;
 }
 
-:root.light .hover\:text-red-400:hover {
-  color: #991b1b !important;
-}
-:root.light .hover\:text-emerald-400:hover {
-  color: #166534 !important;
-}
-:root.light .hover\:text-amber-400:hover {
-  color: #92400e !important;
-}
-
 :root.light .hover\:border-zinc-700:hover,
 :root.light .hover\:border-zinc-800:hover,
 :root.light .hover\:border-zinc-900:hover {
   border-color: #cbd5e1 !important;
 }
 
-/* Header background class override for slash opacity and custom variables */
-:root.light .bg-brand-bg\/90 {
-  background-color: rgba(248, 250, 252, 0.9) !important;
-}
-
-.bg-brand-bg\/90 {
-  background-color: rgba(3, 7, 18, 0.9);
-}
-
-/* Button overrides */
-:root.light button.bg-white {
-  background-color: #0f172a !important;
-  color: #ffffff !important;
-}
-:root.light button.bg-white:hover {
-  background-color: #1e293b !important;
-}
-:root.light button.bg-white svg,
-:root.light button.bg-white path,
-:root.light button.bg-white polygon {
-  fill: #ffffff !important;
-  color: #ffffff !important;
-}
-
-/* Input elements: border and focus */
-:root.light input,
-:root.light select,
-:root.light textarea {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
-}
-
-:root.light input::placeholder,
-:root.light select::placeholder,
-:root.light textarea::placeholder {
-  color: #475569 !important; /* Slate 600, ensures excellent contrast and visibility in light mode */
-  opacity: 1 !important;
-}
-
-:root.light input:focus,
-:root.light select:focus,
-:root.light textarea:focus {
-  border-color: #8b5cf6 !important;
-  outline: none;
-}
-
-/* Glass panel */
-:root.light .glass-panel {
-  background: rgba(255, 255, 255, 0.75) !important;
-  border-color: rgba(15, 23, 42, 0.08) !important;
-  box-shadow: 
-    0 4px 20px rgba(15, 23, 42, 0.04),
-    inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
-}
-
-:root.light .glass-panel-heavy {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border-color: rgba(15, 23, 42, 0.12) !important;
-  box-shadow: 
-    0 10px 30px rgba(15, 23, 42, 0.06),
-    inset 0 1px 2px rgba(255, 255, 255, 0.9) !important;
-}
-
-:root.light .moving-grid {
-  background-image: 
-    linear-gradient(rgba(15, 23, 42, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 23, 42, 0.015) 1px, transparent 1px) !important;
-}
-
-/* Specific borders */
-:root.light .border-zinc-900,
-:root.light .border-zinc-800,
-:root.light .border-zinc-800\/80,
-:root.light .border-zinc-700 {
-  border-color: #e2e8f0 !important;
-}
-
-/* Interactive elements */
+/* Text Gradients Optimized for Light Theme */
 :root.light .text-gradient-purple {
-  background: linear-gradient(135deg, #1e1b4b 10%, #7c3aed 60%, #4f46e5 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: linear-gradient(135deg, #0f172a 10%, #4f46e5 60%, #7c3aed 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 :root.light .text-gradient-cyan {
-  background: linear-gradient(135deg, #0f172a 20%, #0891b2 70%, #0369a1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: linear-gradient(135deg, #0f172a 20%, #0369a1 70%, #0891b2 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 :root.light .text-gradient-gold {
-  background: linear-gradient(135deg, #0f172a 20%, #d97706 75%, #b45309 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: linear-gradient(135deg, #0f172a 20%, #b45309 75%, #d97706 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
-/* Ambient glow accents */
+/* Backdrop Moving Grid */
+:root.light .moving-grid {
+  background-image: 
+    linear-gradient(rgba(15, 23, 42, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.02) 1px, transparent 1px) !important;
+}
+
+/* Premium Light Theme Scrollbar */
+:root.light ::-webkit-scrollbar-track {
+  background: #f8fafc !important;
+}
+
+:root.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  border-radius: 999px !important;
+}
+
+:root.light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8 !important;
+}
+
+/* Glow Spot Accents */
 :root.light .glow-spot-indigo,
 :root.light .glow-spot-cyan,
 :root.light .glow-spot-purple {
-  opacity: 0.4;
+  opacity: 0.15 !important;
 }
 
 

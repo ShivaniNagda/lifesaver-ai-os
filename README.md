@@ -309,6 +309,14 @@ The application relies on the following environment variables, configured in you
 
 ## 🔌 API Documentation
 
+### 🚀 Interactive Swagger UI & API Command Center
+LifeSaver AI OS features a beautiful, fully interactive **Swagger/OpenAPI 3.0 Command Center** built directly into the server. Judges and developers can instantly view, search, filter, and test every single backend endpoint in real-time.
+
+*   **Interactive URL**: [`/api-docs`](/api-docs) or [`/swagger`](/swagger)
+*   **Key Features**: Includes a built-in **Quick Authentication Helper** with a pre-configured, copyable mock JWT token so you can execute live, fully authorized API requests directly from your browser!
+
+---
+
 All endpoints (excluding authentication portals) require a valid `Authorization: Bearer <JWT_TOKEN>` header.
 
 ### 👤 Authentication Portal
