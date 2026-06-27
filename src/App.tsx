@@ -3,7 +3,8 @@ import {
   Sparkles, Shield, AlertTriangle, CheckCircle, Brain, Terminal, 
   Calendar, Clock, User, Settings, ArrowRight, Play, ExternalLink, 
   Send, HelpCircle, Activity, ChevronRight, Zap, Target, BookOpen, 
-  Hourglass, MessageSquare, Briefcase, Plus, Trash2, Mail, Mic
+  Hourglass, MessageSquare, Briefcase, Plus, Trash2, Mail, Mic,
+  Sun, Moon
 } from "lucide-react";
 import AICoreCanvas from "./components/AICoreCanvas";
 import AgentLogsTerminal from "./components/AgentLogsTerminal";
@@ -44,6 +45,48 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}, retr
   }
 };
 
+// High-performance custom 3D tilt interaction hook
+const use3DTilt = (maxRot = 10) => {
+  const [transform, setTransform] = useState("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
+  const [glowStyle, setGlowStyle] = useState<React.CSSProperties>({ opacity: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    
+    // Calculate normalized relative coordinates (-0.5 to 0.5)
+    const x = (e.clientX - rect.left) / width - 0.5;
+    const y = (e.clientY - rect.top) / height - 0.5;
+    
+    // Calculate rotation angles
+    const rotateY = x * maxRot * 2;
+    const rotateX = -y * maxRot * 2;
+    
+    setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`);
+    
+    // Dynamic lighting overlay matching cursor
+    const glowX = ((e.clientX - rect.left) / width) * 100;
+    const glowY = ((e.clientY - rect.top) / height) * 100;
+    setGlowStyle({
+      opacity: 0.15,
+      background: `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(255,255,255,0.8) 0%, transparent 60%)`
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTransform("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
+    setGlowStyle({ opacity: 0 });
+  };
+
+  return {
+    onMouseMove: handleMouseMove,
+    onMouseLeave: handleMouseLeave,
+    style: { transform, transition: "transform 0.15s cubic-bezier(0.25, 1, 0.5, 1)" },
+    glowStyle
+  };
+};
+
 export default function App() {
   // Navigation & View control
   const [view, setView] = useState<"landing" | "dashboard">("landing");
@@ -52,6 +95,21 @@ export default function App() {
   // User Auth & Session state
   const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem("lifeos_email") || null);
   const [userRole, setUserRole] = useState<string>(() => localStorage.getItem("lifeos_role") || "Executive Officer");
+
+  // Dynamic Light/Dark Theme State
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    return (localStorage.getItem("lifeos_theme") as "dark" | "light") || "dark";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "light") {
+      root.classList.add("light");
+    } else {
+      root.classList.remove("light");
+    }
+    localStorage.setItem("lifeos_theme", theme);
+  }, [theme]);
 
   const handleLogout = () => {
     localStorage.removeItem("lifeos_email");
@@ -68,9 +126,7 @@ export default function App() {
   const [newTaskDueDate, setNewTaskDueDate] = useState("2026-06-29");
   
   // Custom context for AI input
-  const [userContext, setUserContext] = useState(
-    "Working late hours on my Startup pitch deck. Also have a crucial Chemistry exam coming up soon and hosting server bills to pay."
-  );
+  const [userContext, setUserContext] = useState("");
 
   // AI Response States
   const [isProcessing, setIsProcessing] = useState(false);
@@ -357,7 +413,7 @@ export default function App() {
   // If no user email, enforce secure login flow
   if (!userEmail) {
     return (
-      <div className="relative min-h-screen bg-[#050505] text-zinc-100 flex items-center justify-center overflow-hidden select-none">
+      <div className="relative min-h-screen bg-brand-bg text-zinc-100 flex items-center justify-center overflow-hidden select-none">
         <div className="absolute inset-0 moving-grid pointer-events-none opacity-20" />
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/[0.02] blur-[150px] pointer-events-none" />
         <div className="w-full max-w-md p-4 relative z-10">
@@ -386,7 +442,7 @@ export default function App() {
   // Render Landing Page
   if (view === "landing") {
     return (
-      <div className="relative min-h-screen bg-[#050505] text-zinc-100 overflow-hidden select-none">
+      <div className="relative min-h-screen bg-brand-bg text-zinc-100 overflow-hidden select-none">
         {/* Moving Grid Background */}
         <div className="absolute inset-0 moving-grid pointer-events-none opacity-20" />
         
@@ -549,12 +605,12 @@ export default function App() {
 
   // Render Premium Platform / Interactive Dashboard View
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-100 flex flex-col relative select-none">
+    <div className="min-h-screen bg-brand-bg text-zinc-100 flex flex-col relative select-none">
       {/* Static grid backdrop */}
       <div className="absolute inset-0 moving-grid pointer-events-none opacity-10" />
 
       {/* Luxury OS Top Bar */}
-      <header className="relative z-20 border-b border-zinc-900 bg-[#050505]/90 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+      <header className="relative z-20 border-b border-zinc-900 bg-brand-bg/90 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded bg-white flex items-center justify-center font-mono font-bold text-black text-xs tracking-tighter">
             L⚡
@@ -586,6 +642,13 @@ export default function App() {
 
         {/* Global actions */}
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="w-8 h-8 rounded-lg border border-zinc-900 bg-zinc-950 flex items-center justify-center text-zinc-400 hover:text-white transition-all cursor-pointer"
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
+          </button>
           <button 
             onClick={handleLogout} 
             className="text-xs text-zinc-400 hover:text-white border border-zinc-900 hover:border-zinc-800 bg-zinc-950 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
@@ -628,7 +691,7 @@ export default function App() {
               <textarea
                 value={userContext}
                 onChange={(e) => setUserContext(e.target.value)}
-                placeholder="E.g., I have an upcoming chemistry exam, startup pitch deck review due this Friday, and server bills to settle."
+                placeholder="E.g., I have my Java DSA interview next week, three assignments due, an upcoming exam, and want to study 4 hours every day while keeping a healthy sleep schedule."
                 className="w-full h-24 bg-zinc-950/80 border border-zinc-900 rounded-xl p-3 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors resize-none font-sans"
               />
               <button
@@ -692,7 +755,15 @@ export default function App() {
               {/* Tasks List rendering */}
               <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
                 {tasks.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-zinc-600">No active commitments registered in local thread.</div>
+                  <div className="flex flex-col items-center justify-center text-center py-8 px-4 bg-zinc-950/40 rounded-xl border border-dashed border-zinc-850">
+                    <div className="p-2.5 bg-zinc-900 rounded-lg text-zinc-500 mb-2.5">
+                      <CheckCircle className="w-5 h-5 text-zinc-400" />
+                    </div>
+                    <p className="text-xs font-semibold text-zinc-200">🚀 Ready to organize your day?</p>
+                    <p className="text-[11px] text-zinc-500 mt-1 max-w-[240px] leading-relaxed">
+                      Add your first commitment above and let the AI automatically build your personalized execution schedule.
+                    </p>
+                  </div>
                 ) : (
                   tasks.map((task) => (
                     <div 
@@ -936,7 +1007,7 @@ export default function App() {
           {activeTab === "rescue" && (
             <div className="space-y-6">
               
-              <div className="p-6 rounded-2xl border border-red-900/40 bg-gradient-to-br from-red-950/20 via-[#050505] to-zinc-950/80 glow-rescue relative overflow-hidden">
+              <div className="p-6 rounded-2xl border border-red-900/40 bg-gradient-to-br from-red-950/20 via-brand-bg to-zinc-950/80 glow-rescue relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-3">
                   <AlertTriangle className="w-6 h-6 text-red-500 animate-pulse" />
                 </div>
@@ -1199,8 +1270,14 @@ export default function App() {
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center py-20 text-xs text-zinc-600">
-                      Configure parameters and click "Compose" to request negotiation backing from the Recovery Agent.
+                    <div className="flex flex-col items-center justify-center text-center py-20 px-4 bg-zinc-950/20 rounded-xl border border-dashed border-zinc-900">
+                      <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-500 mb-3.5">
+                        <Mail className="w-5 h-5 text-zinc-400" />
+                      </div>
+                      <p className="text-xs font-semibold text-zinc-300">📬 Extension Pipeline Standby</p>
+                      <p className="text-[11px] text-zinc-500 mt-1 max-w-[280px] leading-relaxed">
+                        Configure the parameters on the left and click "Compose" to request extension backing from the Recovery Agent.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -1341,8 +1418,14 @@ export default function App() {
 
                   </div>
                 ) : (
-                  <div className="text-center py-24 text-xs text-zinc-600">
-                    Input your target event, timing constraints, and study areas. The Learning &amp; Focus Agents will generate an elite active-recall strategy.
+                  <div className="flex flex-col items-center justify-center text-center py-24 px-4 bg-zinc-950/20 rounded-xl border border-dashed border-zinc-900">
+                    <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-500 mb-3.5">
+                      <BookOpen className="w-5 h-5 text-zinc-400" />
+                    </div>
+                    <p className="text-xs font-semibold text-zinc-300">📚 Cognitive Study Pipeline Idle</p>
+                    <p className="text-[11px] text-zinc-500 mt-1 max-w-[280px] leading-relaxed">
+                      Input your target event, timing constraints, and study areas on the left. The Learning &amp; Focus Agents will generate an elite active-recall strategy.
+                    </p>
                   </div>
                 )}
               </div>

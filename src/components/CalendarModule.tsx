@@ -399,8 +399,14 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
             {loading ? (
               <div className="text-center py-12 font-mono text-xs text-zinc-500 animate-pulse">Syncing calendar corridor...</div>
             ) : selectedDateEvents.length === 0 ? (
-              <div className="text-center py-12 bg-black/20 border border-zinc-900 border-dashed rounded-xl text-xs text-zinc-600">
-                No cognitive blockages mapped on this corridor. Create a focus block or click "Auto-Schedule".
+              <div className="flex flex-col items-center justify-center text-center py-10 px-6 bg-zinc-950/20 border border-dashed border-zinc-900 rounded-xl">
+                <div className="p-3 bg-zinc-950 border border-zinc-900 rounded-xl text-zinc-500 mb-3">
+                  <Calendar className="w-5 h-5 text-zinc-400" />
+                </div>
+                <p className="text-xs font-semibold text-zinc-200">📅 Clear Scheduling Corridor</p>
+                <p className="text-[11px] text-zinc-500 mt-1 max-w-[320px] leading-relaxed">
+                  No cognitive blocks are mapped on this date. Click <strong className="text-emerald-400 font-semibold">Auto-Schedule Tasks</strong> to allocate dedicated study blocks for your commitments.
+                </p>
               </div>
             ) : (
               selectedDateEvents.map((evt) => (

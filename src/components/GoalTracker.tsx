@@ -304,8 +304,14 @@ export default function GoalTracker() {
             {loading ? (
               <div className="text-center py-10 font-mono text-xs text-zinc-500 animate-pulse">Syncing tactical objectives...</div>
             ) : goals.length === 0 ? (
-              <div className="glass-panel p-8 text-center rounded-2xl border border-zinc-800/40 text-xs text-zinc-500">
-                No active strategic goals mapped in current operational profile. Add an objective above or deploy an AI suggestion.
+              <div className="flex flex-col items-center justify-center text-center p-8 bg-zinc-950/40 rounded-2xl border border-dashed border-zinc-800">
+                <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-500 mb-3.5">
+                  <Target className="w-5 h-5 text-zinc-400" />
+                </div>
+                <p className="text-xs font-semibold text-zinc-200">🎯 Zero Strategic Objectives Mapped</p>
+                <p className="text-[11px] text-zinc-500 mt-1 max-w-[280px] leading-relaxed">
+                  No active strategic goals are mapped in your profile. Add an objective above or deploy an AI suggestion to establish direction.
+                </p>
               </div>
             ) : (
               goals.map((goal) => (

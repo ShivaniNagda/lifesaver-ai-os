@@ -67,7 +67,7 @@ export async function processAgentOS(req: AuthenticatedRequest, res: Response) {
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { context, tasks, mode = "general" } = req.body;
-    const situation = context || "Default baseline state.";
+    const situation = context || "I have my Java DSA interview next week, three assignments due, an upcoming exam, and want to study 4 hours every day while keeping a healthy sleep schedule.";
     const tasksList = tasks && Array.isArray(tasks) 
       ? tasks.map((t: any) => `${t.title} (Due: ${t.dueDate || 'N/A'}, Urgency: ${t.urgency || 'medium'})`).join(", ") 
       : "None";

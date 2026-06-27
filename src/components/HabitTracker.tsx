@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Check, Plus, Trash2, Sparkles, Flame, Percent, BarChart2, Activity } from "lucide-react";
+import { Check, Plus, Trash2, Sparkles, Flame, Percent, BarChart2, Activity, Hourglass } from "lucide-react";
 
 interface Habit {
   id?: string;
@@ -313,8 +313,14 @@ export default function HabitTracker() {
           {loading ? (
             <div className="text-center py-10 font-mono text-xs text-zinc-500 animate-pulse">Synchronizing habit loops...</div>
           ) : habits.length === 0 ? (
-            <div className="glass-panel p-12 text-center rounded-2xl border border-zinc-800/40 text-xs text-zinc-500">
-              No disciplines anchored yet in the system. Establish daily studies or startup tracking loops to start.
+            <div className="flex flex-col items-center justify-center text-center p-12 bg-zinc-950/40 rounded-2xl border border-dashed border-zinc-800">
+              <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-500 mb-3.5">
+                <Hourglass className="w-5 h-5 text-zinc-400" />
+              </div>
+              <p className="text-xs font-semibold text-zinc-200">⌛ Habit Loops Unanchored</p>
+              <p className="text-[11px] text-zinc-500 mt-1 max-w-[320px] leading-relaxed">
+                No active disciplines are anchored in the system. Establish daily studies or startup tracking loops to configure your consistency matrix.
+              </p>
             </div>
           ) : (
             habits.map((habit) => {

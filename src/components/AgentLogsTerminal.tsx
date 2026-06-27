@@ -18,16 +18,16 @@ const SIMULATED_IDLE_LOGS: AgentLog[] = [
 ];
 
 const AGENT_COLORS: Record<string, { bg: string; text: string; border: string; icon: any }> = {
-  "Priority Agent": { bg: "rgba(239, 68, 68, 0.1)", text: "text-red-400", border: "border-red-900/40", icon: Shield },
-  "Planning Agent": { bg: "rgba(59, 130, 246, 0.1)", text: "text-blue-400", border: "border-blue-900/40", icon: Brain },
-  "Risk Prediction Agent": { bg: "rgba(245, 158, 11, 0.1)", text: "text-amber-400", border: "border-amber-900/40", icon: Activity },
-  "Recovery Agent": { bg: "rgba(16, 185, 129, 0.1)", text: "text-emerald-400", border: "border-emerald-900/40", icon: CheckCircle },
-  "Focus Agent": { bg: "rgba(139, 92, 246, 0.1)", text: "text-purple-400", border: "border-purple-900/40", icon: Terminal },
-  "Burnout Prevention Agent": { bg: "rgba(236, 72, 153, 0.1)", text: "text-pink-400", border: "border-pink-900/40", icon: Sparkles },
-  "Goal Agent": { bg: "rgba(255, 255, 255, 0.05)", text: "text-zinc-300", border: "border-zinc-800", icon: Shield },
-  "Habit Agent": { bg: "rgba(255, 255, 255, 0.05)", text: "text-zinc-300", border: "border-zinc-800", icon: Activity },
-  "Reflection Agent": { bg: "rgba(255, 255, 255, 0.05)", text: "text-zinc-300", border: "border-zinc-800", icon: Brain },
-  "Learning Agent": { bg: "rgba(255, 255, 255, 0.05)", text: "text-zinc-300", border: "border-zinc-800", icon: Sparkles }
+  "Priority Agent": { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-900/40", icon: Shield },
+  "Planning Agent": { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-900/40", icon: Brain },
+  "Risk Prediction Agent": { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-900/40", icon: Activity },
+  "Recovery Agent": { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-900/40", icon: CheckCircle },
+  "Focus Agent": { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-900/40", icon: Terminal },
+  "Burnout Prevention Agent": { bg: "bg-pink-500/10", text: "text-pink-400", border: "border-pink-900/40", icon: Sparkles },
+  "Goal Agent": { bg: "bg-zinc-900/20", text: "text-zinc-300", border: "border-zinc-800", icon: Shield },
+  "Habit Agent": { bg: "bg-zinc-900/20", text: "text-zinc-300", border: "border-zinc-800", icon: Activity },
+  "Reflection Agent": { bg: "bg-zinc-900/20", text: "text-zinc-300", border: "border-zinc-800", icon: Brain },
+  "Learning Agent": { bg: "bg-zinc-900/20", text: "text-zinc-300", border: "border-zinc-800", icon: Sparkles }
 };
 
 const EMPTY_LOGS: AgentLog[] = [];
