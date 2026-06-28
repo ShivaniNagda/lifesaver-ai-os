@@ -191,6 +191,121 @@
     }
   },
   "paths": {
+    "/scanner/upload": {
+      "post": {
+        "summary": "Extract raw text from a schedule photo (Gemini OCR)",
+        "tags": ["AI Schedule Scanner"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                  "image": { "type": "string", "description": "Base64 encoded JPG or PNG image data uri", "example": "data:image/jpeg;base64,..." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OCR raw text extracted successfully" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/scanner/process": {
+      "post": {
+        "summary": "Convert extracted raw text to structured tasks with Gemini",
+        "tags": ["AI Schedule Scanner"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["rawText"],
+                "properties": {
+                  "rawText": { "type": "string", "example": "Tomorrow 8 PM study chemistry. Next Tuesday exam." },
+                  "id": { "type": "string", "example": "64bc74d89f7f451a99f187a1" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Tasks and AI scheduling diagnostics generated successfully" }
+        }
+      }
+    },
+    "/scanner/create-tasks": {
+      "post": {
+        "summary": "Save approved structured tasks and sync Calendar blocks",
+        "tags": ["AI Schedule Scanner"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["tasks"],
+                "properties": {
+                  "id": { "type": "string", "example": "64bc74d89f7f451a99f187a1" },
+                  "tasks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": { "type": "string" },
+                        "dueDate": { "type": "string" },
+                        "time": { "type": "string" },
+                        "priority": { "type": "string" },
+                        "description": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Tasks successfully generated and synchronised" }
+        }
+      }
+    },
+    "/scanner/history": {
+      "get": {
+        "summary": "Retrieve user scan history",
+        "tags": ["AI Schedule Scanner"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns array of historical scans" }
+        }
+      }
+    },
+    "/scanner/history/{id}": {
+      "delete": {
+        "summary": "Delete a history scan entry",
+        "tags": ["AI Schedule Scanner"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Scan deleted successfully" }
+        }
+      }
+    },
     "/auth/register": {
       "post": {
         "summary": "Create a new user account",
@@ -615,6 +730,63 @@
         },
         "responses": {
           "201": { "description": "Notification registered" }
+        }
+      }
+    },
+    "/notifications/history": {
+      "get": {
+        "summary": "Retrieve the history of dispatched smart email reminders",
+        "tags": ["Notifications Engine"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Array of sent email records and simulation logs" }
+        }
+      }
+    },
+    "/notifications/test-email": {
+      "post": {
+        "summary": "Dispatch a real-time smart coaching test email reminder to your inbox",
+        "tags": ["Notifications Engine"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Test email successfully dispatched and logged" }
+        }
+      }
+    },
+    "/notifications/preferences": {
+      "put": {
+        "summary": "Update specific notification intervals (24h, 3h, 30m, Missed) and email toggles",
+        "tags": ["Notifications Engine"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "emailNotificationsEnabled": { "type": "boolean", "default": true },
+                  "reminder24hEnabled": { "type": "boolean", "default": true },
+                  "reminder3hEnabled": { "type": "boolean", "default": true },
+                  "reminder30mEnabled": { "type": "boolean", "default": true },
+                  "reminderMissedEnabled": { "type": "boolean", "default": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Settings preferences successfully updated" }
+        }
+      }
+    },
+    "/notifications/run-check": {
+      "post": {
+        "summary": "Manually trigger immediate scanning of all pending task deadlines and dispatch reminders",
+        "tags": ["Notifications Engine"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Manual sweep completed successfully" }
         }
       }
     },

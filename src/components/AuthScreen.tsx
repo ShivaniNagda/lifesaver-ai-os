@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Mail, Lock, User, Sparkles, Shield, AlertTriangle, Key, RefreshCw, LogOut } from "lucide-react";
+import { useToast } from "./ToastProvider";
 
 interface AuthScreenProps {
   onAuthSuccess: (email: string, userRole: string) => void;
@@ -8,6 +9,7 @@ interface AuthScreenProps {
 }
 
 export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: AuthScreenProps) {
+  const { success: showSuccess, error: showError, warning: showWarning } = useToast();
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,6 +47,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
     setSuccess("");
     if (!email || !password) {
       setError("Please fill in all credentials.");
+      showError("Missing Required Fields", "Please enter both your email and password.");
       return;
     }
     setLoading(true);
@@ -67,12 +70,15 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       setJwtToken(data.token);
       setTokenExp(3600);
       setSuccess("Successfully signed in.");
+      showSuccess("Login Successful", `Welcome back, ${data.user.username || data.user.email}!`);
       
       setTimeout(() => {
         onAuthSuccess(data.user.email, data.user.role);
       }, 500);
     } catch (err: any) {
-      setError(err.message || "Connection refused by secure core.");
+      const errMsg = err.message || "Connection refused by secure core.";
+      setError(errMsg);
+      showError("Login Failed", errMsg);
     } finally {
       setLoading(false);
     }
@@ -84,6 +90,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
     setSuccess("");
     if (!email || !password || !name) {
       setError("Name, email, and password are required.");
+      showError("Missing Required Fields", "Please specify your name, email, and password.");
       return;
     }
     setLoading(true);
@@ -106,12 +113,15 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       setJwtToken(data.token);
       setTokenExp(3600);
       setSuccess("Account created successfully.");
+      showSuccess("Account Created Successfully", "Your secure AI OS vault has been provisioned!");
       
       setTimeout(() => {
         onAuthSuccess(data.user.email, data.user.role);
       }, 500);
     } catch (err: any) {
-      setError(err.message || "Could not connect to the authentication server.");
+      const errMsg = err.message || "Could not connect to the authentication server.";
+      setError(errMsg);
+      showError("Registration Failed", errMsg);
     } finally {
       setLoading(false);
     }
@@ -123,6 +133,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
     setSuccess("");
     if (!email) {
       setError("Please input your registered email address.");
+      showError("Missing Email", "Please enter your registered email address.");
       return;
     }
     setLoading(true);
@@ -139,8 +150,11 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       }
 
       setSuccess(`Reset link generated: ${data.resetLink}. Expires in 15 mins.`);
+      showSuccess("Password Reset Requested", "A temporary reset link was generated.");
     } catch (err: any) {
-      setError(err.message || "Failed to send password reset email.");
+      const errMsg = err.message || "Failed to send password reset email.";
+      setError(errMsg);
+      showError("Request Failed", errMsg);
     } finally {
       setLoading(false);
     }
@@ -193,12 +207,15 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       setJwtToken(data.token);
       setTokenExp(3600);
       setSuccess("Successfully signed in with Google.");
+      showSuccess("Google Sign-In Successful", `Authenticated securely as ${data.user.email}`);
       
       setTimeout(() => {
         onAuthSuccess(data.user.email, data.user.role);
       }, 500);
     } catch (err: any) {
-      setError(err.message || "Google Sign-In error.");
+      const errMsg = err.message || "Google Sign-In error.";
+      setError(errMsg);
+      showError("Authentication Error", errMsg);
     } finally {
       setLoading(false);
     }
@@ -211,6 +228,7 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
       setLoading(false);
       setTokenExp(3600);
       setSuccess("Session token renewed.");
+      showSuccess("Session Renewed", "Your AI OS access token has been updated.");
     }, 400);
   };
 

@@ -5,6 +5,7 @@ import cors from "cors";
 import fs from "fs";
 import { connectDB } from "./server/config/db";
 import apiRouter from "./server/routes/api";
+import { initScheduler } from "./server/services/notificationService";
 
 dotenv.config();
 
@@ -12,10 +13,17 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-// Initialize Database connection (Attempts MongoDB, falls back to secure Local JSON)
-connectDB();
+// Global HTTP Request Logger
+app.use((req, res, next) => {
+  const sanitizedHeaders = req.headers.authorization 
+    ? { ...req.headers, authorization: "Bearer [REDACTED]" } 
+    : req.headers;
+  console.log(`[Request Received] Method: ${req.method} | URL: ${req.originalUrl} | Headers: ${JSON.stringify(sanitizedHeaders)}`);
+  next();
+});
 
 // Mount our production API router
 app.use("/api", apiRouter);
@@ -256,6 +264,12 @@ app.use("/api/agent/prepare", (req, res, next) => {
 
 // Serve frontend assets
 async function startServer() {
+  // Await Database connection before starting server or accepting any requests
+  await connectDB();
+
+  // Initialize the Smart Deadline Notification Scheduler
+  initScheduler();
+
   const distPath = path.join(process.cwd(), "dist");
 
   if (process.env.NODE_ENV !== "production") {

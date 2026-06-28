@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Target, CheckCircle, Plus, Trash2, Sparkles, Calendar } from "lucide-react";
+import { useToast } from "./ToastProvider";
 
 interface Milestone {
   id: string;
@@ -52,6 +53,7 @@ const AI_GOAL_SUGGESTIONS = [
 ];
 
 export default function GoalTracker() {
+  const { success: showSuccess, error: showError, info: showInfo } = useToast();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [newCategory, setNewCategory] = useState("Startup");
@@ -90,7 +92,10 @@ export default function GoalTracker() {
 
   const handleCreateGoal = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim()) {
+      showError("Validation Error", "Goal title cannot be empty.", "goal");
+      return;
+    }
 
     const milestonesList = newMilestonesText
       .split("\n")
@@ -119,9 +124,13 @@ export default function GoalTracker() {
         setGoals(prev => [data, ...prev]);
         setNewTitle("");
         setNewMilestonesText("");
+        showSuccess("Goal Added Successfully 🎯", `"${data.title}" has been registered.`);
+      } else {
+        showError("Failed to Add Goal", "The database rejected your goal creation attempt.", "goal");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save goal:", err);
+      showError("Server Error", err.message || "Failed to create your goal.", "goal");
     }
   };
 
@@ -151,9 +160,18 @@ export default function GoalTracker() {
       if (res.ok) {
         const updated = await res.json();
         setGoals(prev => prev.map(g => (g.id === goalId || g._id === goalId) ? updated : g));
+        
+        if (nextStatus === "completed" && goal.status !== "completed") {
+          showSuccess("Goal Completed 🎉", `Congratulations on completing "${goal.title}"!`);
+        } else {
+          showSuccess("Goal Updated Successfully", "Milestone progress updated.");
+        }
+      } else {
+        showError("Update Failed", "Could not update milestone.", "goal");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to update milestone:", err);
+      showError("Server Error", "Could not save milestone state.", "goal");
     }
   };
 
@@ -168,9 +186,13 @@ export default function GoalTracker() {
       });
       if (res.ok) {
         setGoals(prev => prev.filter(g => g.id !== goalId && g._id !== goalId));
+        showSuccess("Goal Deleted Successfully", `"${goal.title}" has been removed.`);
+      } else {
+        showError("Delete Failed", "The server rejected the delete action.", "goal");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to delete goal:", err);
+      showError("Server Error", "Could not complete goal deletion.", "goal");
     }
   };
 
@@ -195,9 +217,13 @@ export default function GoalTracker() {
       if (res.ok) {
         const data = await res.json();
         setGoals(prev => [data, ...prev]);
+        showSuccess("Goal Added Successfully 🎯", `AI Goal: "${data.title}" successfully loaded.`);
+      } else {
+        showError("AI Goal Injection Failed", "Database rejected suggestion.", "goal");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to inject AI suggestion:", err);
+      showError("Network Error", "Could not import AI recommended goal.", "goal");
     }
   };
 

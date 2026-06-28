@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   Sparkles, Shield, AlertTriangle, CheckCircle, Brain, Terminal, 
   Calendar, Clock, User, Settings, ArrowRight, Play, ExternalLink, 
   Send, HelpCircle, Activity, ChevronRight, Zap, Target, BookOpen, 
   Hourglass, MessageSquare, Briefcase, Plus, Trash2, Mail, Mic,
-  Sun, Moon
+  Sun, Moon, Bell, Camera, Upload, FileImage, RefreshCw, Check
 } from "lucide-react";
 import AICoreCanvas from "./components/AICoreCanvas";
 import AgentLogsTerminal from "./components/AgentLogsTerminal";
@@ -18,6 +19,9 @@ import HabitTracker from "./components/HabitTracker";
 import CalendarModule from "./components/CalendarModule";
 import SettingsPanel from "./components/SettingsPanel";
 import VoiceAssistant from "./components/VoiceAssistant";
+import NotificationsPanel from "./components/NotificationsPanel";
+import AIScheduleScanner from "./components/AIScheduleScanner";
+import { useToast } from "./components/ToastProvider";
 
 const INITIAL_TASKS: Task[] = [
   { id: "1", title: "Chemistry Midterm Exam Preparation", dueDate: "2026-06-28", urgency: "critical", status: "pending" },
@@ -88,9 +92,10 @@ const use3DTilt = (maxRot = 10) => {
 };
 
 export default function App() {
+  const { toast, success: showSuccess, error: showError, info: showInfo } = useToast();
   // Navigation & View control
   const [view, setView] = useState<"landing" | "dashboard">("landing");
-  const [activeTab, setActiveTab] = useState<"overview" | "twin" | "rescue" | "negotiate" | "prep" | "calendar" | "goals" | "habits" | "settings" | "voice">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "twin" | "rescue" | "negotiate" | "prep" | "calendar" | "goals" | "habits" | "settings" | "voice" | "notifications" | "scanner">("overview");
 
   // User Auth & Session state
   const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem("lifeos_email") || null);
@@ -159,6 +164,179 @@ export default function App() {
   const [prepPlan, setPrepPlan] = useState<PreparationPlan | null>(null);
   const [isPrepLoading, setIsPrepLoading] = useState(false);
 
+  // Smart notification system state & hooks
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [processedInAppIds, setProcessedInAppIds] = useState<string[]>([]);
+  const [showBellDropdown, setShowBellDropdown] = useState(false);
+
+  // Play a soft synthetic beep
+  const playSoftBeep = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime); // 880Hz (A5) for soft chime
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+      
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.6);
+    } catch (err) {
+      console.warn("[Beep Engine] Audio Context blocked or unsupported:", err);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    if (!userEmail) return;
+    try {
+      const res = await fetchWithAuth("/api/notifications");
+      if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await res.json();
+          setNotifications(data);
+        }
+      }
+    } catch (err) {
+      console.error("[Notifications Poller] Failed to sync notifications:", err);
+    }
+  };
+
+  // Poll notifications every 10 seconds and trigger toasts / sounds
+  useEffect(() => {
+    if (!userEmail) return;
+    
+    fetchNotifications();
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetchWithAuth("/api/notifications");
+        if (res.ok) {
+          const contentType = res.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            console.warn("[Notifications Poller] Expected JSON for notifications but got:", contentType);
+            return;
+          }
+          const data = await res.json();
+          setNotifications(data);
+          
+          const settingsRes = await fetchWithAuth("/api/settings");
+          let settings = { soundAlertsEnabled: true, browserNotificationsEnabled: true };
+          if (settingsRes.ok) {
+            const settingsContentType = settingsRes.headers.get("content-type");
+            if (settingsContentType && settingsContentType.includes("application/json")) {
+              const settingsData = await settingsRes.json();
+              if (settingsData) settings = settingsData;
+            }
+          }
+
+          for (const notification of data) {
+            const notifId = notification.id || notification._id;
+            const isAlert = notification.type === "deadline_alert" || notification.type === "missed_alert";
+            
+            if (isAlert && !notification.read && !processedInAppIds.includes(notifId)) {
+              setProcessedInAppIds(prev => [...prev, notifId]);
+
+              if (settings.soundAlertsEnabled !== false && !notification.soundPlayed) {
+                playSoftBeep();
+              }
+
+              if (settings.browserNotificationsEnabled !== false && !notification.browserSent) {
+                if (Notification.permission === "granted") {
+                  const bNotif = new Notification(notification.title || "🔔 LifeSaver AI", {
+                    body: notification.message,
+                  });
+                  bNotif.onclick = () => {
+                    window.focus();
+                    setActiveTab("overview");
+                  };
+                } else if (Notification.permission === "default") {
+                  Notification.requestPermission();
+                }
+              }
+
+              const isMissed = notification.type === "missed_alert";
+              toast({
+                type: isMissed ? "error" : "warning",
+                message: notification.title || "Deadline Alert",
+                description: notification.message,
+                icon: "bell",
+                duration: 12000,
+                actions: [
+                  {
+                    label: "Open Task",
+                    primary: true,
+                    onClick: () => {
+                      setActiveTab("overview");
+                      const taskElement = document.getElementById(`task-item-${notification.taskId}`);
+                      if (taskElement) {
+                        taskElement.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }
+                  },
+                  {
+                    label: "Mark Complete",
+                    onClick: async () => {
+                      await toggleTaskStatus(notification.taskId);
+                      await fetchWithAuth(`/api/notifications/${notifId}/read`, { method: "PUT" });
+                      fetchNotifications();
+                    }
+                  },
+                  {
+                    label: "Snooze",
+                    onClick: async () => {
+                      const currentTask = tasks.find(t => t.id === notification.taskId || (t as any)._id === notification.taskId);
+                      if (currentTask) {
+                        const curDue = new Date(currentTask.dueDate);
+                        const newDue = new Date(curDue.getTime() + 15 * 60 * 1000);
+                        const resTask = await fetchWithAuth(`/api/tasks/${notification.taskId}`, {
+                          method: "PUT",
+                          body: JSON.stringify({ dueDate: newDue.toISOString() })
+                        });
+                        if (resTask.ok) {
+                          setTasks(prev => prev.map(t => (t.id === notification.taskId || (t as any)._id === notification.taskId) ? { ...t, dueDate: newDue.toISOString() } : t));
+                          showSuccess("Task Snoozed ⏰", `"${currentTask.title}" postponed by 15 minutes.`);
+                        }
+                      }
+                      await fetchWithAuth(`/api/notifications/${notifId}/read`, { method: "PUT" });
+                      fetchNotifications();
+                    }
+                  },
+                  {
+                    label: "Dismiss",
+                    onClick: async () => {
+                      await fetchWithAuth(`/api/notifications/${notifId}/read`, { method: "PUT" });
+                      fetchNotifications();
+                    }
+                  }
+                ]
+              });
+
+              await fetchWithAuth(`/api/notifications/${notifId}/delivery-status`, {
+                method: "PUT",
+                body: JSON.stringify({
+                  browserSent: true,
+                  soundPlayed: true,
+                  deliveryStatus: "delivered"
+                })
+              });
+            }
+          }
+        }
+      } catch (err) {
+        console.error("[Notifications Poller] Poll check failed:", err);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [userEmail, processedInAppIds, tasks]);
+
   // Sync tasks on auth
   useEffect(() => {
     if (!userEmail) return;
@@ -166,8 +344,14 @@ export default function App() {
       try {
         const res = await fetchWithAuth("/api/tasks");
         if (res.ok) {
-          const data = await res.json();
-          setTasks(data);
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await res.json();
+            setTasks(data);
+          } else {
+            console.warn("[Sync Tasks] Expected JSON but got:", contentType);
+            setTasks(INITIAL_TASKS);
+          }
         } else if (res.status === 401) {
           console.warn("Session token expired or missing. Clearing local session.");
           handleLogout();
@@ -220,7 +404,10 @@ export default function App() {
   // Handle adding new custom task
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTaskTitle.trim()) return;
+    if (!newTaskTitle.trim()) {
+      showError("Validation Error", "Task title cannot be empty.", "task");
+      return;
+    }
     
     try {
       const res = await fetchWithAuth("/api/tasks", {
@@ -236,9 +423,13 @@ export default function App() {
         const added = await res.json();
         setTasks(prev => [added, ...prev]);
         setNewTaskTitle("");
+        showSuccess("Task Created Successfully", `"${added.title}" has been listed.`);
+      } else {
+        showError("Failed to Create Task", "Database rejected new task registry.", "task");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to add task:", err);
+      showError("Server Error", err.message || "Failed to save new task.", "task");
     }
   };
 
@@ -255,23 +446,37 @@ export default function App() {
       });
       if (res.ok) {
         setTasks(prev => prev.map(t => (t.id === id || (t as any)._id === id) ? { ...t, status: newStatus } : t));
+        if (newStatus === "completed") {
+          showSuccess("Task Marked as Completed 🎉", `Excellent progress on "${task.title}".`);
+        } else {
+          showInfo("Task Updated Successfully", `"${task.title}" reverted to pending.`);
+        }
+      } else {
+        showError("Failed to Update Task", "The database declined the status update.", "task");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to toggle task:", err);
+      showError("Server Error", "Could not synchronize task completion state.", "task");
     }
   };
 
   // Remove task
   const removeTask = async (id: string) => {
+    const task = tasks.find(t => t.id === id || (t as any)._id === id);
+    const title = task ? task.title : "Task";
     try {
       const res = await fetchWithAuth(`/api/tasks/${id}`, {
         method: "DELETE"
       });
       if (res.ok) {
         setTasks(prev => prev.filter(t => t.id !== id && (t as any)._id !== id));
+        showSuccess("Task Deleted Successfully", `"${title}" has been removed.`);
+      } else {
+        showError("Failed to Delete Task", "Server rejected deletion.", "task");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to delete task:", err);
+      showError("Server Error", "Could not complete task removal.", "task");
     }
   };
 
@@ -289,11 +494,13 @@ export default function App() {
       if (res.ok) {
         const added = await res.json();
         setTasks(prev => [added, ...prev]);
+        showSuccess("Task Created Successfully", `"${added.title}" added via AI Assistant.`);
       } else {
         throw new Error("Failed to save task");
       }
     } catch (err) {
       console.error("Programmatic add task failed:", err);
+      showError("Failed to Create Task", `Could not create automated task: "${title}"`);
       throw err;
     }
   };
@@ -336,9 +543,15 @@ export default function App() {
           content: data.reply,
           microAction: data.immediateMicroAction 
         }]);
+        if (data.immediateMicroAction) {
+          showSuccess("AI Action Triggered ⚡", `Action: "${data.immediateMicroAction}" has been initiated.`);
+        }
+      } else {
+        showError("AI Engine Offline", "Failed to get response from your AI Twin.");
       }
     } catch (err) {
       console.error("Twin chat failed:", err);
+      showError("Connection Error", "AI communication path interrupted.");
     } finally {
       setIsTwinChatting(false);
     }
@@ -361,9 +574,13 @@ export default function App() {
       const data = await res.json();
       if (res.ok) {
         setNegoResult(data);
+        showSuccess("Negotiation Script Compiled ⚡", "Ready to extend your deadline.");
+      } else {
+        showError("Failed to Generate Scripts", "AI Negotiation Core was busy or encountered an error.");
       }
     } catch (err) {
       console.error("Negotiation engine failed:", err);
+      showError("Connection Error", "Could not reach Negotiation service.");
     } finally {
       setIsNegoLoading(false);
     }
@@ -385,9 +602,13 @@ export default function App() {
       const data = await res.json();
       if (res.ok) {
         setPrepPlan(data);
+        showSuccess("High-Yield Study Blueprint Created 🎯", "Roadmap & mock prompts loaded.");
+      } else {
+        showError("Generation Failed", "Could not compute exam preparation plan.");
       }
     } catch (err) {
       console.error("Prep generator failed:", err);
+      showError("Network Error", "Unable to transmit prep configuration.");
     } finally {
       setIsPrepLoading(false);
     }
@@ -683,6 +904,151 @@ export default function App() {
           >
             {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
           </button>
+
+          {/* Notification Bell Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setShowBellDropdown(!showBellDropdown);
+                fetchNotifications();
+              }}
+              className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-all cursor-pointer relative ${
+                showBellDropdown 
+                  ? "bg-zinc-800 border-zinc-700 text-white" 
+                  : "border-zinc-900 bg-zinc-950 text-zinc-400 hover:text-white"
+              }`}
+              title="Notifications Panel"
+            >
+              <Bell className={`w-4 h-4 ${notifications.filter(n => !n.read).length > 0 ? "animate-pulse text-indigo-400" : ""}`} />
+              {notifications.filter(n => !n.read).length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-md">
+                  {notifications.filter(n => !n.read).length}
+                </span>
+              )}
+            </button>
+
+            <AnimatePresence>
+              {showBellDropdown && (
+                <>
+                  {/* Backdrop trap to dismiss dropdown on click outside */}
+                  <div 
+                    className="fixed inset-0 z-30" 
+                    onClick={() => setShowBellDropdown(false)} 
+                  />
+                  
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-40 p-1 flex flex-col overflow-hidden max-h-[420px]"
+                  >
+                    {/* Header */}
+                    <div className="px-3 py-2 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/40">
+                      <span className="text-[11px] font-semibold text-zinc-200">
+                        Notifications ({notifications.filter(n => !n.read).length} unread)
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={async () => {
+                            for (const n of notifications.filter(n => !n.read)) {
+                              await fetchWithAuth(`/api/notifications/${n.id || n._id}/read`, { method: "PUT" });
+                            }
+                            fetchNotifications();
+                            showSuccess("All marked as read");
+                          }}
+                          className="text-[9px] text-indigo-400 hover:text-indigo-300 font-medium transition-colors focus:outline-none cursor-pointer"
+                        >
+                          Mark all read
+                        </button>
+                        <span className="text-zinc-700 text-[9px]">&bull;</span>
+                        <button
+                          onClick={async () => {
+                            for (const n of notifications) {
+                              await fetchWithAuth(`/api/notifications/${n.id || n._id}`, { method: "DELETE" });
+                            }
+                            fetchNotifications();
+                            showSuccess("All notifications cleared");
+                          }}
+                          className="text-[9px] text-zinc-500 hover:text-red-400 font-medium transition-colors focus:outline-none cursor-pointer"
+                        >
+                          Clear all
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Notification List */}
+                    <div className="flex-1 overflow-y-auto max-h-[300px] divide-y divide-zinc-850 pr-1">
+                      {notifications.length === 0 ? (
+                        <div className="py-8 text-center text-zinc-500 text-xs">
+                          No notifications yet.
+                        </div>
+                      ) : (
+                        notifications.map((notif) => {
+                          const nId = notif.id || notif._id;
+                          return (
+                            <div 
+                              key={nId}
+                              onClick={async () => {
+                                if (!notif.read) {
+                                  await fetchWithAuth(`/api/notifications/${nId}/read`, { method: "PUT" });
+                                  fetchNotifications();
+                                }
+                                setShowBellDropdown(false);
+                                if (notif.taskId) {
+                                  setActiveTab("overview");
+                                  setTimeout(() => {
+                                    const element = document.getElementById(`task-item-${notif.taskId}`);
+                                    if (element) {
+                                      element.scrollIntoView({ behavior: "smooth" });
+                                    }
+                                  }, 300);
+                                } else {
+                                  setActiveTab("notifications");
+                                }
+                              }}
+                              className={`p-3 text-left transition-colors cursor-pointer hover:bg-zinc-950/60 flex flex-col gap-1 ${
+                                !notif.read ? "bg-indigo-950/15" : ""
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className={`text-[10px] font-semibold truncate ${!notif.read ? "text-white" : "text-zinc-400"}`}>
+                                  {notif.title || "Alert"}
+                                </span>
+                                {!notif.read && (
+                                  <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0" />
+                                )}
+                              </div>
+                              <p className="text-[10px] text-zinc-400 line-clamp-2 leading-snug">
+                                {notif.message}
+                              </p>
+                              <span className="text-[8px] font-mono text-zinc-600 mt-0.5 self-start">
+                                {notif.createdAt ? new Date(notif.createdAt).toLocaleTimeString() : "Recent"}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="border-t border-zinc-800 p-2 bg-zinc-950/40 text-center">
+                      <button
+                        onClick={() => {
+                          setShowBellDropdown(false);
+                          setActiveTab("notifications");
+                        }}
+                        className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors focus:outline-none cursor-pointer"
+                      >
+                        View Notification History
+                      </button>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
           <button 
             onClick={handleLogout} 
             className="text-xs text-zinc-400 hover:text-white border border-zinc-900 hover:border-zinc-800 bg-zinc-950 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
@@ -758,6 +1124,24 @@ export default function App() {
                 </div>
                 <span className="text-[10px] font-mono text-zinc-500">TOTAL: {tasks.length}</span>
               </div>
+
+              {/* Quick Action: AI Schedule Scanner Shortcut */}
+              <button
+                type="button"
+                onClick={() => setActiveTab("scanner")}
+                className="w-full mb-4 flex items-center justify-between p-2.5 rounded-xl border border-violet-500/20 hover:border-violet-500/40 bg-violet-500/5 hover:bg-violet-500/10 transition-all cursor-pointer text-left group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400">
+                    <Camera className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-medium text-white block">📷 Quick Action: Scan Schedule</span>
+                    <span className="text-[10px] text-zinc-400 block mt-0.5">Import photo of handwritten/printed planner</span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-violet-400 transition-all" />
+              </button>
 
               {/* Task Quick-Add form */}
               <form onSubmit={handleAddTask} className="grid grid-cols-12 gap-2 mb-4">
@@ -853,6 +1237,7 @@ export default function App() {
           <div className="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-950 border border-zinc-900 max-w-full overflow-x-auto scrollbar-thin">
             {[
               { id: "overview", label: "Dashboard", icon: Activity },
+              { id: "scanner", label: "AI Scanner", icon: Camera },
               { id: "calendar", label: "Calendar", icon: Calendar },
               { id: "goals", label: "Goals", icon: Target },
               { id: "habits", label: "Habit Tracker", icon: Hourglass },
@@ -860,6 +1245,7 @@ export default function App() {
               { id: "twin", label: "AI Chat", icon: MessageSquare },
               { id: "negotiate", label: "AI Negotiator", icon: Mail },
               { id: "prep", label: "Exam & Interview Prep", icon: BookOpen },
+              { id: "notifications", label: "AI Notifications", icon: Bell },
               { id: "settings", label: "Settings", icon: Settings }
             ].map((tab) => {
               const Icon = tab.icon;
@@ -1489,6 +1875,21 @@ export default function App() {
               onAddTask={programmaticAddTask} 
               onRefreshTasks={handleRefreshTasks} 
               runLifeOSEngine={runLifeOSEngine} 
+            />
+          )}
+
+          {/* TAB CONTENT 8.8: AI Smart Notifications */}
+          {activeTab === "notifications" && (
+            <NotificationsPanel 
+              tasks={tasks} 
+              onRefreshTasks={handleRefreshTasks}
+            />
+          )}
+
+          {/* TAB CONTENT 8.9: AI Schedule Scanner */}
+          {activeTab === "scanner" && (
+            <AIScheduleScanner 
+              onRefreshTasks={handleRefreshTasks}
             />
           )}
 

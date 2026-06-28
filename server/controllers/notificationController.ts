@@ -65,3 +65,26 @@ export async function deleteNotification(req: AuthenticatedRequest, res: Respons
     return res.status(500).json({ error: error.message || "Failed to delete notification." });
   }
 }
+
+export async function updateDeliveryStatus(req: AuthenticatedRequest, res: Response) {
+  try {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    const { browserSent, soundPlayed, deliveryStatus } = req.body;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const notification = await NotificationRepository.findById(id);
+    if (!notification) return res.status(404).json({ error: "Notification not found." });
+    if (notification.userId !== userId) return res.status(403).json({ error: "Forbidden." });
+
+    const updateObj: any = {};
+    if (browserSent !== undefined) updateObj.browserSent = browserSent;
+    if (soundPlayed !== undefined) updateObj.soundPlayed = soundPlayed;
+    if (deliveryStatus !== undefined) updateObj.deliveryStatus = deliveryStatus;
+
+    const updated = await NotificationRepository.findByIdAndUpdate(id, updateObj);
+    return res.json(updated);
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message || "Failed to update delivery status." });
+  }
+}

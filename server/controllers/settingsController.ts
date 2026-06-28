@@ -22,13 +22,34 @@ export async function getSettings(req: AuthenticatedRequest, res: Response) {
         burnoutTriggers: true,
         modelType: "gemini-1.5-pro",
         disruptionGrade: "high",
-        pacingInterval: "45m"
+        pacingInterval: "45m",
+        emailNotificationsEnabled: true,
+        browserNotificationsEnabled: true,
+        soundAlertsEnabled: true,
+        aiSuggestionsEnabled: true,
+        snoozeDuration: 15,
+        reminder24hEnabled: true,
+        reminder12hEnabled: true,
+        reminder6hEnabled: true,
+        reminder3hEnabled: true,
+        reminder1hEnabled: true,
+        reminder30mEnabled: true,
+        reminder10mEnabled: true,
+        reminderReachedEnabled: true,
+        reminderMissedEnabled: true
       });
     }
     const settingsObj = (settings && typeof settings.toObject === "function") ? settings.toObject() : settings;
     return res.json({
       ...settingsObj,
-      isMongoConnected: getIsMongoConnected()
+      isMongoConnected: getIsMongoConnected(),
+      smtpConfigStatus: {
+        EMAIL_SERVICE: process.env.EMAIL_SERVICE || "",
+        EMAIL_HOST: process.env.EMAIL_HOST || "",
+        EMAIL_PORT: process.env.EMAIL_PORT || "",
+        EMAIL_USER: process.env.EMAIL_USER || "",
+        isPassConfigured: !!process.env.EMAIL_PASS
+      }
     });
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Failed to fetch settings." });
@@ -57,7 +78,14 @@ export async function updateSettings(req: AuthenticatedRequest, res: Response) {
     const settingsObj = (settings && typeof settings.toObject === "function") ? settings.toObject() : settings;
     return res.json({
       ...settingsObj,
-      isMongoConnected: getIsMongoConnected()
+      isMongoConnected: getIsMongoConnected(),
+      smtpConfigStatus: {
+        EMAIL_SERVICE: process.env.EMAIL_SERVICE || "",
+        EMAIL_HOST: process.env.EMAIL_HOST || "",
+        EMAIL_PORT: process.env.EMAIL_PORT || "",
+        EMAIL_USER: process.env.EMAIL_USER || "",
+        isPassConfigured: !!process.env.EMAIL_PASS
+      }
     });
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Failed to update settings." });

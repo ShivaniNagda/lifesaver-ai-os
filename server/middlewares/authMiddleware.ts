@@ -14,6 +14,7 @@ export interface AuthenticatedRequest extends Request {
 export function authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.warn(`[Middleware Blocked] Access denied on path ${req.originalUrl}: No Bearer auth header found.`);
     return res.status(401).json({ error: "Access denied. No authentication token provided." });
   }
 
@@ -21,8 +22,10 @@ export function authMiddleware(req: AuthenticatedRequest, res: Response, next: N
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { id: string; email: string; role: string };
     req.user = decoded;
+    console.log(`[Middleware Approved] Verified JWT user: ${decoded.email || decoded.id} (${decoded.role})`);
     next();
-  } catch (err) {
+  } catch (err: any) {
+    console.warn(`[Middleware Blocked] JWT verification failed on path ${req.originalUrl}: ${err.message || err}`);
     return res.status(401).json({ error: "Invalid or expired session token. Please re-authenticate." });
   }
 }

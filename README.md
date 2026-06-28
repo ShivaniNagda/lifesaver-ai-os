@@ -89,6 +89,9 @@ Drafts professional, well-reasoned emails or templates requesting extensions on 
 ### 🖥️ Scrolling Multi-Agent Console
 A live simulated agent log detailing background reasoning and decisions. Displays log outputs from specialized planning agents (Priority, Focus, Recovery, Chronos, Planning) for transparent UX.
 
+### 📷 AI Schedule Scanner (Handwritten & Printed Planner Recognition)
+Allows uploading, drag-and-dropping, or capturing live camera snapshots of handwritten timetables, paper planners, whiteboard schedules, study plans, or sticky notes. Powered by multimodal **Gemini Vision OCR**, the engine extracts handwritten or printed text, automatically translates relative scheduling phrases (e.g., *"tomorrow at 8 PM"*, *"next Tuesday exam"*, *"Monday midnight deadline"*) into precise absolute timestamps, organizes them into an interactive review dashboard, and synchronizes them to the core Database Checklist and hourly Calendar blocks with tailormade scheduling recommendations.
+
 ---
 
 ## 🎥 Demo

@@ -23,9 +23,14 @@ export const ResetPasswordSchema = z.object({
 
 export const TaskSchema = z.object({
   title: z.string().min(1),
+  description: z.string().optional().default(""),
   dueDate: z.string().optional().default(""),
   urgency: z.enum(["low", "medium", "high", "critical"]).optional().default("medium"),
-  status: z.enum(["pending", "completed"]).optional().default("pending")
+  priority: z.enum(["low", "medium", "high", "critical"]).optional().default("medium"),
+  status: z.enum(["pending", "completed"]).optional().default("pending"),
+  completed: z.boolean().optional().default(false),
+  userEmail: z.string().optional().default(""),
+  notificationStatus: z.string().optional().default("pending")
 });
 
 export const GoalSchema = z.object({
@@ -47,7 +52,7 @@ export const HabitSchema = z.object({
   frequency: z.string().optional().default("daily"),
   category: z.string().optional().default("health"),
   streak: z.number().optional().default(0),
-  history: z.array(z.string()).optional().default([])
+  history: z.record(z.string(), z.boolean()).optional().default({})
 });
 
 export const CalendarEventSchema = z.object({
@@ -68,5 +73,19 @@ export const SettingsSchema = z.object({
   burnoutTriggers: z.boolean().optional(),
   modelType: z.string().optional(),
   disruptionGrade: z.string().optional(),
-  pacingInterval: z.string().optional()
+  pacingInterval: z.string().optional(),
+  emailNotificationsEnabled: z.boolean().optional(),
+  browserNotificationsEnabled: z.boolean().optional(),
+  soundAlertsEnabled: z.boolean().optional(),
+  aiSuggestionsEnabled: z.boolean().optional(),
+  snoozeDuration: z.number().optional(),
+  reminder24hEnabled: z.boolean().optional(),
+  reminder12hEnabled: z.boolean().optional(),
+  reminder6hEnabled: z.boolean().optional(),
+  reminder3hEnabled: z.boolean().optional(),
+  reminder1hEnabled: z.boolean().optional(),
+  reminder30mEnabled: z.boolean().optional(),
+  reminder10mEnabled: z.boolean().optional(),
+  reminderReachedEnabled: z.boolean().optional(),
+  reminderMissedEnabled: z.boolean().optional()
 });

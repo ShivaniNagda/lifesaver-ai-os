@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Trash2, AlertTriangle, Sparkles, RefreshCw, Clock } from "lucide-react";
+import { Calendar, Trash2, AlertTriangle, Sparkles, RefreshCw, Clock, Download } from "lucide-react";
 import { Task } from "../types";
+import { useToast } from "./ToastProvider";
 
 interface CalendarEvent {
   id?: string;
@@ -30,6 +31,7 @@ const getMonthDays = () => {
 };
 
 export default function CalendarModule({ tasks }: CalendarModuleProps) {
+  const { success: showSuccess, error: showError, warning: showWarning } = useToast();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState("2026-06-28");
   const [loading, setLoading] = useState(false);
@@ -119,7 +121,10 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
 
   const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!evtTitle.trim()) return;
+    if (!evtTitle.trim()) {
+      showError("Validation Error", "Event title is required.", "calendar");
+      return;
+    }
 
     try {
       const res = await fetch("/api/calendar", {
@@ -139,9 +144,13 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
         setEvents(prev => [...prev, data]);
         setEvtTitle("");
         setEvtDesc("");
+        showSuccess("Event Added Successfully 📅", `"${data.title}" is on your calendar.`);
+      } else {
+        showError("Failed to Add Event", "The server rejected the new event creation.", "calendar");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to add calendar event:", err);
+      showError("Server Error", err.message || "Failed to create event.", "calendar");
     }
   };
 
@@ -153,15 +162,22 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
       });
       if (res.ok) {
         setEvents(prev => prev.filter(e => e.id !== id && e._id !== id));
+        showSuccess("Event Deleted Successfully", "Event removed from calendar.");
+      } else {
+        showError("Delete Failed", "The server rejected the calendar delete operation.", "calendar");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to remove calendar event:", err);
+      showError("Server Error", "Could not delete calendar event.", "calendar");
     }
   };
 
   const handleAutoSchedule = async () => {
     const pendingTasks = tasks.filter(t => t.status !== "completed");
-    if (pendingTasks.length === 0) return;
+    if (pendingTasks.length === 0) {
+      showWarning("Auto-Schedule Info", "No pending tasks found to auto-schedule.");
+      return;
+    }
 
     let targetDate = new Date();
     const newScheduledEvents: any[] = [];
@@ -199,8 +215,10 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
       const results = await Promise.all(promises);
       setEvents(prev => [...prev, ...results]);
       setSyncStatus("autoscheduled");
-    } catch (e) {
+      showSuccess("AI Schedule Created", `Auto-scheduled ${results.length} focus sessions for pending tasks!`, "calendar");
+    } catch (e: any) {
       console.error("Auto scheduling failed:", e);
+      showError("AI Scheduling Failed", "Could not generate automated task slots.", "calendar");
     } finally {
       setTimeout(() => setSyncStatus("idle"), 2000);
     }
@@ -210,8 +228,121 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
     setSyncStatus("syncing");
     setTimeout(() => {
       setSyncStatus("synced");
+      showSuccess("Google Calendar Synced 📅", "Successfully imported current events from GCal.", "calendar");
       setTimeout(() => setSyncStatus("idle"), 2500);
     }, 1200);
+  };
+
+  const exportToICS = () => {
+    try {
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, "0");
+      const dtStamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
+
+      const escapeText = (str: string) => {
+        if (!str) return "";
+        return str
+          .replace(/\\/g, "\\\\")
+          .replace(/,/g, "\\,")
+          .replace(/;/g, "\\;")
+          .replace(/\n/g, "\\n")
+          .replace(/\r/g, "");
+      };
+
+      const getNextDayStr = (dateStr: string) => {
+        const d = new Date(dateStr + "T00:00:00");
+        d.setDate(d.getDate() + 1);
+        return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+      };
+
+      const eventParts: string[] = [];
+
+      // 1. Export Calendar Events (planned sessions)
+      events.forEach((evt) => {
+        const title = escapeText(evt.title);
+        const description = escapeText(
+          `${evt.description || "No description"}\nCategory: ${evt.category}`
+        );
+        const cleanDate = evt.date.replace(/-/g, "");
+        const cleanStart = evt.startTime.replace(/:/g, "");
+        const cleanEnd = evt.endTime.replace(/:/g, "");
+        const uid = `session-${evt.id || evt._id || Math.random().toString(36).substring(2, 11)}@lifesaver.ai`;
+
+        eventParts.push("BEGIN:VEVENT");
+        eventParts.push(`UID:${uid}`);
+        eventParts.push(`DTSTAMP:${dtStamp}`);
+        eventParts.push(`DTSTART:${cleanDate}T${cleanStart}00`);
+        eventParts.push(`DTEND:${cleanDate}T${cleanEnd}00`);
+        eventParts.push(`SUMMARY:${title}`);
+        eventParts.push(`DESCRIPTION:${description}`);
+        eventParts.push(`CATEGORIES:${evt.category.toUpperCase()}`);
+        eventParts.push("STATUS:CONFIRMED");
+        eventParts.push("END:VEVENT");
+      });
+
+      // 2. Export Tasks (planned tasks)
+      tasks.forEach((task) => {
+        const title = escapeText(`[Task] ${task.title}`);
+        const description = escapeText(
+          `Urgency: ${task.urgency}\nStatus: ${task.status}`
+        );
+        const uid = `task-${task.id || Math.random().toString(36).substring(2, 11)}@lifesaver.ai`;
+
+        eventParts.push("BEGIN:VEVENT");
+        eventParts.push(`UID:${uid}`);
+        eventParts.push(`DTSTAMP:${dtStamp}`);
+
+        if (task.dueDate.includes("T") || task.dueDate.includes(" ")) {
+          const d = new Date(task.dueDate);
+          const dtStart = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+          
+          const dEnd = new Date(d.getTime() + 30 * 60 * 1000);
+          const dtEnd = `${dEnd.getFullYear()}${pad(dEnd.getMonth() + 1)}${pad(dEnd.getDate())}T${pad(dEnd.getHours())}${pad(dEnd.getMinutes())}${pad(dEnd.getSeconds())}`;
+
+          eventParts.push(`DTSTART:${dtStart}`);
+          eventParts.push(`DTEND:${dtEnd}`);
+        } else {
+          const cleanDate = task.dueDate.replace(/-/g, "");
+          const nextDay = getNextDayStr(task.dueDate);
+
+          eventParts.push(`DTSTART;VALUE=DATE:${cleanDate}`);
+          eventParts.push(`DTEND;VALUE=DATE:${nextDay}`);
+        }
+
+        eventParts.push(`SUMMARY:${title}`);
+        eventParts.push(`DESCRIPTION:${description}`);
+        eventParts.push(`CATEGORIES:TASK,${task.urgency.toUpperCase()}`);
+        eventParts.push(task.status === "completed" ? "STATUS:COMPLETED" : "STATUS:CONFIRMED");
+        eventParts.push("END:VEVENT");
+      });
+
+      const icsLines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//LifeSaver AI OS//Calendar Export//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        ...eventParts,
+        "END:VCALENDAR"
+      ];
+
+      const icsContent = icsLines.join("\r\n");
+
+      const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `lifesaver_calendar_${now.toISOString().split("T")[0]}.ics`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showSuccess("ICS Exported Successfully 📅", "Your tasks and sessions have been downloaded.");
+    } catch (err: any) {
+      console.error("Failed to export ICS file:", err);
+      showError("Export Failed", "Could not compile or download the iCalendar file.", "calendar");
+    }
   };
 
   const monthDays = getMonthDays();
@@ -248,13 +379,24 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
               <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Calendar Settings</h3>
             </div>
             
-            <button 
-              onClick={syncWithGoogleSim}
-              className="text-[10px] font-mono border border-zinc-800 bg-zinc-950 px-2 py-1 rounded hover:border-zinc-700 text-zinc-400 flex items-center gap-1 cursor-pointer"
-            >
-              <RefreshCw className={`w-3 h-3 ${syncStatus === "syncing" ? "animate-spin" : ""}`} />
-              {syncStatus === "syncing" ? "Syncing..." : syncStatus === "synced" ? "Synced" : "Sync Calendar"}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button 
+                onClick={syncWithGoogleSim}
+                className="text-[10px] font-mono border border-zinc-800 bg-zinc-950 px-2 py-1 rounded hover:border-zinc-700 text-zinc-400 flex items-center gap-1 cursor-pointer transition-all"
+              >
+                <RefreshCw className={`w-3 h-3 ${syncStatus === "syncing" ? "animate-spin" : ""}`} />
+                {syncStatus === "syncing" ? "Syncing..." : syncStatus === "synced" ? "Synced" : "Sync Calendar"}
+              </button>
+
+              <button 
+                onClick={exportToICS}
+                className="text-[10px] font-mono border border-zinc-800 bg-zinc-950 px-2 py-1 rounded hover:border-zinc-700 text-zinc-400 flex items-center gap-1 cursor-pointer transition-all hover:bg-zinc-900"
+                title="Export planned tasks and sessions as an iCalendar file"
+              >
+                <Download className="w-3 h-3 text-indigo-400" />
+                Export ICS
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleAddEvent} className="space-y-3.5">

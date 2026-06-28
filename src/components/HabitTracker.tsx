@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Check, Plus, Trash2, Sparkles, Flame, Percent, BarChart2, Activity, Hourglass } from "lucide-react";
+import { useToast } from "./ToastProvider";
 
 interface Habit {
   id?: string;
@@ -32,6 +33,7 @@ const getLast7Days = () => {
 };
 
 export default function HabitTracker() {
+  const { success: showSuccess, error: showError, info: showInfo } = useToast();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [newFrequency, setNewFrequency] = useState<"daily" | "weekly">("daily");
@@ -71,7 +73,10 @@ export default function HabitTracker() {
 
   const handleCreateHabit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim()) {
+      showError("Validation Error", "Habit name cannot be empty.", "habit");
+      return;
+    }
 
     try {
       const res = await fetch("/api/habits", {
@@ -89,9 +94,13 @@ export default function HabitTracker() {
         const data = await res.json();
         setHabits(prev => [data, ...prev]);
         setNewTitle("");
+        showSuccess("Habit Added Successfully 🌱", `"${data.title}" has been started.`);
+      } else {
+        showError("Failed to Add Habit", "Could not persist your new habit in the secure core.", "habit");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to create habit:", err);
+      showError("Server Error", err.message || "Failed to create your habit.", "habit");
     }
   };
 
@@ -136,9 +145,18 @@ export default function HabitTracker() {
       if (res.ok) {
         const updated = await res.json();
         setHabits(prev => prev.map(h => (h.id === habitId || h._id === habitId) ? updated : h));
+        
+        if (!wasCompleted) {
+          showSuccess("Habit Completed 🔥", `You locked in "${habit.title}" today! Streak: ${streak}`);
+        } else {
+          showInfo("Habit Restored", `Unchecked "${habit.title}" for this date.`);
+        }
+      } else {
+        showError("Update Failed", "Could not log habit completion.", "habit");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to toggle habit status:", err);
+      showError("Server Error", "Could not communicate with server.", "habit");
     }
   };
 
@@ -153,9 +171,13 @@ export default function HabitTracker() {
       });
       if (res.ok) {
         setHabits(prev => prev.filter(h => h.id !== habitId && h._id !== habitId));
+        showSuccess("Habit Deleted Successfully", `"${habit.title}" was removed.`);
+      } else {
+        showError("Delete Failed", "The server declined to delete this habit.", "habit");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to delete habit:", err);
+      showError("Server Error", "Habit removal failed.", "habit");
     }
   };
 
@@ -175,9 +197,13 @@ export default function HabitTracker() {
       if (res.ok) {
         const data = await res.json();
         setHabits(prev => [data, ...prev]);
+        showSuccess("Habit Added Successfully 🌱", `AI Recommended Habit: "${data.title}" is active.`);
+      } else {
+        showError("AI Suggestion Failed", "Could not install recommended habit.", "habit");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to install habit suggestion:", err);
+      showError("Network Error", "Could not import suggestion.", "habit");
     }
   };
 

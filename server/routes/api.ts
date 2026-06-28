@@ -4,9 +4,11 @@ import { getTasks, createTask, updateTask, deleteTask } from "../controllers/tas
 import { getGoals, createGoal, updateGoal, deleteGoal } from "../controllers/goalController";
 import { getHabits, createHabit, updateHabit, deleteHabit } from "../controllers/habitController";
 import { getEvents, createEvent, updateEvent, deleteEvent } from "../controllers/calendarController";
-import { getNotifications, createNotification, markAsRead, deleteNotification } from "../controllers/notificationController";
+import { getNotifications, createNotification, markAsRead, deleteNotification, updateDeliveryStatus } from "../controllers/notificationController";
+import { getHistory, sendTestEmail, updatePreferences, triggerManualCheck } from "../controllers/notificationSystemController";
 import { getSettings, updateSettings, updateProfile } from "../controllers/settingsController";
 import { processAgentOS, negotiateExtension, twinChat, prepareExam, getTwinChatLogs, getAgentLogs } from "../controllers/aiController";
+import { uploadImage, processText, createScannedTasks, getScanHistory, deleteScanHistory } from "../controllers/scannerController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { TaskRepository, GoalRepository, HabitRepository, CalendarEventRepository } from "../repositories/baseRepository";
 
@@ -56,21 +58,47 @@ router.delete("/calendar/:id", authMiddleware, deleteEvent);
 
 // -----------------------------------------------------------------
 // AI OPERATIONS (SECURE ENGINES)
+// Supports both "/ai" and "/agent" prefixes to guarantee complete end-to-end integration
 // -----------------------------------------------------------------
 router.post("/ai/process", authMiddleware, processAgentOS);
+router.post("/agent/process", authMiddleware, processAgentOS);
+
 router.post("/ai/negotiate", authMiddleware, negotiateExtension);
+router.post("/agent/negotiate", authMiddleware, negotiateExtension);
+
 router.post("/ai/twin-chat", authMiddleware, twinChat);
+router.post("/agent/twin-chat", authMiddleware, twinChat);
+
 router.post("/ai/prepare", authMiddleware, prepareExam);
+router.post("/agent/prepare", authMiddleware, prepareExam);
+
 router.get("/ai/chat-logs", authMiddleware, getTwinChatLogs);
+router.get("/agent/chat-logs", authMiddleware, getTwinChatLogs);
+
 router.get("/ai/agent-logs", authMiddleware, getAgentLogs);
+router.get("/agent/agent-logs", authMiddleware, getAgentLogs);
 
 // -----------------------------------------------------------------
 // NOTIFICATIONS (SECURE CRUD)
 // -----------------------------------------------------------------
 router.get("/notifications", authMiddleware, getNotifications);
+router.get("/notifications/history", authMiddleware, getHistory);
 router.post("/notifications", authMiddleware, createNotification);
+router.post("/notifications/test-email", authMiddleware, sendTestEmail);
+router.put("/notifications/preferences", authMiddleware, updatePreferences);
+router.post("/notifications/run-check", authMiddleware, triggerManualCheck);
 router.put("/notifications/:id/read", authMiddleware, markAsRead);
+router.put("/notifications/:id/delivery-status", authMiddleware, updateDeliveryStatus);
 router.delete("/notifications/:id", authMiddleware, deleteNotification);
+
+// -----------------------------------------------------------------
+// AI SCHEDULE SCANNER
+// -----------------------------------------------------------------
+router.post("/scanner/upload", authMiddleware, uploadImage);
+router.post("/scanner/process", authMiddleware, processText);
+router.post("/scanner/create-tasks", authMiddleware, createScannedTasks);
+router.get("/scanner/history", authMiddleware, getScanHistory);
+router.delete("/scanner/history/:id", authMiddleware, deleteScanHistory);
 
 // -----------------------------------------------------------------
 // SETTINGS & PROFILE

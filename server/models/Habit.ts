@@ -6,7 +6,7 @@ export interface IHabit extends Document {
   frequency: string;
   category: string;
   streak: number;
-  history: string[]; // List of YYYY-MM-DD completion dates
+  history: Record<string, boolean>; // Maps YYYY-MM-DD -> completed state
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,7 +18,7 @@ const HabitSchema: Schema = new Schema(
     frequency: { type: String, default: "daily" },
     category: { type: String, default: "health" },
     streak: { type: Number, default: 0 },
-    history: [{ type: String }],
+    history: { type: Schema.Types.Mixed, default: {} },
   },
   {
     timestamps: true,

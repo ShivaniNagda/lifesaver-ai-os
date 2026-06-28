@@ -5,12 +5,14 @@
   --raw-brand-bg: #030712;
   --raw-brand-card: rgba(10, 15, 30, 0.4);
   --raw-brand-border: rgba(255, 255, 255, 0.05);
+  color-scheme: dark;
 }
 
 :root.light {
   --raw-brand-bg: #f8fafc;
   --raw-brand-card: rgba(255, 255, 255, 0.85);
   --raw-brand-border: rgba(15, 23, 42, 0.08);
+  color-scheme: light;
 }
 
 @theme {
@@ -418,6 +420,29 @@ body {
   border-color: #4f46e5 !important; /* Primary Indigo Focus Accent */
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12) !important;
   outline: none !important;
+}
+
+/* Custom styles for webkit calendar picker indicators */
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark !important;
+}
+
+:root.light input[type="date"],
+:root.light input[type="time"] {
+  color-scheme: light !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.8;
+  filter: none !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
 /* Buttons System */

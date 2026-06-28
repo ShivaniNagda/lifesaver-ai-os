@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Settings, Shield, User, Bell, Cpu, Lock, Sparkles, Check } from "lucide-react";
+import { useToast } from "./ToastProvider";
 
 interface SettingsPanelProps {
   userEmail: string;
@@ -8,6 +9,7 @@ interface SettingsPanelProps {
 }
 
 export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: SettingsPanelProps) {
+  const { success: showSuccess, error: showError } = useToast();
   const [activeSection, setActiveSection] = useState<"profile" | "notifications" | "ai" | "security">("profile");
 
   // Form states
@@ -21,6 +23,10 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [burnoutTriggers, setBurnoutTriggers] = useState(true);
+  const [browserNotificationsEnabled, setBrowserNotificationsEnabled] = useState(true);
+  const [soundAlertsEnabled, setSoundAlertsEnabled] = useState(true);
+  const [aiSuggestionsEnabled, setAiSuggestionsEnabled] = useState(true);
+  const [snoozeDuration, setSnoozeDuration] = useState(15);
 
   // AI settings
   const [modelType, setModelType] = useState("gemini-1.5-pro");
@@ -38,7 +44,7 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
     const token = localStorage.getItem("lifeos_token");
     return {
       "Content-Type": "application/json",
-      ...(token ? { "Authorization": `Bearer ${token}` } : {})
+      ...(token ? { "Authorization": "Bearer ${token}" } : {})
     };
   };
 
@@ -62,6 +68,10 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
             setPushEnabled(data.pushEnabled !== false);
             setEmailAlerts(data.emailAlerts !== false);
             setBurnoutTriggers(data.burnoutTriggers !== false);
+            setBrowserNotificationsEnabled(data.browserNotificationsEnabled !== false);
+            setSoundAlertsEnabled(data.soundAlertsEnabled !== false);
+            setAiSuggestionsEnabled(data.aiSuggestionsEnabled !== false);
+            if (data.snoozeDuration !== undefined) setSnoozeDuration(data.snoozeDuration);
             if (data.isMongoConnected !== undefined) {
               setIsMongoConnected(data.isMongoConnected);
             }
@@ -91,6 +101,10 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
           pushEnabled,
           emailAlerts,
           burnoutTriggers,
+          browserNotificationsEnabled,
+          soundAlertsEnabled,
+          aiSuggestionsEnabled,
+          snoozeDuration,
           modelType,
           disruptionGrade,
           pacingInterval,
@@ -103,9 +117,13 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
         if (data && data.isMongoConnected !== undefined) {
           setIsMongoConnected(data.isMongoConnected);
         }
+        showSuccess("Settings Saved Successfully", "Your profile and configuration has been updated.");
+      } else {
+        showError("Failed to Save Settings", "Server rejected settings synchronization.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to persist systems settings:", err);
+      showError("Server Error", "Could not synchronize settings to core database.");
     } finally {
       setTimeout(() => {
         setSaveIndication(false);
@@ -251,6 +269,51 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-950/40 border border-zinc-900">
                     <div>
+                      <span className="text-xs font-semibold text-white block">Browser Notifications</span>
+                      <p className="text-[10px] text-zinc-500 leading-normal">Show native browser deadline alerts and recovery updates</p>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={browserNotificationsEnabled} 
+                      onChange={(e) => {
+                        const val = e.target.checked;
+                        setBrowserNotificationsEnabled(val);
+                        if (val && Notification.permission !== "granted") {
+                          Notification.requestPermission();
+                        }
+                      }}
+                      className="w-4 h-4 rounded bg-zinc-950 border-zinc-800" 
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-950/40 border border-zinc-900">
+                    <div>
+                      <span className="text-xs font-semibold text-white block">Sound Alerts</span>
+                      <p className="text-[10px] text-zinc-500 leading-normal">Play a soft pleasant acoustic chime when a reminder is triggered</p>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={soundAlertsEnabled} 
+                      onChange={(e) => setSoundAlertsEnabled(e.target.checked)}
+                      className="w-4 h-4 rounded bg-zinc-950 border-zinc-800" 
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-950/40 border border-zinc-900">
+                    <div>
+                      <span className="text-xs font-semibold text-white block">AI Suggestions & Recovery Plans</span>
+                      <p className="text-[10px] text-zinc-500 leading-normal">Generate smart, customized recovery plans on overdue tasks</p>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={aiSuggestionsEnabled} 
+                      onChange={(e) => setAiSuggestionsEnabled(e.target.checked)}
+                      className="w-4 h-4 rounded bg-zinc-950 border-zinc-800" 
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-950/40 border border-zinc-900">
+                    <div>
                       <span className="text-xs font-semibold text-white block">AI Voice Alerts</span>
                       <p className="text-[10px] text-zinc-500 leading-normal">Speak reminders when task deadlines approach</p>
                     </div>
@@ -287,8 +350,25 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
                       className="w-4 h-4 rounded bg-zinc-950 border-zinc-800" 
                     />
                   </div>
-                </div>
 
+                  <div className="flex flex-col gap-1.5 p-3 rounded-lg bg-zinc-950/40 border border-zinc-900">
+                    <div>
+                      <span className="text-xs font-semibold text-white block">Snooze Duration</span>
+                      <p className="text-[10px] text-zinc-500 leading-normal">Configure the duration (minutes) when postponing deadline alerts</p>
+                    </div>
+                    <select
+                      value={snoozeDuration}
+                      onChange={(e) => setSnoozeDuration(parseInt(e.target.value, 10))}
+                      className="w-full bg-zinc-950 border border-zinc-900 rounded-lg px-2.5 py-1.5 text-xs text-zinc-400 focus:outline-none mt-2"
+                    >
+                      <option value="5">5 Minutes</option>
+                      <option value="10">10 Minutes</option>
+                      <option value="15">15 Minutes</option>
+                      <option value="30">30 Minutes</option>
+                      <option value="60">1 Hour</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             )}
 
