@@ -289,63 +289,112 @@ The backend architecture is structured around standard REST principles. Accessin
 
 ## 12. UI SCREEN VISUAL MAPS
 
-The user interface features a cohesive dark theme built with high-contrast text and interactive components.
+The user interface features a unified, highly polished design architecture optimized for responsive scaling, text readability, and smooth transitions. Below is the mapped visual list of all 21 interface screens.
 
-### 1. Dashboard Landing Layout
-![Workspace Access Sign-In](README/screenshots/signin.png)
-*Figure 1: Authentication gateway where users can register or log in to launch their secure workspace.*
+### 1. Landing & Onboarding Portal
+![Landing Portal](README/screenshots/signin.png)
+*Figure 1: Welcome gateway supporting registration, profile initialization, and theme caching.*
+* **Key Functionality**: Creates unique user profile records using `POST /api/auth/register`, setting customizable professional/academic roles.
 
-### 2. Login Verification Portal
-![Secure Authentication Portal](README/screenshots/login.png)
-*Figure 2: Secure login interface requiring validated JWT access credentials.*
+### 2. Secure Access Gateway
+![Login Verification](README/screenshots/login.png)
+*Figure 2: Secure sign-in panel verifying active session credentials.*
+* **Key Functionality**: Authenticates users using `POST /api/auth/login`, issuing signed JSON Web Tokens for private session authorization.
 
-### 3. Unified Dashboard Workspace
-![LifeSaver AI OS Dashboard](README/screenshots/dashboard.png)
-*Figure 3: Centralized view showing completion probability meters, workload insight indicators, customized briefings, and core task tracking.*
+### 3. Unified Dashboard HUD
+![Unified Dashboard](README/screenshots/2.png)
+*Figure 3: High-fidelity analytics HUD showing aggregate performance scores, burnout levels, and active stress alerts.*
+* **Key Functionality**: Dynamically calculates completion probability scales, aggregates task lists, and displays customized AI stress guides.
 
-### 4. Interactive Calendar Planner
-![Interactive Hour Planner Calendar](README/screenshots/calender.png)
-*Figure 4: Hour-by-hour calendar grid allowing manual scheduling and deep-work planning.*
+### 4. Interactive Tasks Board
+![Tasks Board](README/screenshots/3.png)
+*Figure 4: A category-tagged task list designed for granular prioritization and completion checks.*
+* **Key Functionality**: Supports full CRUD capabilities via `/api/tasks` database schema, updating dashboard metrics immediately upon checking items.
 
-### 5. Multi-Agent AI Scheduler
-![AI Planner Coordinates](README/screenshots/Ai_planner.png)
-*Figure 5: AI Auto-Scheduler interface for running automated calendar allocations and schedule configurations.*
+### 5. Strategic Goals Milestone Board
+![Strategic Goals Tracker](README/screenshots/4.png)
+*Figure 5: High-level milestone decomposition planner featuring nested sub-goals and completion percentage sliders.*
+* **Key Functionality**: Synced to the `/api/goals` collection, allowing users to map out long-term projects and check off incremental milestones.
 
-### 6. AI Voice Assistant Centre
-![AI Voice Assistant Controls](README/screenshots/AivoiceAssistant.png)
-*Figure 6: Microphone-activated voice interface for hands-free command execution.*
+### 6. Habits Consistency Matrix
+![Habits Tracker](README/screenshots/5.png)
+*Figure 6: Interactive habits grid detailing repeating disciplines, logging histories, and computing streaks.*
+* **Key Functionality**: Automatically processes consecutive daily checks on `/api/habits` schemas to build and update streak counters.
 
-### 7. Conversational Twin Chat
-![AI Twin Chatroom](README/screenshots/aichat.png)
-*Figure 7: Conversational interface for exploring scheduling habits and productivity strategies.*
+### 7. Hour-by-Hour Calendar Planner
+![Hourly Calendar Grid](README/screenshots/6.png)
+*Figure 7: Time-blocked scheduling grid designed for hourly planning and daily commitments.*
+* **Key Functionality**: Interfaces with `/api/calendar` database models, facilitating custom time-blocking for focus and restoration.
 
-### 8. AI Negotiator Extension Architect
-![AI Negotiator Interface](README/screenshots/Ai_negotiator.png)
-*Figure 8: AI-assisted interface for generating tailored deadline extension email drafts.*
+### 8. AI Multi-Agent Auto-Scheduler
+![AI Auto-Scheduler Workspace](README/screenshots/7.png)
+*Figure 8: Intelligent task scheduler allocating open calendar spaces based on pending high-priority checklists.*
+* **Key Functionality**: Passes calendar blocks and tasks to Gemini via `/api/ai/process`, automatically generating optimized time schedules.
 
-### 9. Exam & Interview Preparation Hub
-![Exam and Interview Prep](README/screenshots/Exam_And_Interview_Prep.png)
-*Figure 9: Step-by-step syllabus decomposition engine for structuring study tracks.*
+### 9. Reflective AI Twin Dialogue Chat
+![AI Twin Chat Console](README/screenshots/8.png)
+*Figure 9: Conversational dialogue room where users discuss habits and study tracks with an AI coach.*
+* **Key Functionality**: Calls `POST /api/ai/twin-chat`, maintaining complete, persistent conversational histories on the backend.
 
-### 10. Habits Consistency Grid
-![Habit Metrics](README/screenshots/HabitMetrix.png)
-*Figure 10: Matrix tracking repeating routines, daily streaks, and consistency rings.*
+### 10. AI Extension Negotiator Drafts
+![AI Negotiator Panel](README/screenshots/9.png)
+*Figure 10: Extension email generator tailoring formal or empathetic deadline request letters.*
+* **Key Functionality**: Integrates Google Gemini prompting through `/api/ai/negotiate` to return structured, copyable communication templates.
 
-### 11. Strategic Goals Board
-![Strategic Goals](README/screenshots/goals.png)
-*Figure 11: Milestone engine designed to decompose long-term projects into manageable targets.*
+### 11. AI Multimodal Schedule Scanner (OCR)
+![AI OCR Syllabus Scanner](README/screenshots/10.png)
+*Figure 11: OCR scanning interface parsing printed planners or handwritten schedules.*
+* **Key Functionality**: Sends image files to Gemini Vision, extracting unstructured schedules and batch-saving them to database tasks and calendar blocks.
 
-### 12. Advanced Connection Settings
-![System Setup Control Panel](README/screenshots/setting.png)
-*Figure 12: Configurations panel for toggling notification channels, work hours, and verifying active database status.*
+### 12. System Notifications Control Panel
+![Notifications Control](README/screenshots/notification.png)
+*Figure 12: Visual notification hub compiling critical system checks, pacing reminders, and threshold alerts.*
+* **Key Functionality**: Fetches, modifies, and deletes custom diagnostic notifications via `/api/notifications` controller endpoints.
 
-### 13. Dynamic Theme Settings
-![Toggle Theme Mechanics](README/screenshots/Toggle_Theme.png)
-*Figure 13: Instant theme engine allowing seamless transitions between cyber dark and eye-safe light themes.*
+### 13. Automatic Email Digest Reminders
+![Email Digest System](README/screenshots/11.png)
+*Figure 13: Sample HTML email digest compiled and sent directly to the user's register address.*
+* **Key Functionality**: Managed server-side via Node-cron schedules and Nodemailer, analyzing database state variables to send summary updates.
 
-### 14. Responsive Light Theme Layout
-![Light Mode Interface](README/screenshots/LightTheme.png)
-*Figure 14: Polished, alternative light theme layout offering enhanced readability and high contrast.*
+### 14. Interactive Performance Analytics
+![Performance Charts](README/screenshots/12.png)
+*Figure 14: Quantitative analytics screen visualizing completion rate distributions and productivity metrics.*
+* **Key Functionality**: Interacts with active records to render dynamic Recharts illustrating task categories and weekly performance ratios.
+
+### 15. Advanced Settings Console
+![Workspace Preference Settings](README/screenshots/13.png)
+*Figure 15: Configuration hub for daily working hour ranges, alert parameters, and network status checks.*
+* **Key Functionality**: Writes personalized preference values directly to `/api/settings` persistence layers.
+
+### 16. Security & Credentials Controller
+![Authentication Security Settings](README/screenshots/14.png)
+*Figure 16: Security controls for verifying active tokens, changing passwords, and terminating sessions.*
+* **Key Functionality**: Integrates JWT-based validation layers, protecting account security and monitoring unauthorized access attempts.
+
+### 17. Persistent Profile & Avatar Customizer
+![Profile Settings](README/screenshots/15.png)
+*Figure 17: Profile configuration workspace supporting custom handles, roles, and photo uploads.*
+* **Key Functionality**: Supports uploading JPG, PNG, JPEG, or WEBP files up to 5MB, saving paths to the User model and reloading them instantly.
+
+### 18. Interactive Swagger Spec API Portal
+![Interactive Swagger Specification](README/screenshots/16.png)
+*Figure 18: Integrated Swagger/OpenAPI 3.0 specification UI for exploring and executing endpoint requests.*
+* **Key Functionality**: Serves `/api-docs` and `/swagger` directly, providing a pre-loaded quick-auth JWT helper for live development testing.
+
+### 19. AI Voice Assistant Command Centre
+![Voice Command Console](README/screenshots/17.png)
+*Figure 19: Vocal interface translating microphone speech inputs to task updates and audio text-to-speech.*
+* **Key Functionality**: Converts speech strings to structured JSON payloads on-the-fly, modifying database checklists and calendar blocks.
+
+### 20. Syllabus Prep & Exam Scheduler
+![Exam Preparation Hub](README/screenshots/18.png)
+*Figure 20: Curriculum decompressor setting chronological study tracks for upcoming syllabus blocks.*
+* **Key Functionality**: Utilizes `POST /api/ai/prepare` with Google Gemini to divide complex syllabi into discrete daily study items.
+
+### 21. Light Theme & Toggle Mechanics
+![Theme Toggle Mechanics](README/screenshots/20.png)
+*Figure 21: High-contrast light styling layout with crisp border parameters and enhanced text visibility.*
+* **Key Functionality**: Pure client-side toggle persisting state settings inside standard localStorage to adapt workspace views.
 
 ---
 

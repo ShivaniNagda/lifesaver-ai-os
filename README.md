@@ -106,63 +106,112 @@ Experience the deployed application:
 
 ## 🖼️ Screenshots
 
-Explore the fully realized dark, sleek user interface designs and features of **LifeSaver AI OS**:
+Explore the fully realized light and dark user interface designs and features of **LifeSaver AI OS**:
 
-### 1. Unified Dashboard
-![LifeSaver AI OS Dashboard](README/screenshots/dashboard.png)
-*The centralized workspace presenting success probability meters, burnout risk scales, active stress briefs, and interactive task lists.*
+### 1. Landing & Onboarding Portal
+![Landing Portal](README/screenshots/signin.png)
+*The system's onboarding gateway where new users can register their accounts, configure their initial professional or academic roles, and set up customizable timezone and preference profiles.*
+* **Capabilities**: Connected directly to the `POST /api/auth/register` controller to create isolated user workspaces.
 
-### 2. Workspace Access Portal
-![Workspace Access Sign-In](README/screenshots/signin.png)
-*Register or sign in to establish your personal workspace parameters with instant multi-device synchronization.*
+### 2. Secure Login Verification Gateway
+![Login Verification](README/screenshots/login.png)
+*The secure session unlock portal designed to authorize user access, leveraging encrypted server-side token storage.*
+* **Capabilities**: Utilizes `POST /api/auth/login` with JWT generation, password verification via BcryptJS, and local database fallback routines.
 
-### 3. Secure Login Verification
-![Secure Authentication Portal](README/screenshots/login.png)
-*Secure session unlock interface utilizing JWT verification, fully integrated with Mongoose and offline fallbacks.*
+### 3. Unified Dashboard Workspace HUD
+![Unified Dashboard](README/screenshots/2.png)
+*A high-fidelity central workspace presenting real-time cognitive metrics, aggregate Success Probability gauges, Burnout Risk meters, and custom-compiled AI tactical stress briefs.*
+* **Capabilities**: Powered by `/api/analytics/dashboard` aggregates, evaluating task volume, calendar density, and habit consistency dynamically.
 
-### 4. Interactive Hourly Planner & Calendar
-![Interactive Hour Planner Calendar](README/screenshots/calender.png)
-*Grid-based schedule organizer allowing users to program hourly deep-work blocks, lectures, recovery sessions, and milestones.*
+### 4. Interactive Tasks Checklist
+![Tasks Checklist](README/screenshots/3.png)
+*A robust, organized checklist panel allowing users to create, view, complete, and delete specific commitments with custom categories and Low/Medium/High priority indicators.*
+* **Capabilities**: Interfaces with `/api/tasks` database models, writing task updates and category metrics directly to persistence layers.
 
-### 5. AI Multi-Agent Planner
-![AI Planner Coordinates](README/screenshots/Ai_planner.png)
-*Run Google Gemini AI engine processing to review active timelines, manage pacing intervals, and configure disruption grades.*
+### 5. Strategic Goal & Milestone Tracker
+![Strategic Goal Board](README/screenshots/4.png)
+*A long-term planning interface that maps out objectives with interactive progress sliders, custom categories, and structured sub-milestone checklist checkpoints.*
+* **Capabilities**: Interacts with `/api/goals` schemas, enabling multi-stage milestone tracking and progressive goal percentage calculations.
 
-### 6. AI Voice Assistant Command Centre
-![AI Voice Assistant Controls](README/screenshots/AivoiceAssistant.png)
-*Hands-free voice controller enabling spoken NLP task registration and text-to-speech audio schedule summaries.*
+### 6. Habits Consistency Matrix
+![Habit Tracker Matrix](README/screenshots/5.png)
+*A routine tracking system designed to establish and monitor daily habits, calculating dynamic consistency scores and consecutive daily check-in streaks.*
+* **Capabilities**: Synced to `/api/habits` schemas, supporting automated daily streak calculations and completion logging.
 
-### 7. AI Twin Dialogue Chat
-![AI Twin Chatroom](README/screenshots/aichat.png)
-*A reflective chatbot console where you can engage in structured conversations with your productivity future-self.*
+### 7. Hour-by-Hour Calendar Planner
+![Hourly Planner Calendar](README/screenshots/6.png)
+*A visual hourly planner allowing users to allocate specific segments of the day to focused study blocks, lectures, personal meetings, or restorative recovery intervals.*
+* **Capabilities**: Linked directly to `/api/calendar` database models, facilitating full CRUD actions and visual time blocks.
 
-### 8. AI Negotiator Extension Architect
-![AI Negotiator Interface](README/screenshots/Ai_negotiator.png)
-*Draft professional, persuasive, and tone-customized deadline extension requests in response to outages or emergencies.*
+### 8. AI Multi-Agent Planner (Auto-Scheduler)
+![AI Auto-Scheduler](README/screenshots/7.png)
+*An intelligent scheduling module that analyzes active task backlogs and vacant calendar slots to automatically recommend and allocate structured daily planners.*
+* **Capabilities**: Harnesses Google Gemini via `POST /api/ai/process` to resolve schedule gaps and save computed event blocks in `/api/calendar`.
 
-### 9. Exam & Interview Preparation Phases
-![Exam and Interview Prep](README/screenshots/Exam_And_Interview_Prep.png)
-*Decompose upcoming syllabus blocks and coding profiles into sequential, day-by-day structural phase study programs.*
+### 9. Conversational AI Twin Dialogue
+![AI Twin Chatroom](README/screenshots/8.png)
+*A reflective chatbot console where users engage in dialogue with a customized productivity mentor, discussing workload bottlenecks, stress management, and optimization strategies.*
+* **Capabilities**: Leverages Google Gemini through `POST /api/ai/twin-chat`, retrieving and saving persistent user chat histories.
 
-### 10. Habit Consistency Matrix
-![Habit Metrics](README/screenshots/HabitMetrix.png)
-*Track daily habits with consistency percentages, active calendar integrations, and consecutive streak ring graphics.*
+### 10. AI Negotiator Extension Architect
+![AI Negotiator Extension Drafts](README/screenshots/9.png)
+*An intelligent drafting assistant that composes persuasive, customized deadline extension request emails tailored to specific tone selections and reasoning parameters.*
+* **Capabilities**: Calls `POST /api/ai/negotiate` with contextual project variables, returning formatted, copyable message templates.
 
-### 11. Strategic Goal Milestone Engine
-![Strategic Goals](README/screenshots/goals.png)
-*High-level long-term goal setting engine showing categorized pursuits, milestone checkpoints, and AI progress alignment metrics.*
+### 11. AI OCR Schedule Scanner
+![AI OCR Scanner](README/screenshots/10.png)
+*A multimodal data-entry scanner allowing users to upload or snap photos of handwritten timetables, syllabi, or schedules to automatically parse and batch-import them.*
+* **Capabilities**: Powered by server-side Gemini Vision OCR, translating relative date references to absolute timestamps and batch-saving them to database collections.
 
-### 12. Advanced System Settings & Connection Diagnostics
-![System Setup Control Panel](README/screenshots/setting.png)
-*Configure push alerts, email triggers, pacing frequencies, and verify live database connectivity fallback status.*
+### 12. System Notifications Control Panel
+![Notifications Control](README/screenshots/notification.png)
+*A visual feed displaying diagnostic system updates, multi-agent messages, custom-configured reminders, and automatic workload threshold alerts.*
+* **Capabilities**: Connected to `/api/notifications` routes to fetch, mark as read, or dismiss system warnings.
 
-### 13. Dynamic Light Mode Theme Support
-![Light Mode Interface](README/screenshots/LightTheme.png)
-*Experience an alternative high-contrast, modern clean light styling designed with crisp borders and perfect readability.*
+### 13. Scheduled HTML Email Digests
+![Email Digest System](README/screenshots/11.png)
+*Automatic, scheduled email briefs compiling active timelines, upcoming priority commitments, and custom performance metrics directly to the user's inbox.*
+* **Capabilities**: Powered by Node-cron and Nodemailer on the server side, analyzing active database records to compose and dispatch structured email notifications.
 
-### 14. Responsive Theme Customization
-![Toggle Theme Mechanics](README/screenshots/Toggle_Theme.png)
-*Instantly toggle workspace visuals between deeply immersive cyber dark mode and eye-safe, bright light mode.*
+### 14. Performance Analytics Dashboard
+![Performance Analytics](README/screenshots/12.png)
+*A visual analytical dashboard showing task completion performance, goal progress histories, category distributions, and habit consistency charts.*
+* **Capabilities**: Aggregates records from `Task`, `Goal`, `Habit`, and `CalendarEvent` schemas via Recharts.
+
+### 15. System Settings Console
+![Settings Console](README/screenshots/13.png)
+*A comprehensive workspace settings panel supporting customization of daily working hour ranges, sound alert preferences, and email notification toggles.*
+* **Capabilities**: Governed by `/api/settings` controller endpoints to maintain customized user preference states in the database.
+
+### 16. Authentication & Session Security Controls
+![Security Controls](README/screenshots/14.png)
+*Session and authentication security panel supporting credentials updates, secure password resets, active token logs, and multi-device session terminations.*
+* **Capabilities**: Integrates with standard JWT token verification middleware, monitoring access points and authorizing user sessions.
+
+### 17. Persistent Profile & Avatar Customization
+![Profile Customization](README/screenshots/15.png)
+*A profile customization panel supporting custom handle configurations, workspace role profile adjustments, and secure user image uploads.*
+* **Capabilities**: Supports uploading JPG, PNG, JPEG, or WEBP images up to 5MB, saving paths or falling back to standard dynamically generated initials.
+
+### 18. Interactive Swagger API Documentation Portal
+![Swagger API Documentation](README/screenshots/16.png)
+*A fully interactive OpenAPI 3.0 specification command center built into the server, enabling judges and developers to test backend endpoints in real-time.*
+* **Capabilities**: Served directly at `/api-docs` or `/swagger`, parsing `/server/openapi.json` to enable live, authorized API request execution.
+
+### 19. AI Voice Assistant Command Centre
+![AI Voice Assistant](README/screenshots/17.png)
+*Hands-free voice controller enabling spoken natural language commands like "Add task revise database" or "Show today's schedule" with instant syntheses.*
+* **Capabilities**: Leverages browser Web Speech Recognition to parse spoken queries, mapping them to structural task modifications in real-time.
+
+### 20. Exam & Interview Preparation Hub
+![Exam Prep Hub](README/screenshots/18.png)
+*A specialized module designed to dissect complex academic curricula, syllabus chapters, or technical job interview tracks into manageable segments.*
+* **Capabilities**: Submits parameters to `POST /api/ai/prepare` to generate custom-compiled checklists and calendar pacing guides.
+
+### 21. Theme Customization & Light Mode
+![Theme Toggle and Light Mode](README/screenshots/20.png)
+*Toggle between dark cyberpunk theme and eye-safe, high-contrast light mode, offering customized color selections and modern borders.*
+* **Capabilities**: Powered by client-side state hooks persisted in localStorage, updating colors dynamically across all dashboard panels.
 
 ---
 
@@ -333,21 +382,29 @@ graph TD
 ├── vite.config.ts                 # Vite bundle parameters
 ├── README/
 │   └── screenshots/               # Standardized application user interface screenshots
-│       ├── Ai_negotiator.png
-│       ├── Ai_planner.png
-│       ├── AivoiceAssistant.png
-│       ├── Exam_And_Interview_Prep.png
-│       ├── HabitMetrix.png
+│       ├── 2.png
+│       ├── 3.png
+│       ├── 4.png
+│       ├── 5.png
+│       ├── 6.png
+│       ├── 7.png
+│       ├── 8.png
+│       ├── 9.png
+│       ├── 10.png
+│       ├── 11.png
+│       ├── 12.png
+│       ├── 13.png
+│       ├── 14.png
+│       ├── 15.png
+│       ├── 16.png
+│       ├── 17.png
+│       ├── 18.png
+│       ├── 20.png
 │       ├── LightTheme.png
 │       ├── Toggle_Theme.png
-│       ├── aichat.png
-│       ├── calender.png
-│       ├── dashboard.png
-│       ├── goals.png
 │       ├── login.png
-│       ├── setting.png
-│       ├── signin.png
-│       └── strategic_goal_engine.png
+│       ├── notification.png
+│       └── signin.png
 ├── server/                        # Production Express Backend
 │   ├── config/
 │   │   └── db.ts                  # Mongoose connector with local JSON fallback

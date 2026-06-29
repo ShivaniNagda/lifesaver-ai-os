@@ -31,7 +31,7 @@ export async function getAvatar(req: AuthenticatedRequest, res: Response) {
     const user = await UserRepository.findById(userId);
     if (!user) return res.status(404).json({ error: "User not found." });
 
-    return res.json({ profileImage: user.profileImage || "" });
+    return res.json({ profileImage: user.profileImage || null });
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Failed to fetch avatar." });
   }
@@ -127,11 +127,11 @@ export async function deleteAvatar(req: AuthenticatedRequest, res: Response) {
       }
     }
 
-    await UserRepository.findByIdAndUpdate(userId, { profileImage: "" });
+    await UserRepository.findByIdAndUpdate(userId, { profileImage: null });
 
     return res.json({
       message: "Profile picture removed.",
-      profileImage: ""
+      profileImage: null
     });
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Failed to remove avatar." });

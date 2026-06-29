@@ -7,9 +7,17 @@ interface SettingsPanelProps {
   userEmail: string;
   userRole: string;
   onUpdateRole: (role: string) => void;
+  avatar?: string;
+  onAvatarUpdated?: (newUrl: string) => void;
 }
 
-export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: SettingsPanelProps) {
+export default function SettingsPanel({ 
+  userEmail, 
+  userRole, 
+  onUpdateRole, 
+  avatar: propAvatar, 
+  onAvatarUpdated 
+}: SettingsPanelProps) {
   const { success: showSuccess, error: showError } = useToast();
 
   // Play a beautiful, professional, double-chime sound on request
@@ -63,7 +71,13 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
 
   // Form states
   const [name, setName] = useState("Shivanifs");
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState(propAvatar || "");
+  
+  useEffect(() => {
+    if (propAvatar !== undefined) {
+      setAvatar(propAvatar);
+    }
+  }, [propAvatar]);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [workHoursStart, setWorkHoursStart] = useState("08:00");
   const [workHoursEnd, setWorkHoursEnd] = useState("18:00");
@@ -162,8 +176,10 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
           const data = await res.json();
           if (data && data.profileImage) {
             setAvatar(data.profileImage);
+            onAvatarUpdated?.(data.profileImage);
           } else {
             setAvatar("");
+            onAvatarUpdated?.("");
           }
         }
       } catch (err) {
@@ -293,7 +309,7 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
                       aria-label="Manage profile picture"
                     >
                       <img 
-                        src={avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"} 
+                        src={avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(userEmail || "User") + "&background=random"} 
                         alt="Current user avatar" 
                         className="w-14 h-14 rounded-full border border-zinc-800 object-cover group-hover:brightness-75 transition-all"
                         referrerPolicy="no-referrer"
@@ -810,7 +826,10 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
         isOpen={isAvatarModalOpen}
         onClose={() => setIsAvatarModalOpen(false)}
         currentAvatar={avatar}
-        onAvatarUpdated={(newUrl) => setAvatar(newUrl)}
+        onAvatarUpdated={(newUrl) => {
+          setAvatar(newUrl);
+          onAvatarUpdated?.(newUrl);
+        }}
       />
     </div>
   );

@@ -104,6 +104,26 @@ export default function App() {
   // User Auth & Session state
   const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem("lifeos_email") || null);
   const [userRole, setUserRole] = useState<string>(() => localStorage.getItem("lifeos_role") || "Executive Officer");
+  const [avatar, setAvatar] = useState<string>("");
+
+  useEffect(() => {
+    if (!userEmail) {
+      setAvatar("");
+      return;
+    }
+    const loadAvatar = async () => {
+      try {
+        const res = await fetchWithAuth("/api/profile/avatar");
+        if (res.ok) {
+          const data = await res.json();
+          setAvatar(data.profileImage || "");
+        }
+      } catch (err) {
+        console.error("Failed to load profile avatar:", err);
+      }
+    };
+    loadAvatar();
+  }, [userEmail]);
 
   // Dynamic Light/Dark Theme State
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -1150,12 +1170,26 @@ export default function App() {
           </button>
           <button 
             onClick={() => setActiveTab("settings")}
-            className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
-              activeTab === "settings" ? "bg-white border-white text-black font-semibold" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
+            className={`w-8 h-8 rounded-full border flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+              activeTab === "settings" ? "bg-white border-white" : "bg-zinc-900 border-zinc-800"
             }`}
             title="Open Settings Console"
           >
-            <User className="w-4 h-4" />
+            {avatar ? (
+              <img 
+                src={avatar} 
+                alt="Profile" 
+                className="w-full h-full object-cover" 
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <img 
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userEmail || "User")}&background=random`} 
+                alt="Default Profile" 
+                className="w-full h-full object-cover" 
+                referrerPolicy="no-referrer"
+              />
+            )}
           </button>
         </div>
       </header>
@@ -2095,6 +2129,8 @@ export default function App() {
                   userEmail={userEmail || ""} 
                   userRole={userRole} 
                   onUpdateRole={(role) => setUserRole(role)} 
+                  avatar={avatar}
+                  onAvatarUpdated={(newUrl) => setAvatar(newUrl)}
                 />
               </div>
               <div className="md:col-span-4">

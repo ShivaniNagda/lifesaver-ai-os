@@ -9,7 +9,7 @@ interface AvatarManagerModalProps {
   onAvatarUpdated: (newUrl: string) => void;
 }
 
-const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80";
+const DEFAULT_AVATAR = "https://ui-avatars.com/api/?name=User&background=random";
 
 export default function AvatarManagerModal({
   isOpen,

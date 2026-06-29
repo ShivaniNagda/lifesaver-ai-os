@@ -5,7 +5,7 @@ export interface IUser extends Document {
   email: string;
   passwordHash: string;
   role: string;
-  profileImage?: string;
+  profileImage?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,7 +16,7 @@ const UserSchema: Schema = new Schema(
     email: { type: String, required: true, unique: true, index: true },
     passwordHash: { type: String, required: true },
     role: { type: String, default: "Executive Officer" },
-    profileImage: { type: String, default: "" },
+    profileImage: { type: String, default: null },
   },
   {
     timestamps: true,
