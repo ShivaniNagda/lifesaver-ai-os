@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Settings, Shield, User, Bell, Cpu, Lock, Sparkles, Check } from "lucide-react";
+import { Settings, Shield, User, Bell, Cpu, Lock, Sparkles, Check, Camera, Volume2 } from "lucide-react";
 import { useToast } from "./ToastProvider";
+import AvatarManagerModal from "./AvatarManagerModal";
 
 interface SettingsPanelProps {
   userEmail: string;
@@ -10,11 +11,60 @@ interface SettingsPanelProps {
 
 export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: SettingsPanelProps) {
   const { success: showSuccess, error: showError } = useToast();
+
+  // Play a beautiful, professional, double-chime sound on request
+  const playTestChime = () => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) {
+        showError("Not Supported", "Web Audio API is not supported in this browser.");
+        return;
+      }
+      
+      const audioCtx = new AudioContextClass();
+      
+      // First chime (C5)
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      gain1.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+      
+      osc1.start(audioCtx.currentTime);
+      osc1.stop(audioCtx.currentTime + 0.8);
+      
+      // Second chime (E5), starting slightly later
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.15); // E5
+      gain2.gain.setValueAtTime(0.0, audioCtx.currentTime);
+      gain2.gain.setValueAtTime(0.06, audioCtx.currentTime + 0.15);
+      gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.95);
+      
+      osc2.start(audioCtx.currentTime + 0.15);
+      osc2.stop(audioCtx.currentTime + 0.95);
+
+      showSuccess("Test Chime", "Dual-tone ascending acoustic chime triggered.");
+    } catch (err) {
+      console.warn("[Beep Engine] Test chime failed:", err);
+      showError("Playback Blocked", "Browser blocked audio. Tap or click anywhere on the page first.");
+    }
+  };
+
   const [activeSection, setActiveSection] = useState<"profile" | "notifications" | "ai" | "security">("profile");
 
   // Form states
   const [name, setName] = useState("Shivanifs");
-  const [avatar, setAvatar] = useState("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80");
+  const [avatar, setAvatar] = useState("");
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [workHoursStart, setWorkHoursStart] = useState("08:00");
   const [workHoursEnd, setWorkHoursEnd] = useState("18:00");
   const [focusLevel, setFocusLevel] = useState("max");
@@ -101,6 +151,29 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
     };
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    const loadAvatar = async () => {
+      try {
+        const res = await fetch("/api/profile/avatar", {
+          headers: getHeaders()
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.profileImage) {
+            setAvatar(data.profileImage);
+          } else {
+            setAvatar("");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load profile avatar:", err);
+      }
+    };
+    if (userEmail) {
+      loadAvatar();
+    }
+  }, [userEmail]);
 
   const triggerSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,11 +286,22 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
                 {/* Profile header display */}
                 <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-black/40 border border-zinc-900 justify-between">
                   <div className="flex items-center gap-4">
-                    <img 
-                      src={avatar} 
-                      alt="Current user avatar" 
-                      className="w-14 h-14 rounded-full border border-zinc-800 object-cover" 
-                    />
+                    <button
+                      type="button"
+                      onClick={() => setIsAvatarModalOpen(true)}
+                      className="relative rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-black group transition-all shrink-0"
+                      aria-label="Manage profile picture"
+                    >
+                      <img 
+                        src={avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"} 
+                        alt="Current user avatar" 
+                        className="w-14 h-14 rounded-full border border-zinc-800 object-cover group-hover:brightness-75 transition-all"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute -bottom-1 -right-1 p-1 bg-zinc-900 border border-zinc-800 rounded-full text-zinc-300 group-hover:bg-emerald-500 group-hover:text-black group-hover:border-emerald-400 transition-all shadow-md">
+                        <Camera className="w-3 h-3" />
+                      </div>
+                    </button>
                     <div>
                       <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest block font-bold">Welcome Back 👋</span>
                       <h4 className="text-sm font-semibold text-white mt-0.5">{userEmail || "shivanifs.1786145@gmail.com"}</h4>
@@ -340,9 +424,18 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
                   </div>
 
                   <div className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-950/40 border border-zinc-900">
-                    <div>
+                    <div className="space-y-1">
                       <span className="text-xs font-semibold text-white block">Sound Chimes</span>
                       <p className="text-[10px] text-zinc-500 leading-normal">Play a soft acoustic tune when scheduling recommendations arrive</p>
+                      <button
+                        type="button"
+                        onClick={playTestChime}
+                        className="mt-2 flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono font-bold tracking-wide text-emerald-400 hover:text-emerald-300 bg-emerald-950/20 border border-emerald-900/40 hover:border-emerald-700/50 rounded-lg transition-all focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                        id="btn-test-sound"
+                      >
+                        <Volume2 className="w-3 h-3" />
+                        TEST SOUND
+                      </button>
                     </div>
                     <input 
                       type="checkbox" 
@@ -713,6 +806,12 @@ export default function SettingsPanel({ userEmail, userRole, onUpdateRole }: Set
 
       </div>
 
+      <AvatarManagerModal 
+        isOpen={isAvatarModalOpen}
+        onClose={() => setIsAvatarModalOpen(false)}
+        currentAvatar={avatar}
+        onAvatarUpdated={(newUrl) => setAvatar(newUrl)}
+      />
     </div>
   );
 }

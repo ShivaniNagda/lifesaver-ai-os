@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Sparkles, Shield, AlertTriangle, CheckCircle, Brain, Terminal, 
@@ -224,26 +224,59 @@ export default function App() {
   const [processedInAppIds, setProcessedInAppIds] = useState<string[]>([]);
   const [showBellDropdown, setShowBellDropdown] = useState(false);
 
-  // Play a soft synthetic beep
+  // Play a beautiful, professional, double-chime sound using Web Audio API
+  // Uses a cooldown to prevent overlapping sounds from simultaneous notifications.
+  const lastSoundPlayTimeRef = useRef<number>(0);
+
   const playSoftBeep = () => {
+    const now = Date.now();
+    // 2-second cooldown to prevent overlapping sounds
+    if (now - lastSoundPlayTimeRef.current < 2000) {
+      console.log("[Beep Engine] Cooldown active, skipping overlapping sound.");
+      return;
+    }
+    lastSoundPlayTimeRef.current = now;
+
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) {
+        console.warn("[Beep Engine] Web Audio API is not supported in this browser.");
+        return;
+      }
       
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
+      const audioCtx = new AudioContextClass();
       
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime); // 880Hz (A5) for soft chime
-      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      // First chime (C5)
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
       
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      gain1.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
       
-      osc.start(audioCtx.currentTime);
-      osc.stop(audioCtx.currentTime + 0.6);
+      osc1.start(audioCtx.currentTime);
+      osc1.stop(audioCtx.currentTime + 0.8);
+      
+      // Second chime (E5), starting slightly later
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.15); // E5
+      gain2.gain.setValueAtTime(0.0, audioCtx.currentTime);
+      gain2.gain.setValueAtTime(0.06, audioCtx.currentTime + 0.15);
+      gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.95);
+      
+      osc2.start(audioCtx.currentTime + 0.15);
+      osc2.stop(audioCtx.currentTime + 0.95);
+      
     } catch (err) {
-      console.warn("[Beep Engine] Audio Context blocked or unsupported:", err);
+      console.warn("[Beep Engine] Playback blocked or failed:", err);
     }
   };
 

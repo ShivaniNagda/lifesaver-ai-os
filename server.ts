@@ -28,6 +28,9 @@ app.use((req, res, next) => {
 // Mount our production API router
 app.use("/api", apiRouter);
 
+// Serve uploads directory
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 // Serve the Swagger OpenAPI spec
 app.get("/api/openapi.json", (req, res) => {
   res.sendFile(path.join(process.cwd(), "server/openapi.json"));
@@ -166,48 +169,44 @@ app.get(["/api-docs", "/swagger"], (req, res) => {
       font-size: 14px;
       margin-bottom: 12px;
     }
-    .token-helper-code {
+    .token-helper-card ol {
+      color: #475569;
+      font-size: 14px;
+      padding-left: 20px;
+      line-height: 1.6;
+      margin-top: 8px;
+      margin-bottom: 0;
+    }
+    .token-helper-card li {
+      margin-bottom: 6px;
+    }
+    .token-helper-card code {
       background: #f1f5f9;
-      padding: 12px;
-      border-radius: 8px;
+      padding: 2px 6px;
+      border-radius: 4px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 13px;
       color: #0f172a;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       border: 1px solid #cbd5e1;
-    }
-    .copy-btn {
-      background: #4f46e5;
-      color: #ffffff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
-    .copy-btn:hover {
-      background: #4338ca;
     }
   </style>
 </head>
 <body>
   <div class="swagger-header">
-    <h1>LifeSaver AI OS &mdash; API Control Center</h1>
+    <h1>LifeSaver AI Assistant &mdash; API Control Center</h1>
     <span class="badge">OpenAPI 3.0</span>
   </div>
 
   <div class="token-helper-card">
-    <h3>🔑 Quick Authentication Helper</h3>
-    <p>To perform interactive testing, please click "Authorize" on the right of the schema panel below, then enter your JWT bearer token. Here is a pre-registered mock token for instant testing:</p>
-    <div class="token-helper-code">
-      <span id="mock-token-text">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2stdXNlci0xMjMiLCJ1c2VybmFtZSI6InNoaXZhbmlfZGV2ZWxvcGVyIiwiZW1haWwiOiJzaGl2YW5pZnMuMTc4NjE0NUBnbWFpbC5jb20ifQ.mock_signature_for_testing</span>
-      <button class="copy-btn" onclick="copyToken()">Copy Token</button>
-    </div>
+    <h3>🔐 Authentication</h3>
+    <p>Most protected endpoints require a valid JWT access token.</p>
+    <p><strong>Steps to authorize:</strong></p>
+    <ol>
+      <li>Register a new account (or use an existing one via the <strong>Authentication</strong> group).</li>
+      <li>Login to receive a JWT access token in the response payload.</li>
+      <li>Click the <strong>Authorize</strong> button on the top right.</li>
+      <li>Enter your token in the dialog box exactly in the following format: <code>Bearer &lt;your_jwt_token&gt;</code></li>
+    </ol>
   </div>
 
   <div id="swagger-ui"></div>
@@ -233,12 +232,6 @@ app.get(["/api-docs", "/swagger"], (req, res) => {
       });
       window.ui = ui;
     };
-
-    function copyToken() {
-      const token = document.getElementById("mock-token-text").innerText;
-      navigator.clipboard.writeText(token);
-      alert("Mock JWT Token copied to clipboard! Paste it into the BearerAuth dialog in Swagger UI.");
-    }
   </script>
 </body>
 </html>`);

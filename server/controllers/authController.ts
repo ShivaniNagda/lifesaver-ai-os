@@ -44,7 +44,8 @@ export async function register(req: any, res: Response) {
         id: newUser.id || newUser._id,
         username: newUser.username,
         email: newUser.email,
-        role: newUser.role
+        role: newUser.role,
+        profileImage: newUser.profileImage || ""
       }
     });
   } catch (error: any) {
@@ -84,7 +85,8 @@ export async function login(req: any, res: Response) {
         id: user.id || user._id,
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        profileImage: user.profileImage || ""
       }
     });
   } catch (error: any) {
@@ -161,7 +163,8 @@ export async function getMe(req: AuthenticatedRequest, res: Response) {
       id: user.id || user._id,
       username: user.username,
       email: user.email,
-      role: user.role
+      role: user.role,
+      profileImage: user.profileImage || ""
     });
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Failed to fetch operator parameters." });

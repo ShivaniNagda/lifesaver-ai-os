@@ -7,6 +7,7 @@ import { getEvents, createEvent, updateEvent, deleteEvent } from "../controllers
 import { getNotifications, createNotification, markAsRead, deleteNotification, updateDeliveryStatus } from "../controllers/notificationController";
 import { getHistory, sendTestEmail, updatePreferences, triggerManualCheck } from "../controllers/notificationSystemController";
 import { getSettings, updateSettings, updateProfile } from "../controllers/settingsController";
+import { getAvatar, uploadAvatar, deleteAvatar } from "../controllers/avatarController";
 import { processAgentOS, negotiateExtension, twinChat, prepareExam, getTwinChatLogs, getAgentLogs } from "../controllers/aiController";
 import { uploadImage, processText, createScannedTasks, getScanHistory, deleteScanHistory } from "../controllers/scannerController";
 import { authMiddleware } from "../middlewares/authMiddleware";
@@ -106,6 +107,14 @@ router.delete("/scanner/history/:id", authMiddleware, deleteScanHistory);
 router.get("/settings", authMiddleware, getSettings);
 router.put("/settings", authMiddleware, updateSettings);
 router.put("/profile", authMiddleware, updateProfile);
+
+// -----------------------------------------------------------------
+// PROFILE AVATAR MANAGEMENT
+// -----------------------------------------------------------------
+router.get("/profile/avatar", authMiddleware, getAvatar);
+router.post("/profile/avatar", authMiddleware, uploadAvatar);
+router.put("/profile/avatar", authMiddleware, uploadAvatar);
+router.delete("/profile/avatar", authMiddleware, deleteAvatar);
 
 // -----------------------------------------------------------------
 // ANALYTICS (DASHBOARD HIGHLIGHTS)

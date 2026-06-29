@@ -107,7 +107,8 @@ export async function updateProfile(req: AuthenticatedRequest, res: Response) {
       id: user.id || user._id,
       username: user.username,
       email: user.email,
-      role: user.role
+      role: user.role,
+      profileImage: user.profileImage || ""
     });
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Failed to update profile." });

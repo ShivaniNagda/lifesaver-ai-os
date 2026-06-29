@@ -1,9 +1,14 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "LifeSaver AI OS API",
+    "title": "LifeSaver AI Assistant API",
     "version": "1.0.0",
-    "description": "Comprehensive API Reference and Command Center for LifeSaver AI productivity platform. Fully synced with the Node/Express backend."
+    "description": "Interactive REST API documentation for the LifeSaver AI Assistant platform. Explore, test, and understand all available backend endpoints.\n\n### 👥 Contacts & Repository Details\n- **Developer:** Shivani Nagda\n- **GitHub Repository:** [https://github.com/ShivaniNagda/lifesaver-ai-os](https://github.com/ShivaniNagda/lifesaver-ai-os)\n- **Portfolio:** [https://ShivaniNagda.vercel.app](https://ShivaniNagda.vercel.app)\n- **LinkedIn:** [https://www.linkedin.com/in/shivaninagda](https://www.linkedin.com/in/shivaninagda)\n- **Support Email:** shivanifs.1786145@gmail.com",
+    "contact": {
+      "name": "Shivani Nagda",
+      "url": "https://ShivaniNagda.vercel.app",
+      "email": "shivanifs.1786145@gmail.com"
+    }
   },
   "servers": [
     {
@@ -11,13 +16,31 @@
       "description": "Primary API Gateway"
     }
   ],
+  "tags": [
+    { "name": "Authentication", "description": "Endpoints managing secure user registration, log in, log out, and session password restorations." },
+    { "name": "Users", "description": "Retrieve general properties and metadata of active user accounts." },
+    { "name": "Profile", "description": "Manage user profile properties and Base64-based avatar picture files on disk." },
+    { "name": "Dashboard", "description": "Retrieve real-time consolidated productivity stats and performance indices." },
+    { "name": "Tasks", "description": "Task management operations for planning, scheduling, and updating user deadlines." },
+    { "name": "Goals", "description": "Manage mid-to-long term objectives, complete with interactive milestone check-ins." },
+    { "name": "Habits", "description": "Define routine trackers, increment streak counts, and analyze adherence history logs." },
+    { "name": "Calendar", "description": "Schedule structural time-blocks and coordinate daily commitments." },
+    { "name": "Notifications", "description": "Dispatch system warning alert panels, smart email coaching notes, and configure delivery rules." },
+    { "name": "AI Assistant", "description": "Run advanced multi-topic study course schedulers and inspect multi-agent system execution traces." },
+    { "name": "AI Planner", "description": "Autonomous schedule allocation planners optimizing workflows and detecting burnout risk factors." },
+    { "name": "AI Chat", "description": "Engage in cognitive twin chat sessions mimicking your productivity style." },
+    { "name": "AI Negotiator", "description": "Automatically draft polite and highly convincing deadline extension letter drafts." },
+    { "name": "OCR Scanner", "description": "Extract raw schedule/syllabus information from image attachments and convert them to rich JSON schemas." },
+    { "name": "Settings", "description": "Fetch and update system tuning preferences and selected model families." },
+    { "name": "Analytics", "description": "SaaS aggregates mapping performance variables, completion trends, and burnouts." }
+  ],
   "components": {
     "securitySchemes": {
       "BearerAuth": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Enter your secure JWT token. Authenticated requests require this header format: `Authorization: Bearer <token>`."
+        "description": "Enter your secure JWT token. Format required: `Bearer <your_jwt_token>`."
       }
     },
     "schemas": {
@@ -43,33 +66,35 @@
         "type": "object",
         "required": ["title"],
         "properties": {
-          "title": { "type": "string", "example": "Prepare DSA Interview notes" },
+          "title": { "type": "string", "example": "Complete Java DSA Revision" },
           "dueDate": { "type": "string", "example": "2026-07-05" },
-          "urgency": { "type": "string", "enum": ["low", "medium", "high", "critical"], "example": "critical" },
-          "status": { "type": "string", "enum": ["pending", "completed"], "example": "pending" }
+          "time": { "type": "string", "example": "16:00" },
+          "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"], "example": "high" },
+          "status": { "type": "string", "enum": ["pending", "completed"], "example": "pending" },
+          "description": { "type": "string", "example": "Revise binary trees, heap sort, and graph algorithms before the mock coding round." }
         }
       },
       "Goal": {
         "type": "object",
         "required": ["title"],
         "properties": {
-          "title": { "type": "string", "example": "Master React 19 State Engines" },
-          "description": { "type": "string", "example": "Build five production-level apps using new React server actions and compiler features." },
+          "title": { "type": "string", "example": "Hackathon Submission" },
+          "description": { "type": "string", "example": "Build five functional modules, audit the API endpoints with OpenAPI specs, and deploy the production-ready platform." },
           "category": { "type": "string", "example": "study" },
-          "targetDate": { "type": "string", "example": "2026-08-15" },
-          "progress": { "type": "integer", "minimum": 0, "maximum": 100, "example": 20 },
+          "targetDate": { "type": "string", "example": "2026-06-30" },
+          "progress": { "type": "integer", "minimum": 0, "maximum": 100, "example": 90 },
+          "status": { "type": "string", "enum": ["active", "completed", "delayed"], "example": "active" },
           "milestones": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
                 "id": { "type": "string", "example": "m-1" },
-                "title": { "type": "string", "example": "Finish advanced docs section" },
+                "title": { "type": "string", "example": "Complete Backend APIs & Router" },
                 "completed": { "type": "boolean", "example": true }
               }
             }
-          },
-          "status": { "type": "string", "enum": ["active", "completed", "delayed"], "example": "active" }
+          }
         }
       },
       "Habit": {
@@ -78,11 +103,11 @@
         "properties": {
           "title": { "type": "string", "example": "Solve 2 LeetCode Questions" },
           "frequency": { "type": "string", "example": "daily" },
-          "category": { "type": "string", "example": "health" },
+          "category": { "type": "string", "example": "study" },
           "streak": { "type": "integer", "example": 5 },
           "history": {
             "type": "array",
-            "items": { "type": "string", "example": "2026-06-26" }
+            "items": { "type": "string", "example": "2026-06-28" }
           }
         }
       },
@@ -95,15 +120,15 @@
           "startTime": { "type": "string", "example": "14:00" },
           "endTime": { "type": "string", "example": "15:30" },
           "category": { "type": "string", "enum": ["work", "study", "billing", "personal"], "example": "study" },
-          "description": { "type": "string", "example": "Reviewing system parameters and distributed data store logs." }
+          "description": { "type": "string", "example": "Reviewing load balancers and horizontal partitioning schemas." }
         }
       },
       "Notification": {
         "type": "object",
         "required": ["title", "message"],
         "properties": {
-          "title": { "type": "string", "example": "Burnout Alert Avoidance" },
-          "message": { "type": "string", "example": "You have over 12 study hours planned. Schedule a 30-min break." },
+          "title": { "type": "string", "example": "Burnout Alert Warning" },
+          "message": { "type": "string", "example": "You have scheduled 12 hours of intense work. Shift some blocks to prevent fatigue." },
           "type": { "type": "string", "example": "warning" },
           "read": { "type": "boolean", "example": false }
         }
@@ -130,6 +155,21 @@
           "password": { "type": "string", "example": "my_brand_new_secret_password_1" }
         }
       },
+      "AvatarUpload": {
+        "type": "object",
+        "required": ["image"],
+        "properties": {
+          "image": { "type": "string", "description": "Base64 encoded JPG, PNG, WEBP image with data URL wrapper", "example": "data:image/png;base64,iVBORw0KGgoAAAANSU..." }
+        }
+      },
+      "DeliveryStatusUpdate": {
+        "type": "object",
+        "properties": {
+          "browserSent": { "type": "boolean", "example": true },
+          "soundPlayed": { "type": "boolean", "example": true },
+          "deliveryStatus": { "type": "string", "example": "delivered" }
+        }
+      },
       "AIProcessRequest": {
         "type": "object",
         "properties": {
@@ -139,8 +179,8 @@
             "items": {
               "type": "object",
               "properties": {
-                "title": { "type": "string", "example": "DSA Revision" },
-                "dueDate": { "type": "string", "example": "2026-06-30" },
+                "title": { "type": "string", "example": "Complete Java DSA Revision" },
+                "dueDate": { "type": "string", "example": "2026-07-05" },
                 "urgency": { "type": "string", "example": "high" }
               }
             }
@@ -191,125 +231,11 @@
     }
   },
   "paths": {
-    "/scanner/upload": {
-      "post": {
-        "summary": "Extract raw text from a schedule photo (Gemini OCR)",
-        "tags": ["AI Schedule Scanner"],
-        "security": [{ "BearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["image"],
-                "properties": {
-                  "image": { "type": "string", "description": "Base64 encoded JPG or PNG image data uri", "example": "data:image/jpeg;base64,..." }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "OCR raw text extracted successfully" },
-          "401": { "description": "Unauthorized" }
-        }
-      }
-    },
-    "/scanner/process": {
-      "post": {
-        "summary": "Convert extracted raw text to structured tasks with Gemini",
-        "tags": ["AI Schedule Scanner"],
-        "security": [{ "BearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["rawText"],
-                "properties": {
-                  "rawText": { "type": "string", "example": "Tomorrow 8 PM study chemistry. Next Tuesday exam." },
-                  "id": { "type": "string", "example": "64bc74d89f7f451a99f187a1" }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Tasks and AI scheduling diagnostics generated successfully" }
-        }
-      }
-    },
-    "/scanner/create-tasks": {
-      "post": {
-        "summary": "Save approved structured tasks and sync Calendar blocks",
-        "tags": ["AI Schedule Scanner"],
-        "security": [{ "BearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["tasks"],
-                "properties": {
-                  "id": { "type": "string", "example": "64bc74d89f7f451a99f187a1" },
-                  "tasks": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "title": { "type": "string" },
-                        "dueDate": { "type": "string" },
-                        "time": { "type": "string" },
-                        "priority": { "type": "string" },
-                        "description": { "type": "string" }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Tasks successfully generated and synchronised" }
-        }
-      }
-    },
-    "/scanner/history": {
-      "get": {
-        "summary": "Retrieve user scan history",
-        "tags": ["AI Schedule Scanner"],
-        "security": [{ "BearerAuth": [] }],
-        "responses": {
-          "200": { "description": "Returns array of historical scans" }
-        }
-      }
-    },
-    "/scanner/history/{id}": {
-      "delete": {
-        "summary": "Delete a history scan entry",
-        "tags": ["AI Schedule Scanner"],
-        "security": [{ "BearerAuth": [] }],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" }
-          }
-        ],
-        "responses": {
-          "200": { "description": "Scan deleted successfully" }
-        }
-      }
-    },
     "/auth/register": {
       "post": {
         "summary": "Create a new user account",
-        "tags": ["Authentication Portal"],
+        "description": "Registers a new user record in the persistent DB with username, email, and password properties.",
+        "tags": ["Authentication"],
         "requestBody": {
           "required": true,
           "content": {
@@ -319,15 +245,36 @@
           }
         },
         "responses": {
-          "201": { "description": "Profile registered successfully" },
-          "400": { "description": "Registration input validation failed" }
+          "201": {
+            "description": "Profile registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "User registered successfully." },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "example": "u-1" },
+                        "username": { "type": "string", "example": "shivani_developer" },
+                        "email": { "type": "string", "example": "shivanifs.1786145@gmail.com" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation error or email already in use" }
         }
       }
     },
     "/auth/login": {
       "post": {
         "summary": "Authenticate user credentials",
-        "tags": ["Authentication Portal"],
+        "description": "Validates email and password, and issues a standard JWT access bearer token if successful.",
+        "tags": ["Authentication"],
         "requestBody": {
           "required": true,
           "content": {
@@ -337,7 +284,28 @@
           }
         },
         "responses": {
-          "200": { "description": "Logged in successfully, token returned" },
+          "200": {
+            "description": "Logged in successfully, token returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Login successful." },
+                    "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.your_jwt_body.your_signature" },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "example": "u-1" },
+                        "username": { "type": "string", "example": "shivani_developer" },
+                        "email": { "type": "string", "example": "shivanifs.1786145@gmail.com" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           "401": { "description": "Invalid email or credentials" }
         }
       }
@@ -345,7 +313,8 @@
     "/auth/logout": {
       "post": {
         "summary": "Invalidate user sessions",
-        "tags": ["Authentication Portal"],
+        "description": "Signs the user out and clears standard authorization cookies.",
+        "tags": ["Authentication"],
         "responses": {
           "200": { "description": "Logout successful" }
         }
@@ -353,8 +322,9 @@
     },
     "/auth/forgot-password": {
       "post": {
-        "summary": "Request a secure password reset token",
-        "tags": ["Authentication Portal"],
+        "summary": "Request a password reset link token",
+        "description": "Dispatches a recovery reset token to the matching registered email address.",
+        "tags": ["Authentication"],
         "requestBody": {
           "required": true,
           "content": {
@@ -375,8 +345,9 @@
     },
     "/auth/reset-password": {
       "post": {
-        "summary": "Set a new password using a reset token",
-        "tags": ["Authentication Portal"],
+        "summary": "Set a new password using reset token",
+        "description": "Applies a new structural password string when presented with a valid matching reset token.",
+        "tags": ["Authentication"],
         "requestBody": {
           "required": true,
           "content": {
@@ -400,43 +371,251 @@
     },
     "/auth/me": {
       "get": {
-        "summary": "Retrieve information about current authenticated session",
-        "tags": ["Authentication Portal"],
+        "summary": "Retrieve session information",
+        "description": "Fetches account variables for the active bearer token owner.",
+        "tags": ["Users"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "User account retrieved successfully" },
+          "200": {
+            "description": "User account retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "example": "u-1" },
+                    "username": { "type": "string", "example": "shivani_developer" },
+                    "email": { "type": "string", "example": "shivanifs.1786145@gmail.com" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/profile": {
+      "put": {
+        "summary": "Update user credentials and settings",
+        "description": "Alters user properties (username, email, or credentials) in the database.",
+        "tags": ["Profile"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProfileUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Credentials updated successfully" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/profile/avatar": {
+      "get": {
+        "summary": "Retrieve profile avatar image URL",
+        "description": "Fetches the stored relative filepath or URL reference for the active user's avatar.",
+        "tags": ["Profile"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Profile picture URL returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "profileImage": { "type": "string", "example": "/uploads/avatar_u-1_1719632000000.png" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Upload profile avatar picture",
+        "description": "Takes a Base64-wrapped image data URI (JPG, JPEG, PNG, WEBP), writes a file on disk, updates profile parameters, and returns the relative asset path.",
+        "tags": ["Profile"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AvatarUpload" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Avatar uploaded and saved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Profile picture updated successfully." },
+                    "profileImage": { "type": "string", "example": "/uploads/avatar_u-1_1719632000000.png" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid format or size exceed limits" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "put": {
+        "summary": "Replace profile avatar picture",
+        "description": "Replaces the active avatar picture on disk with a new Base64-wrapped image representation.",
+        "tags": ["Profile"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AvatarUpload" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Avatar successfully replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Profile picture updated successfully." },
+                    "profileImage": { "type": "string", "example": "/uploads/avatar_u-1_1719632000000.png" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "delete": {
+        "summary": "Remove profile avatar picture",
+        "description": "Removes the avatar picture file on disk and resets user profileImage parameters back to empty.",
+        "tags": ["Profile"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Avatar successfully removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Profile picture removed." },
+                    "profileImage": { "type": "string", "example": "" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/analytics/dashboard": {
+      "get": {
+        "summary": "Retrieve aggregated dashboard analytics",
+        "description": "Assembles comprehensive statistical metrics counting total tasks, completion progress, habit streaks, goals achievement rate, and structural burnout levels.",
+        "tags": ["Dashboard", "Analytics"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "SaaS productivity aggregates and charts parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tasksCount": { "type": "integer", "example": 15 },
+                    "tasksCompleted": { "type": "integer", "example": 8 },
+                    "habitsCount": { "type": "integer", "example": 4 },
+                    "goalsCount": { "type": "integer", "example": 2 },
+                    "burnoutRisk": { "type": "string", "example": "moderate" },
+                    "weeklyActivity": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "day": { "type": "string", "example": "Mon" },
+                          "tasks": { "type": "integer", "example": 3 },
+                          "habits": { "type": "integer", "example": 2 }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           "401": { "description": "Unauthorized" }
         }
       }
     },
     "/tasks": {
       "get": {
-        "summary": "Retrieve tasks belonging to the user",
-        "tags": ["Productivity Engine"],
+        "summary": "Retrieve user tasks list",
+        "description": "Fetches all active tasks belonging to the authenticated user.",
+        "tags": ["Tasks"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "List of active task elements" }
+          "200": {
+            "description": "List of user tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Task" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       },
       "post": {
-        "summary": "Append a new task milestone",
-        "tags": ["Productivity Engine"],
+        "summary": "Create a new task",
+        "description": "Appends a new task item under the authenticated user session.",
+        "tags": ["Tasks"],
         "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Task" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Task" }
+            }
           }
         },
         "responses": {
-          "201": { "description": "Task created successfully" }
+          "201": {
+            "description": "Task created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Task" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/tasks/{id}": {
       "put": {
-        "summary": "Update task values, tags, or completion status",
-        "tags": ["Productivity Engine"],
+        "summary": "Update task values and properties",
+        "description": "Modifies properties of a specific task matched by its unique database ID.",
+        "tags": ["Tasks"],
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "task-abc-123" }
@@ -444,53 +623,84 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Task" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Task" }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Task updated successfully" }
+          "200": { "description": "Task updated successfully" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Task not found" }
         }
       },
       "delete": {
-        "summary": "Dismiss and delete a task",
-        "tags": ["Productivity Engine"],
+        "summary": "Delete a task",
+        "description": "Permanently deletes a specific task item from database registers.",
+        "tags": ["Tasks"],
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "task-abc-123" }
         ],
         "responses": {
-          "200": { "description": "Task deleted successfully" }
+          "200": { "description": "Task deleted successfully" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Task not found" }
         }
       }
     },
     "/goals": {
       "get": {
-        "summary": "Fetch active long-term objectives",
-        "tags": ["Productivity Engine"],
+        "summary": "Fetch active goals list",
+        "description": "Fetches a full structural array of goal objects registered under the user.",
+        "tags": ["Goals"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "List of active user goals" }
+          "200": {
+            "description": "List of goals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Goal" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       },
       "post": {
         "summary": "Establish a new goal parameters",
-        "tags": ["Productivity Engine"],
+        "description": "Registers a new structured objective with targets, milestone steps, and milestones arrays.",
+        "tags": ["Goals"],
         "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Goal" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Goal" }
+            }
           }
         },
         "responses": {
-          "201": { "description": "Goal created successfully" }
+          "201": {
+            "description": "Goal created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Goal" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/goals/{id}": {
       "put": {
-        "summary": "Log goal progress and update sub-milestones",
-        "tags": ["Productivity Engine"],
+        "summary": "Update objective parameters",
+        "description": "Alters properties or milestones progress parameters inside a matching goal.",
+        "tags": ["Goals"],
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "goal-xyz-789" }
@@ -498,53 +708,83 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Goal" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Goal" }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Goal updated successfully" }
+          "200": { "description": "Goal updated successfully" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Goal not found" }
         }
       },
       "delete": {
         "summary": "Delete a long-term goal",
-        "tags": ["Productivity Engine"],
+        "description": "Permanently drops a goal and its children milestones from databases.",
+        "tags": ["Goals"],
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "goal-xyz-789" }
         ],
         "responses": {
-          "200": { "description": "Goal deleted successfully" }
+          "200": { "description": "Goal deleted successfully" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/habits": {
       "get": {
-        "summary": "Retrieve logged habits and discipline metrics",
-        "tags": ["Productivity Engine"],
+        "summary": "Retrieve registered habits list",
+        "description": "Fetches user routine objects, tracking streaks and daily checking progress flags.",
+        "tags": ["Habits"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "List of active habits with streaks" }
+          "200": {
+            "description": "List of habits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Habit" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       },
       "post": {
-        "summary": "Register a new routine or habit",
-        "tags": ["Productivity Engine"],
+        "summary": "Register a new routine habit",
+        "description": "Inserts a new daily or weekly routine habit monitor into persistent schedules.",
+        "tags": ["Habits"],
         "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Habit" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Habit" }
+            }
           }
         },
         "responses": {
-          "201": { "description": "Habit registered successfully" }
+          "201": {
+            "description": "Habit registered successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Habit" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/habits/{id}": {
       "put": {
-        "summary": "Complete a habit for today and trigger streak counter",
-        "tags": ["Productivity Engine"],
+        "summary": "Modify a habit properties",
+        "description": "Alters properties, title, frequency, or completes habit streak checkpoints.",
+        "tags": ["Habits"],
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "habit-123" }
@@ -552,53 +792,82 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Habit" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Habit" }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Habit status updated successfully" }
+          "200": { "description": "Habit status updated successfully" },
+          "401": { "description": "Unauthorized" }
         }
       },
       "delete": {
         "summary": "Permanently discard a habit tracking stream",
-        "tags": ["Productivity Engine"],
+        "description": "Drops habit tracker items completely.",
+        "tags": ["Habits"],
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "habit-123" }
         ],
         "responses": {
-          "200": { "description": "Habit deleted successfully" }
+          "200": { "description": "Habit deleted successfully" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/calendar": {
       "get": {
         "summary": "Retrieve planned schedule calendar events",
-        "tags": ["Productivity Engine"],
+        "description": "Fetches structural arrays of scheduled blocks mapped onto the interactive calendar canvas.",
+        "tags": ["Calendar"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "List of active calendar schedules" }
+          "200": {
+            "description": "List of calendar schedules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/CalendarEvent" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       },
       "post": {
-        "summary": "Pin a block of time onto the interactive calendar",
-        "tags": ["Productivity Engine"],
+        "summary": "Pin a block of time onto the calendar",
+        "description": "Pins an isolated hourly commitment event or study block directly into database agendas.",
+        "tags": ["Calendar"],
         "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/CalendarEvent" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CalendarEvent" }
+            }
           }
         },
         "responses": {
-          "201": { "description": "Calendar block created" }
+          "201": {
+            "description": "Calendar block created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CalendarEvent" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/calendar/{id}": {
       "put": {
-        "summary": "Modify hours or category details of an event",
-        "tags": ["Productivity Engine"],
+        "summary": "Modify calendar event detail parameters",
+        "description": "Updates hours, dates, labels, or properties of an existing calendar event block.",
+        "tags": ["Calendar"],
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "event-999" }
@@ -606,157 +875,488 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/CalendarEvent" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CalendarEvent" }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Calendar event modified" }
+          "200": { "description": "Calendar event modified" },
+          "401": { "description": "Unauthorized" }
         }
       },
       "delete": {
         "summary": "Remove a scheduled calendar event",
-        "tags": ["Productivity Engine"],
+        "description": "Permanently dismisses calendar event blocks from the user's agenda.",
+        "tags": ["Calendar"],
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "event-999" }
         ],
         "responses": {
-          "200": { "description": "Event deleted successfully" }
+          "200": { "description": "Event deleted successfully" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/ai/process": {
       "post": {
         "summary": "Run active Gemini-driven planning simulation engine",
-        "tags": ["AI Core Operations"],
+        "description": "Triggers the core AI Planner engine, executing an optimized structural schedule layout, analyzing risk flags, and creating custom micro-pacing recommendations.",
+        "tags": ["AI Planner"],
         "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/AIProcessRequest" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AIProcessRequest" }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Optimized schedule timelines, burnout risk forecasts, and multi-agent reports" }
+          "200": {
+            "description": "Optimized schedule timelines, burnout risk forecasts, and multi-agent reports",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "timeline": { "type": "array", "items": { "type": "object" } },
+                    "burnoutRisk": { "type": "string", "example": "high" },
+                    "agentLogs": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/ai/negotiate": {
       "post": {
-        "summary": "Draft a persuasive, automated deadline extension request",
-        "tags": ["AI Core Operations"],
+        "summary": "Draft an automated persuasive deadline extension letter",
+        "description": "Applies specified excuse reasonings, professor names, and selected tones to draft elegant request emails using Gemini AI.",
+        "tags": ["AI Negotiator"],
         "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/AINegotiateRequest" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AINegotiateRequest" }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Extension draft complete with custom tone" }
+          "200": {
+            "description": "Extension email draft response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "draft": { "type": "string", "example": "Dear Professor H. Miller,\n\nI hope this email finds you well. I am writing to respectfully request a short deadline extension..." }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/ai/twin-chat": {
       "post": {
-        "summary": "Simulate dialogue with your productivity future-self twin",
-        "tags": ["AI Core Operations"],
+        "summary": "Interact with your custom productivity double",
+        "description": "Sends messages to a specialized conversational bot context-fed with your actual tasks, habits, and preferences.",
+        "tags": ["AI Chat"],
         "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/AITwinChatRequest" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AITwinChatRequest" }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Dialog feedback and micro-actions returned" }
-        }
-      }
-    },
-    "/ai/prepare": {
-      "post": {
-        "summary": "Generate structural phase-study programs for upcoming exam/interview",
-        "tags": ["AI Core Operations"],
-        "security": [{ "BearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/AIPrepareRequest" } }
-          }
-        },
-        "responses": {
-          "200": { "description": "Study timeline program" }
+          "200": {
+            "description": "Personalized digital-double reaction response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": { "type": "string", "example": "Let's chunk your Java DSA revision down to 3 smaller steps. Start with 1 heap sort heapify function right now!" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/ai/chat-logs": {
       "get": {
-        "summary": "Fetch logged dialog interactions with the Assistant Bot",
-        "tags": ["AI Core Operations"],
+        "summary": "Fetch conversational twin chat session logs",
+        "description": "Fetches the conversational history records logged between the user and their twin chatbot.",
+        "tags": ["AI Chat"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "Array of user-assistant dialog blocks" }
+          "200": {
+            "description": "Array of logged chat dialogue objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "role": { "type": "string", "example": "user" },
+                      "content": { "type": "string", "example": "How do I get started?" },
+                      "timestamp": { "type": "string", "example": "2026-06-29T10:30:00Z" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/ai/prepare": {
+      "post": {
+        "summary": "Generate specialized exam or interview preparation pathways",
+        "description": "Constructs structured progressive milestone blocks mapping subjects to days left using AI.",
+        "tags": ["AI Assistant"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AIPrepareRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Structured daily syllabus preparation roadmap",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "plan": { "type": "string", "example": "Day 1: Focus heavily on System Design fundamentals.\nDay 2: Mock coding on heap sort..." }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/ai/agent-logs": {
       "get": {
-        "summary": "Query multi-agent reasoning logs and system trace diagnostics",
-        "tags": ["AI Core Operations"],
+        "summary": "Fetch internal multi-agent execution and reasoning traces",
+        "description": "Retrieves debug logs listing actions processed by internal autonomous AI planners.",
+        "tags": ["AI Assistant"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "Active system traces" }
+          "200": {
+            "description": "List of multi-agent process traces",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string", "example": "log-1" },
+                      "action": { "type": "string", "example": "Burnout risk assessment triggered" },
+                      "details": { "type": "string", "example": "Allocated 4 slots for study, flagged 1 hour overlapping work." },
+                      "timestamp": { "type": "string", "example": "2026-06-29T10:25:00Z" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/scanner/upload": {
+      "post": {
+        "summary": "Upload visual schedule and parse text raw elements",
+        "description": "Processes syllabus files or calendar images through visual OCR scanning and extracts raw textual notes.",
+        "tags": ["OCR Scanner"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                  "image": { "type": "string", "description": "Base64 data URI of the JPG/PNG schedule file", "example": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD..." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OCR raw text extracted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "rawText": { "type": "string", "example": "CS101 Syllabus:\nComplete Java DSA Revision due July 5\nExam on July 10" },
+                    "id": { "type": "string", "example": "64bc74d89f7f451a99f187a1" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/scanner/process": {
+      "post": {
+        "summary": "Convert parsed text into structured tasks components",
+        "description": "Takes extracted visual OCR raw text inputs and parses them into organized structural lists using Gemini reasoning models.",
+        "tags": ["OCR Scanner"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["rawText"],
+                "properties": {
+                  "rawText": { "type": "string", "example": "Tomorrow 8 PM study chemistry. Next Tuesday exam." },
+                  "id": { "type": "string", "example": "64bc74d89f7f451a99f187a1" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tasks and AI scheduling diagnostics generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "example": "64bc74d89f7f451a99f187a1" },
+                    "tasks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": { "type": "string", "example": "Complete Java DSA Revision" },
+                          "dueDate": { "type": "string", "example": "2026-07-05" },
+                          "time": { "type": "string", "example": "16:00" },
+                          "priority": { "type": "string", "example": "high" },
+                          "description": { "type": "string", "example": "Extracted from syllabus upload" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/scanner/create-tasks": {
+      "post": {
+        "summary": "Approve and import OCR-scanned task elements into DB",
+        "description": "Saves approved schedules to your core database task registers and sets up calendar time blocks.",
+        "tags": ["OCR Scanner"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["tasks"],
+                "properties": {
+                  "id": { "type": "string", "example": "64bc74d89f7f451a99f187a1" },
+                  "tasks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": { "type": "string", "example": "Complete Java DSA Revision" },
+                        "dueDate": { "type": "string", "example": "2026-07-05" },
+                        "time": { "type": "string", "example": "16:00" },
+                        "priority": { "type": "string", "example": "high" },
+                        "description": { "type": "string", "example": "Syllabus extracted item" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Tasks successfully generated and synchronised" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/scanner/history": {
+      "get": {
+        "summary": "Fetch OCR image scanning history log list",
+        "description": "Lists historic scans complete with extracted markdown text values, matching ids, and dates.",
+        "tags": ["OCR Scanner"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Returns arrays of logged scans on file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string", "example": "64bc74d89f7f451a99f187a1" },
+                      "rawText": { "type": "string", "example": "CS101 Syllabus notes..." },
+                      "createdAt": { "type": "string", "example": "2026-06-29T10:00:00Z" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/scanner/history/{id}": {
+      "delete": {
+        "summary": "Delete an OCR scanning record from logs",
+        "description": "Drops an individual image scanning history record from database history logs.",
+        "tags": ["OCR Scanner"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "64bc74d89f7f451a99f187a1" }
+        ],
+        "responses": {
+          "200": { "description": "Scan deleted successfully" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/notifications": {
       "get": {
-        "summary": "Retrieve warnings or custom system alert logs",
-        "tags": ["Notifications Engine"],
+        "summary": "Fetch alerts and active notifications list",
+        "description": "Fetches the full unread warning panel cards and diagnostic alert updates logged.",
+        "tags": ["Notifications"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "Active alert list" }
+          "200": {
+            "description": "Active system warnings list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Notification" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       },
       "post": {
-        "summary": "Register a customized notification alert or diagnostics event",
-        "tags": ["Notifications Engine"],
+        "summary": "Manually emit a custom notification",
+        "description": "Creates and registers a custom system notification in the persistent database.",
+        "tags": ["Notifications"],
         "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Notification" } }
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Notification" }
+            }
           }
         },
         "responses": {
-          "201": { "description": "Notification registered" }
+          "201": {
+            "description": "Notification successfully created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Notification" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/notifications/history": {
       "get": {
-        "summary": "Retrieve the history of dispatched smart email reminders",
-        "tags": ["Notifications Engine"],
+        "summary": "Fetch sent coaching email dispatch logs",
+        "description": "Fetches logged delivery entries for all smart coaching emails triggered on behalf of the user.",
+        "tags": ["Notifications"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "Array of sent email records and simulation logs" }
+          "200": {
+            "description": "Array of sent email logging markers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string", "example": "log-notif-1" },
+                      "recipient": { "type": "string", "example": "shivanifs.1786145@gmail.com" },
+                      "subject": { "type": "string", "example": "[LifeSaver] Complete Java DSA Revision Deadline Coaching Alert" },
+                      "bodyExcerpt": { "type": "string", "example": "You have scheduled 12 hours of intense work..." },
+                      "sentAt": { "type": "string", "example": "2026-06-29T10:15:00Z" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/notifications/test-email": {
       "post": {
-        "summary": "Dispatch a real-time smart coaching test email reminder to your inbox",
-        "tags": ["Notifications Engine"],
+        "summary": "Dispatch a real-time test coaching email to your inbox",
+        "description": "Dispatches a live HTML sample alert containing adaptive workflow coaching tips directly to the user's register email.",
+        "tags": ["Notifications"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "Test email successfully dispatched and logged" }
+          "200": { "description": "Test email successfully dispatched and logged" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/notifications/preferences": {
       "put": {
-        "summary": "Update specific notification intervals (24h, 3h, 30m, Missed) and email toggles",
-        "tags": ["Notifications Engine"],
+        "summary": "Update smart notifications triggers",
+        "description": "Configures boolean rules managing which email triggers (24h, 3h, 30m, Missed) the scheduler runs.",
+        "tags": ["Notifications"],
         "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
@@ -765,69 +1365,125 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "emailNotificationsEnabled": { "type": "boolean", "default": true },
-                  "reminder24hEnabled": { "type": "boolean", "default": true },
-                  "reminder3hEnabled": { "type": "boolean", "default": true },
-                  "reminder30mEnabled": { "type": "boolean", "default": true },
-                  "reminderMissedEnabled": { "type": "boolean", "default": true }
+                  "emailNotificationsEnabled": { "type": "boolean", "default": true, "example": true },
+                  "reminder24hEnabled": { "type": "boolean", "default": true, "example": true },
+                  "reminder3hEnabled": { "type": "boolean", "default": true, "example": true },
+                  "reminder30mEnabled": { "type": "boolean", "default": true, "example": true },
+                  "reminderMissedEnabled": { "type": "boolean", "default": true, "example": true }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Settings preferences successfully updated" }
+          "200": { "description": "Settings preferences successfully updated" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/notifications/run-check": {
       "post": {
-        "summary": "Manually trigger immediate scanning of all pending task deadlines and dispatch reminders",
-        "tags": ["Notifications Engine"],
+        "summary": "Manually trigger immediate scanning of all pending task deadlines",
+        "description": "Forces the notification scheduler to scan for impending task deadlines and dispatch matching alerts immediately.",
+        "tags": ["Notifications"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "Manual sweep completed successfully" }
+          "200": { "description": "Manual sweep completed successfully" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/notifications/{id}/read": {
       "put": {
         "summary": "Mark alert read",
-        "tags": ["Notifications Engine"],
+        "description": "Flags a specific system notification card as read.",
+        "tags": ["Notifications"],
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "notif-1" }
         ],
         "responses": {
-          "200": { "description": "Alert marked read" }
+          "200": { "description": "Alert marked read" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/notifications/{id}/delivery-status": {
+      "put": {
+        "summary": "Update specific notification delivery states",
+        "description": "Alters structural delivery logs of an alert including soundPlayed, browserSent, and custom delivery statuses.",
+        "tags": ["Notifications"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "notif-1" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DeliveryStatusUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delivery status successfully modified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "example": "notif-1" },
+                    "browserSent": { "type": "boolean", "example": true },
+                    "soundPlayed": { "type": "boolean", "example": true },
+                    "deliveryStatus": { "type": "string", "example": "delivered" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Notification not found" }
         }
       }
     },
     "/notifications/{id}": {
       "delete": {
         "summary": "Dismiss and permanently discard an alert notification",
-        "tags": ["Notifications Engine"],
+        "description": "Permanently deletes a specific notification card matched by database ID.",
+        "tags": ["Notifications"],
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "notif-1" }
         ],
         "responses": {
-          "200": { "description": "Alert dismissed" }
+          "200": { "description": "Alert dismissed" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
     "/settings": {
       "get": {
         "summary": "Fetch core setup preferences",
-        "tags": ["System Metrics & Profile"],
+        "description": "Retrieves work hour limits, pacing intervals, focus level configurations, and active model family details.",
+        "tags": ["Settings"],
         "security": [{ "BearerAuth": [] }],
         "responses": {
-          "200": { "description": "Active system settings object" }
+          "200": {
+            "description": "Active system settings object",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Settings" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
         }
       },
       "put": {
         "summary": "Modify configuration fields or active model settings",
-        "tags": ["System Metrics & Profile"],
+        "description": "Updates global workspace rules, notification toggles, or selected LLM types.",
+        "tags": ["Settings"],
         "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
@@ -836,33 +1492,8 @@
           }
         },
         "responses": {
-          "200": { "description": "System configuration applied successfully" }
-        }
-      }
-    },
-    "/profile": {
-      "put": {
-        "summary": "Update user credentials and display names",
-        "tags": ["System Metrics & Profile"],
-        "security": [{ "BearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/ProfileUpdate" } }
-          }
-        },
-        "responses": {
-          "200": { "description": "Credentials updated successfully" }
-        }
-      }
-    },
-    "/analytics/dashboard": {
-      "get": {
-        "summary": "Retrieve aggregates across tasks, habits, and goals",
-        "tags": ["System Metrics & Profile"],
-        "security": [{ "BearerAuth": [] }],
-        "responses": {
-          "200": { "description": "Aggregated SaaS progress parameters" }
+          "200": { "description": "System configuration applied successfully" },
+          "401": { "description": "Unauthorized" }
         }
       }
     }
