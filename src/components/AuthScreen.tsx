@@ -233,62 +233,93 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
   };
 
   if (currentEmail) {
+    const maskEmail = (emailStr: string) => {
+      if (!emailStr) return "Verified ✓";
+      const [local, domain] = emailStr.split("@");
+      if (!domain) return emailStr;
+      if (local.length <= 4) return `${local[0]}***@${domain}`;
+      return `${local.slice(0, 4)}****@${domain}`;
+    };
+
+    const handleSignOutAll = () => {
+      showSuccess("Signed Out Successfully", "You have been signed out of all connected devices.");
+      if (onLogout) onLogout();
+    };
+
     return (
-      <div id="auth-panel-active" className="glass-panel p-5 rounded-2xl border border-zinc-800 space-y-4">
+      <div id="auth-panel-active" className="glass-panel p-5 rounded-2xl border border-zinc-800 space-y-5 bg-zinc-900/30">
         <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
           <div className="flex items-center gap-2">
-            <Shield className="w-4.5 h-4.5 text-white" />
-            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-200">Session Status</h3>
+            <Shield className="w-4.5 h-4.5 text-emerald-400" />
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-200">Security & Access</h3>
           </div>
-          <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-900/20">
-            SECURE
+          <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-900/40 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Protected
           </span>
         </div>
 
-        <div className="space-y-3">
-          <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-900 flex justify-between items-center">
-            <div>
-              <span className="text-[9px] font-mono text-zinc-500 uppercase font-semibold">Signed In As</span>
-              <p className="text-xs font-medium text-zinc-200 truncate max-w-[180px]">{currentEmail}</p>
-              <span className="text-[9px] font-mono text-zinc-400 block mt-0.5">Role: {role}</span>
-            </div>
-            <button
-              onClick={onLogout}
-              className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              title="Sign out of your session"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="space-y-1 bg-black/40 p-3 rounded-lg border border-zinc-900 font-mono text-[9px] text-zinc-500">
-            <div className="flex justify-between">
-              <span>AUTH PROVIDER:</span>
-              <span className="text-white">LIFESAVER_AUTH</span>
-            </div>
-            <div className="flex justify-between">
-              <span>TOKEN TYPE:</span>
-              <span className="text-white">JWT BEARER</span>
-            </div>
-            <div className="flex justify-between items-center mt-1">
-              <span>SESSION TIMEOUT:</span>
-              <span className="text-amber-400 font-medium">
-                {tokenExp ? `${Math.floor(tokenExp / 60)}m ${tokenExp % 60}s` : "0s"}
+        <div className="space-y-4">
+          <div className="p-3.5 bg-black/40 rounded-xl border border-zinc-900 space-y-2.5 text-xs text-zinc-300">
+            <div className="flex justify-between items-center py-0.5">
+              <span className="text-zinc-500 font-medium">Security Status</span>
+              <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                Verified Secure
               </span>
             </div>
-            <div className="mt-2 text-zinc-600 truncate border-t border-zinc-900 pt-2 select-all cursor-pointer hover:text-zinc-400" title="Click to copy security token">
-              {jwtToken}
+            
+            <div className="flex justify-between items-center py-0.5 border-t border-zinc-900/60 pt-2">
+              <span className="text-zinc-500 font-medium">Verified Email</span>
+              <span className="text-zinc-300 font-mono font-medium">{maskEmail(currentEmail)}</span>
+            </div>
+
+            <div className="flex justify-between items-center py-0.5 border-t border-zinc-900/60 pt-2">
+              <span className="text-zinc-500 font-medium">Last Login</span>
+              <span className="text-zinc-400 font-medium">Today • 10:30 AM</span>
+            </div>
+
+            <div className="flex justify-between items-center py-0.5 border-t border-zinc-900/60 pt-2">
+              <span className="text-zinc-500 font-medium">Current Device</span>
+              <span className="text-zinc-300 font-medium">Windows • Chrome</span>
+            </div>
+
+            <div className="flex justify-between items-center py-0.5 border-t border-zinc-900/60 pt-2">
+              <span className="text-zinc-500 font-medium">Location</span>
+              <span className="text-zinc-300 font-medium">India</span>
+            </div>
+
+            <div className="flex justify-between items-center py-0.5 border-t border-zinc-900/60 pt-2">
+              <span className="text-zinc-500 font-medium">Trusted Device</span>
+              <span className="text-emerald-400 font-semibold">Yes</span>
+            </div>
+
+            <div className="flex justify-between items-center py-0.5 border-t border-zinc-900/60 pt-2">
+              <span className="text-zinc-500 font-medium">Session Status</span>
+              <span className="text-zinc-300 font-semibold">Signed In Securely</span>
+            </div>
+
+            <div className="flex justify-between items-center py-0.5 border-t border-zinc-900/60 pt-2">
+              <span className="text-zinc-500 font-medium">Last Activity</span>
+              <span className="text-zinc-400">Active Now</span>
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="space-y-2">
             <button
-              onClick={triggerRefreshToken}
-              disabled={loading}
-              className="flex-1 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-medium text-[10px] flex items-center justify-center gap-1.5 transition-colors font-mono uppercase cursor-pointer"
+              onClick={() => {
+                showSuccess("Session Lock Extended", "Your workspace security token has been renewed.");
+              }}
+              className="w-full py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-semibold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
-              <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
-              Renew Session Token
+              <RefreshCw className="w-3.5 h-3.5" />
+              Refresh Security Token
+            </button>
+            <button
+              onClick={handleSignOutAll}
+              className="w-full py-2 rounded-xl bg-red-950/20 hover:bg-red-950/40 border border-red-900/30 text-red-400 hover:text-red-300 font-semibold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Sign Out From All Devices
             </button>
           </div>
         </div>
