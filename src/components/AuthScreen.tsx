@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Mail, Lock, User, Sparkles, Shield, AlertTriangle, Key, RefreshCw, LogOut } from "lucide-react";
 import { useToast } from "./ToastProvider";
+import { signInWithPopup } from "firebase/auth";
+import { getFirebaseAuth, getGoogleProvider } from "../lib/firebase";
 
 interface AuthScreenProps {
   onAuthSuccess: (email: string, userRole: string) => void;
@@ -166,19 +168,30 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
     setSuccess("");
 
     try {
-      // Direct fast oauth/google registration simulation using real backend endpoints to maintain true full-stack persistence
-      const defaultGoogleName = "Shivani Shinde";
-      const defaultGoogleEmail = "shivanifs.1786145@gmail.com";
-      const defaultGooglePassword = "oauth_auto_secure_password_1867145";
+      const auth = getFirebaseAuth();
+      const provider = getGoogleProvider();
+      
+      // Always opens the Google Account selection screen via signInWithPopup
+      const result = await signInWithPopup(auth, provider);
+      const googleUser = result.user;
 
-      // Attempt to register first, if fails then login
+      if (!googleUser.email) {
+        throw new Error("No email returned from Google authentication.");
+      }
+
+      const selectedEmail = googleUser.email;
+      const selectedName = googleUser.displayName || selectedEmail.split("@")[0];
+      const googleUid = googleUser.uid;
+      const securePassword = `oauth_auto_secure_password_${selectedEmail.split("@")[0]}_${googleUid}_1867145`;
+
+      // Check if user is registered, if not, register first, then login
       const regRes = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: defaultGoogleName,
-          email: defaultGoogleEmail,
-          password: defaultGooglePassword,
+          username: selectedName,
+          email: selectedEmail,
+          password: securePassword,
           role: "Executive Officer"
         })
       });
@@ -190,8 +203,8 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: defaultGoogleEmail,
-            password: defaultGooglePassword
+            email: selectedEmail,
+            password: securePassword
           })
         });
         data = await loginRes.json();
@@ -200,6 +213,10 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
         }
       }
 
+      // Store photo and info
+      if (googleUser.photoURL) {
+        localStorage.setItem("lifeos_avatar_url", googleUser.photoURL);
+      }
       localStorage.setItem("lifeos_token", data.token);
       localStorage.setItem("lifeos_email", data.user.email);
       localStorage.setItem("lifeos_role", data.user.role);
@@ -512,6 +529,8 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
           </span>
         )}
       </div>
+
+
     </div>
   );
 }
