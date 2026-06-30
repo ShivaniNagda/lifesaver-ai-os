@@ -230,9 +230,34 @@ export default function AuthScreen({ onAuthSuccess, currentEmail, onLogout }: Au
         onAuthSuccess(data.user.email, data.user.role);
       }, 500);
     } catch (err: any) {
-      const errMsg = err.message || "Google Sign-In error.";
-      setError(errMsg);
-      showError("Authentication Error", errMsg);
+      const errCode = err?.code || "";
+      const errMsg = err?.message || "";
+      
+      if (errCode === "auth/popup-closed-by-user" || errMsg.includes("popup-closed-by-user")) {
+        showWarning("Sign-In Cancelled", "The Google login popup was closed before completion.");
+        setError(""); // Clear error state to avoid showing raw technical error card
+        return;
+      }
+
+      if (errCode === "auth/popup-blocked" || errMsg.includes("popup-blocked")) {
+        const popupMsg = "The Google login window was blocked by your browser. Please allow popups and try again.";
+        setError(popupMsg);
+        showError("Popup Blocked", popupMsg);
+        return;
+      }
+
+      if (errCode === "auth/cancelled-popup-request" || errMsg.includes("cancelled-popup-request")) {
+        return;
+      }
+
+      // Format any other firebase-specific error code into a friendly message
+      let friendlyMsg = errMsg;
+      if (errMsg.includes("auth/")) {
+        friendlyMsg = "Google authentication failed. Please verify your network or try again.";
+      }
+      
+      setError(friendlyMsg);
+      showError("Authentication Error", friendlyMsg);
     } finally {
       setLoading(false);
     }

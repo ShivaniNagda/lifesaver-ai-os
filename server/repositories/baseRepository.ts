@@ -101,8 +101,15 @@ export class BaseRepository<M extends any, T extends { id?: string; _id?: string
         const obj = doc.toObject();
         return { ...obj, id: obj._id.toString() };
       } catch (err: any) {
-        console.error(`[Repository Save Failed] MongoDB doc.save() error:`, err);
-        throw err;
+        console.error(`[Repository Save Failed] MongoDB doc.save() error:`, err, "Attempting self-healing fallback to local JSON db...");
+        try {
+          const doc = await this.jsonDb.create(data);
+          console.log(`[Repository Save Fallback Successful] Successfully saved item in Fallback Local JSON database. ID: ${doc.id}`);
+          return doc;
+        } catch (fallbackErr: any) {
+          console.error(`[Repository Save Fallback Failed] Local JSON database write error:`, fallbackErr);
+          throw err;
+        }
       }
     } else {
       try {
