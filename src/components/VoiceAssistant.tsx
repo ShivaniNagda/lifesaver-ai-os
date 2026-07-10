@@ -258,6 +258,7 @@ export default function VoiceAssistant({ tasks, onAddTask, onRefreshTasks, runLi
               ? "bg-red-500 border-red-400 text-white shadow-lg shadow-red-500/20 scale-105" 
               : "bg-zinc-900 hover:bg-zinc-850 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white"
           }`}
+          aria-label={isListening ? "Stop listening voice command" : "Start listening voice command"}
         >
           {isListening ? (
             <Mic className="w-6 h-6 animate-ping absolute" />

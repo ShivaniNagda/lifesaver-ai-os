@@ -31,6 +31,12 @@ app.use("/api", apiRouter);
 // Serve uploads directory
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
+// Explicit robots.txt endpoint to avoid returning index.html (which causes Lighthouse SEO issues)
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain");
+  res.send("User-agent: *\nAllow: /");
+});
+
 // Serve the Swagger OpenAPI spec
 app.get("/api/openapi.json", (req, res) => {
   res.sendFile(path.join(process.cwd(), "server/openapi.json"));

@@ -661,6 +661,7 @@ export default function NotificationsPanel({ tasks, onRefreshTasks }: Notificati
                 <button
                   onClick={() => setActiveEmailPreview(null)}
                   className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition cursor-pointer"
+                  aria-label="Close Email Preview"
                 >
                   <X className="w-4 h-4" />
                 </button>

@@ -654,6 +654,7 @@ export default function AIScheduleScanner({ onRefreshTasks }: AIScheduleScannerP
                               <button
                                 onClick={() => removeTaskRow(i)}
                                 className="p-1 rounded text-zinc-500 hover:text-red-400 hover:bg-red-500/10 cursor-pointer opacity-0 group-hover:opacity-100 transition-all"
+                                aria-label="Delete Task Row"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -818,6 +819,7 @@ export default function AIScheduleScanner({ onRefreshTasks }: AIScheduleScannerP
                     <button
                       onClick={(e) => deleteHistoryItem(e, item.id || item._id || "")}
                       className="p-1 rounded text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
+                      aria-label="Delete history scan"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

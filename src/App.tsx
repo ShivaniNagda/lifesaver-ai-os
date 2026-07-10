@@ -1017,6 +1017,7 @@ export default function App() {
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="w-8 h-8 rounded-lg border border-zinc-900 bg-zinc-950 flex items-center justify-center text-zinc-400 hover:text-white transition-all cursor-pointer"
             title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            aria-label="Toggle visual theme"
           >
             {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
           </button>
@@ -1034,6 +1035,7 @@ export default function App() {
                   : "border-zinc-900 bg-zinc-950 text-zinc-400 hover:text-white"
               }`}
               title="Notifications Panel"
+              aria-label="Open notifications panel"
             >
               <Bell className={`w-4 h-4 ${notifications.filter(n => !n.read).length > 0 ? "animate-pulse text-indigo-400" : ""}`} />
               {notifications.filter(n => !n.read).length > 0 && (
@@ -1199,7 +1201,7 @@ export default function App() {
       </header>
 
       {/* Main OS App Body */}
-      <div className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
         
         {/* LEFT COLUMN: System Context, Active Goals, Habit list & Real-time Tasks (4 Cols) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
@@ -1296,6 +1298,7 @@ export default function App() {
                 <button
                   type="submit"
                   className="col-span-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-medium rounded-lg text-xs flex items-center justify-center transition-colors"
+                  aria-label="Add Task"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -1340,6 +1343,7 @@ export default function App() {
                         <button 
                           onClick={() => removeTask(task.id)} 
                           className="text-zinc-600 hover:text-red-400 p-0.5 transition-colors"
+                          aria-label="Delete Task"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1843,6 +1847,7 @@ export default function App() {
                   type="submit"
                   disabled={isTwinChatting}
                   className="px-4 py-3 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
+                  aria-label="Send message"
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -2007,6 +2012,7 @@ export default function App() {
                         type="button"
                         onClick={handleAddTopic}
                         className="px-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-medium rounded-lg text-xs"
+                        aria-label="Add topic"
                       >
                         +
                       </button>
@@ -2023,6 +2029,7 @@ export default function App() {
                             type="button" 
                             onClick={() => setPrepTopics(prev => prev.filter((_, i) => i !== index))}
                             className="text-zinc-600 hover:text-red-400"
+                            aria-label="Remove topic"
                           >
                             ×
                           </button>
@@ -2175,7 +2182,7 @@ export default function App() {
 
         </div>
 
-      </div>
+      </main>
 
     </div>
   );
