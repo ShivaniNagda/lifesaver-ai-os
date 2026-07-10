@@ -4,17 +4,41 @@ export default function AICoreCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const isHoveredRef = useRef(false);
+  const isVisibleRef = useRef(true);
+
+  // Sync state and ref for hover
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    isHoveredRef.current = true;
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    isHoveredRef.current = false;
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false }); // Optimize canvas rendering context
     if (!ctx) return;
 
     let animationId: number;
     let width = 0;
     let height = 0;
+
+    // Viewport Intersection Observer to pause drawing when offscreen
+    const intersectionObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        isVisibleRef.current = entry.isIntersecting;
+      }
+    }, { threshold: 0.05 });
+
+    if (containerRef.current) {
+      intersectionObserver.observe(containerRef.current);
+    }
 
     // Handle container resizing securely
     const resizeObserver = new ResizeObserver((entries) => {
@@ -43,7 +67,7 @@ export default function AICoreCanvas() {
     }
 
     const nodes: Node3D[] = [];
-    const nodeCount = 36;
+    const nodeCount = 30; // Slightly reduced from 36 for optimized mobile math performance
     const radius = 110;
 
     // Distribute nodes evenly on a sphere using Fibonacci lattice
@@ -69,38 +93,47 @@ export default function AICoreCanvas() {
     }
 
     const particles: Particle[] = [];
-    const particleCount = 40;
+    const particleCount = 25; // Slightly reduced from 40 for optimal CPU rendering
 
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * 400 - 200,
         y: Math.random() * 400 - 200,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        size: Math.random() * 2 + 0.5,
-        alpha: Math.random() * 0.5 + 0.2,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 1.5 + 0.5,
+        alpha: Math.random() * 0.4 + 0.2,
       });
     }
 
-    let angleY = 0.003;
-    let angleX = 0.002;
+    const angleY = 0.003;
+    const angleX = 0.002;
 
     const animate = () => {
-      ctx.clearRect(0, 0, width, height);
+      // Loop request at start
+      animationId = requestAnimationFrame(animate);
 
-      // Draw subtle background radial glow
+      // If offscreen, completely skip any rendering/math to save CPU
+      if (!isVisibleRef.current) return;
+
+      // Draw dark background explicitly since alpha: false is set for speed
+      ctx.fillStyle = "#030712"; // Match background color exactly for higher performance
+      ctx.fillRect(0, 0, width, height);
+
       const cx = width / 2;
       const cy = height / 2;
 
+      // Draw subtle background radial glow
       const gradient = ctx.createRadialGradient(cx, cy, 10, cx, cy, radius * 1.8);
-      gradient.addColorStop(0, "rgba(255, 255, 255, 0.035)");
-      gradient.addColorStop(0.5, "rgba(100, 100, 100, 0.01)");
-      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+      gradient.addColorStop(0, "rgba(255, 255, 255, 0.025)");
+      gradient.addColorStop(0.5, "rgba(100, 100, 100, 0.005)");
+      gradient.addColorStop(1, "rgba(3, 7, 18, 1)");
       ctx.fillStyle = gradient;
       ctx.fillRect(cx - radius * 2, cy - radius * 2, radius * 4, radius * 4);
 
-      // Adjust rotation speed based on hover state
-      const speedMultiplier = isHovered ? 2.5 : 1;
+      // Adjust rotation speed based on hover state ref (avoids state teardown)
+      const hoverActive = isHoveredRef.current;
+      const speedMultiplier = hoverActive ? 2.5 : 1;
       const currentAngleY = angleY * speedMultiplier;
       const currentAngleX = angleX * speedMultiplier;
 
@@ -112,12 +145,12 @@ export default function AICoreCanvas() {
 
       nodes.forEach((node) => {
         // Rotate around Y axis
-        let x1 = node.x * cosY - node.z * sinY;
-        let z1 = node.z * cosY + node.x * sinY;
+        const x1 = node.x * cosY - node.z * sinY;
+        const z1 = node.z * cosY + node.x * sinY;
 
         // Rotate around X axis
-        let y2 = node.y * cosX - z1 * sinX;
-        let z2 = z1 * cosX + node.y * sinX;
+        const y2 = node.y * cosX - z1 * sinX;
+        const z2 = z1 * cosX + node.y * sinX;
 
         node.x = x1;
         node.y = y2;
@@ -129,19 +162,21 @@ export default function AICoreCanvas() {
 
       // Draw connection lines between nearby nodes
       ctx.lineWidth = 0.4;
-      for (let i = 0; i < sortedNodes.length; i++) {
-        for (let j = i + 1; j < sortedNodes.length; j++) {
-          const n1 = sortedNodes[i];
+      const len = sortedNodes.length;
+      for (let i = 0; i < len; i++) {
+        const n1 = sortedNodes[i];
+        for (let j = i + 1; j < len; j++) {
           const n2 = sortedNodes[j];
 
           const dx = n1.x - n2.x;
           const dy = n1.y - n2.y;
           const dz = n1.z - n2.z;
-          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          const distSq = dx * dx + dy * dy + dz * dz;
 
-          // Connect nodes closer than threshold
-          if (dist < 90) {
-            const opacity = ((90 - dist) / 90) * 0.15 * ((n1.z + radius) / (2 * radius));
+          // Connect nodes closer than threshold (90px => 8100 distSq)
+          if (distSq < 8100) {
+            const dist = Math.sqrt(distSq);
+            const opacity = ((90 - dist) / 90) * 0.12 * ((n1.z + radius) / (2 * radius));
             ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
             ctx.beginPath();
             ctx.moveTo(cx + n1.x, cy + n1.y);
@@ -153,10 +188,9 @@ export default function AICoreCanvas() {
 
       // Draw nodes
       sortedNodes.forEach((node) => {
-        // Depth-based size and opacity projection
         const scale = (node.z + radius * 1.5) / (radius * 2.5);
-        const drawSize = Math.max(1, (isHovered ? 3.5 : 2.5) * scale);
-        const opacity = Math.min(1, Math.max(0.1, 0.6 * scale));
+        const drawSize = Math.max(1, (hoverActive ? 3.5 : 2.5) * scale);
+        const opacity = Math.min(1, Math.max(0.1, 0.5 * scale));
 
         ctx.beginPath();
         ctx.arc(cx + node.x, cy + node.y, drawSize, 0, Math.PI * 2);
@@ -164,11 +198,11 @@ export default function AICoreCanvas() {
         ctx.fill();
 
         // Core central pulse for active nodes
-        if (isHovered && Math.random() > 0.96) {
+        if (hoverActive && Math.random() > 0.98) {
           ctx.beginPath();
-          ctx.arc(cx + node.x, cy + node.y, drawSize * 2.5, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(255, 255, 255, 0.3)`;
-          ctx.lineWidth = 0.5;
+          ctx.arc(cx + node.x, cy + node.y, drawSize * 2.2, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+          ctx.lineWidth = 0.4;
           ctx.stroke();
         }
       });
@@ -182,16 +216,16 @@ export default function AICoreCanvas() {
         if (Math.abs(p.x) > 220) p.x = -p.x;
         if (Math.abs(p.y) > 220) p.y = -p.y;
 
-        const pScale = isHovered ? 1.5 : 1;
+        const pScale = hoverActive ? 1.4 : 1;
         ctx.beginPath();
         ctx.arc(cx + p.x, cy + p.y, p.size * pScale, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(200, 200, 200, ${p.alpha})`;
         ctx.fill();
 
         // Connect some particles back to the core nodes
-        if (isHovered && Math.random() > 0.98) {
+        if (hoverActive && Math.random() > 0.99) {
           const nearestNode = nodes[Math.floor(Math.random() * nodes.length)];
-          ctx.strokeStyle = `rgba(255, 255, 255, 0.08)`;
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
           ctx.lineWidth = 0.3;
           ctx.beginPath();
           ctx.moveTo(cx + p.x, cy + p.y);
@@ -201,22 +235,20 @@ export default function AICoreCanvas() {
       });
 
       // Draw holographic HUD rings
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.02)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.015)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(cx, cy, radius * 1.3, 0, Math.PI * 2);
       ctx.stroke();
 
-      if (isHovered) {
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+      if (hoverActive) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
         ctx.setLineDash([4, 15]);
         ctx.beginPath();
         ctx.arc(cx, cy, radius * 1.5, angleY * 5, angleY * 5 + Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
       }
-
-      animationId = requestAnimationFrame(animate);
     };
 
     animate();
@@ -224,18 +256,19 @@ export default function AICoreCanvas() {
     return () => {
       cancelAnimationFrame(animationId);
       resizeObserver.disconnect();
+      intersectionObserver.disconnect();
     };
-  }, [isHovered]);
+  }, []); // Run absolutely once on mount to maximize performance and avoid effect recreation
 
   return (
     <div
       ref={containerRef}
       id="ai-core-container"
       className="relative w-full h-80 md:h-96 flex items-center justify-center cursor-pointer overflow-hidden rounded-3xl"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      <canvas ref={canvasRef} className="w-full h-full block absolute inset-0" />
+      <canvas ref={canvasRef} className="w-full h-full block absolute inset-0 bg-[#030712]" />
       <div className="absolute bottom-6 flex flex-col items-center pointer-events-none select-none">
         <span className="font-mono text-[10px] tracking-widest text-zinc-500 uppercase">
           AI Core Status

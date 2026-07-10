@@ -1365,7 +1365,11 @@ export default function App() {
         <div className="lg:col-span-8 flex flex-col gap-6">
           
           {/* High-End Sub-Navigation for Advanced OS Modes */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-950 border border-zinc-900 max-w-full overflow-x-auto scrollbar-thin">
+          <div 
+            role="tablist"
+            aria-label="Operating System Sections"
+            className="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-950 border border-zinc-900 max-w-full overflow-x-auto scrollbar-thin"
+          >
             {[
               { id: "overview", label: "Dashboard", icon: Activity },
               { id: "analytics", label: "Executive Overview", icon: BarChart3 },
@@ -1385,6 +1389,10 @@ export default function App() {
               return (
                 <button
                   key={tab.id}
+                  role="tab"
+                  aria-selected={isSelected}
+                  aria-controls={`tabpanel-${tab.id}`}
+                  id={`tab-${tab.id}`}
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
                     isSelected 
@@ -1392,16 +1400,18 @@ export default function App() {
                       : "text-zinc-400 hover:text-white hover:bg-zinc-900"
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-3.5 h-3.5" aria-hidden="true" />
                   {tab.label}
                 </button>
               );
             })}
           </div>
 
-          {/* TAB CONTENT 1: Dashboard (Primary UI Overview with AI prediction widgets) */}
-          {activeTab === "overview" && (
-            <div className="space-y-6">
+          {/* TAB CONTENT PANEL AREA */}
+          <div role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`} className="outline-none space-y-6">
+            {/* TAB CONTENT 1: Dashboard (Primary UI Overview with AI prediction widgets) */}
+            {activeTab === "overview" && (
+              <div className="space-y-6">
               
               {/* Analytics Summary Dashboard Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -2161,6 +2171,7 @@ export default function App() {
               </div>
             </div>
           )}
+          </div>
 
         </div>
 
