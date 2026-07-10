@@ -161,6 +161,9 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [osResponse, setOsResponse] = useState<AgentOSResponse | null>(null);
 
+  const successRate = osResponse ? osResponse.successProbability : 84;
+  const isLowSuccess = successRate < 70;
+
   // Generate stable task completion and burnout data for the last 7 days
   const taskTrendData = React.useMemo(() => {
     const completedCount = tasks.filter(t => t.status === "completed").length;
@@ -1174,6 +1177,7 @@ export default function App() {
               activeTab === "settings" ? "bg-white border-white" : "bg-zinc-900 border-zinc-800"
             }`}
             title="Open Settings Console"
+            aria-label="Open Settings Console"
           >
             {avatar ? (
               <img 
@@ -1403,14 +1407,26 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 
                 {/* Score Widget 1: Success Probability */}
-                <div id="success-probability-card" className="glass-panel p-5 rounded-2xl border border-zinc-800 relative overflow-hidden flex justify-between gap-4 h-40 bg-zinc-900/30">
+                <div 
+                  id="success-probability-card" 
+                  className={`glass-panel p-5 rounded-2xl border relative overflow-hidden flex justify-between gap-4 h-40 bg-zinc-900/30 transition-all duration-300 ${
+                    isLowSuccess 
+                      ? "border-amber-500/50 bg-amber-950/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]" 
+                      : "border-zinc-800"
+                  }`}
+                >
                   <div className="flex flex-col justify-between flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <Target className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <Target className={`w-4 h-4 shrink-0 animate-pulse ${isLowSuccess ? "text-amber-500" : "text-emerald-400"}`} />
                       <span className="text-[10px] font-mono tracking-widest text-zinc-400 uppercase truncate">Success Rate</span>
+                      {isLowSuccess && (
+                        <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded text-[8px] font-mono font-semibold uppercase tracking-wider animate-pulse ml-1 flex items-center gap-0.5 shrink-0">
+                          <span>⚠️</span> Below 70%
+                        </span>
+                      )}
                     </div>
                     <div className="my-1.5">
-                      <span className="text-3xl sm:text-4xl font-display font-semibold text-white">
+                      <span className={`text-3xl sm:text-4xl font-display font-semibold transition-colors duration-300 ${isLowSuccess ? "text-amber-400" : "text-white"}`}>
                         {osResponse ? `${osResponse.successProbability}%` : "84%"}
                       </span>
                       <p className="text-[10px] text-zinc-500 font-mono mt-0.5 truncate">7-day task completions</p>
@@ -1418,8 +1434,8 @@ export default function App() {
                     {/* Subtle progress bar */}
                     <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-emerald-400 transition-all duration-1000" 
-                        style={{ width: `${osResponse ? osResponse.successProbability : 84}%` }} 
+                        className={`h-full transition-all duration-1000 ${isLowSuccess ? "bg-amber-500" : "bg-emerald-400"}`} 
+                        style={{ width: `${successRate}%` }} 
                       />
                     </div>
                   </div>
@@ -1434,8 +1450,8 @@ export default function App() {
                         <AreaChart data={taskTrendData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
                           <defs>
                             <linearGradient id="colorCompletions" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                              <stop offset="5%" stopColor={isLowSuccess ? "#f59e0b" : "#10b981"} stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor={isLowSuccess ? "#f59e0b" : "#10b981"} stopOpacity={0}/>
                             </linearGradient>
                           </defs>
                           <Tooltip 
@@ -1444,7 +1460,7 @@ export default function App() {
                                 return (
                                   <div className="bg-zinc-950 border border-zinc-800 px-2 py-1 rounded shadow-lg text-[9px] font-mono text-zinc-300">
                                     <div className="font-semibold text-zinc-400">{payload[0].payload.day}</div>
-                                    <div className="font-bold text-emerald-400 mt-0.5">{payload[0].value} done</div>
+                                    <div className={`font-bold mt-0.5 ${isLowSuccess ? "text-amber-400" : "text-emerald-400"}`}>{payload[0].value} done</div>
                                   </div>
                                 );
                               }
@@ -1455,7 +1471,7 @@ export default function App() {
                           <Area 
                             type="monotone" 
                             dataKey="completions" 
-                            stroke="#10b981" 
+                            stroke={isLowSuccess ? "#f59e0b" : "#10b981"} 
                             strokeWidth={1.5} 
                             fillOpacity={1} 
                             fill="url(#colorCompletions)" 
