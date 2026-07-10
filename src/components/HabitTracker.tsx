@@ -422,6 +422,7 @@ export default function HabitTracker() {
                     <button
                       onClick={() => removeHabit(habit)}
                       className="text-zinc-600 hover:text-red-400 p-1.5 transition-colors cursor-pointer"
+                      aria-label="Delete Habit"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

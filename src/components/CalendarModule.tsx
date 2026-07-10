@@ -574,6 +574,7 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
                   <button
                     onClick={() => removeEvent(evt.id || evt._id || "")}
                     className="text-zinc-600 hover:text-red-400 p-1 transition-colors shrink-0 cursor-pointer"
+                    aria-label="Delete Event"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

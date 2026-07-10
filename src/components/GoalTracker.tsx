@@ -363,6 +363,7 @@ export default function GoalTracker() {
                       <button
                         onClick={() => removeGoal(goal)}
                         className="text-zinc-600 hover:text-red-400 p-1 transition-colors cursor-pointer"
+                        aria-label="Delete goal"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

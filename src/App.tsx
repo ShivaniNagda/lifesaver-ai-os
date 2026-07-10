@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Sparkles, Shield, AlertTriangle, CheckCircle, Brain, Terminal, 
@@ -8,24 +8,37 @@ import {
   Sun, Moon, Bell, Camera, Upload, FileImage, RefreshCw, Check,
   BarChart3
 } from "lucide-react";
-import AICoreCanvas from "./components/AICoreCanvas";
-import AgentLogsTerminal from "./components/AgentLogsTerminal";
 import GeminiBadgeTooltip from "./components/GeminiBadgeTooltip";
 import { 
   Task, TimelineNode, AgentLog, FutureSelfDialog, AgentOSResponse, 
   NegotiationResult, PreparationPlan, TwinChatResponse, ChatMessage 
 } from "./types";
-import AuthScreen from "./components/AuthScreen";
-import GoalTracker from "./components/GoalTracker";
-import HabitTracker from "./components/HabitTracker";
-import CalendarModule from "./components/CalendarModule";
-import SettingsPanel from "./components/SettingsPanel";
-import VoiceAssistant from "./components/VoiceAssistant";
-import NotificationsPanel from "./components/NotificationsPanel";
-import AIScheduleScanner from "./components/AIScheduleScanner";
-import ExecutiveOverview from "./components/ExecutiveOverview";
 import { useToast } from "./components/ToastProvider";
-import { AreaChart, Area, ResponsiveContainer, Tooltip } from "recharts";
+
+// Lazy-loaded heavy components for performance optimization
+const AICoreCanvas = React.lazy(() => import("./components/AICoreCanvas"));
+const AgentLogsTerminal = React.lazy(() => import("./components/AgentLogsTerminal"));
+const AuthScreen = React.lazy(() => import("./components/AuthScreen"));
+const GoalTracker = React.lazy(() => import("./components/GoalTracker"));
+const HabitTracker = React.lazy(() => import("./components/HabitTracker"));
+const CalendarModule = React.lazy(() => import("./components/CalendarModule"));
+const SettingsPanel = React.lazy(() => import("./components/SettingsPanel"));
+const VoiceAssistant = React.lazy(() => import("./components/VoiceAssistant"));
+const NotificationsPanel = React.lazy(() => import("./components/NotificationsPanel"));
+const AIScheduleScanner = React.lazy(() => import("./components/AIScheduleScanner"));
+const ExecutiveOverview = React.lazy(() => import("./components/ExecutiveOverview"));
+const DashboardSparkline = React.lazy(() => import("./components/DashboardSparkline"));
+
+const LoadingFallback = () => (
+  <div className="flex flex-col items-center justify-center p-8 min-h-[160px] w-full text-center">
+    <div className="w-6 h-6 rounded-full border-2 border-zinc-800 border-t-white animate-spin mb-3" />
+    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Core Synchronizing...</span>
+  </div>
+);
+
+const SparklineFallback = () => (
+  <div className="w-full h-20 bg-zinc-950/20 rounded animate-pulse" />
+);
 
 const INITIAL_TASKS: Task[] = [
   { id: "1", title: "Chemistry Midterm Exam Preparation", dueDate: "2026-06-28", urgency: "critical", status: "pending" },
@@ -765,15 +778,17 @@ export default function App() {
               LifeSaver <span className="font-mono text-zinc-500 text-xs tracking-widest uppercase ml-1.5 border border-zinc-800 px-1.5 py-0.5 rounded">AI Assistant</span>
             </span>
           </div>
-          <AuthScreen 
-            onAuthSuccess={(email, role) => {
-              setUserEmail(email);
-              setUserRole(role);
-              setView("dashboard");
-            }} 
-            currentEmail={undefined}
-            onLogout={() => {}}
-          />
+          <Suspense fallback={<LoadingFallback />}>
+            <AuthScreen 
+              onAuthSuccess={(email, role) => {
+                setUserEmail(email);
+                setUserRole(role);
+                setView("dashboard");
+              }} 
+              currentEmail={undefined}
+              onLogout={() => {}}
+            />
+          </Suspense>
         </div>
       </div>
     );
@@ -870,7 +885,9 @@ export default function App() {
             <div className="lg:col-span-5 relative flex flex-col items-center">
               <div className="w-full max-w-md relative glass-panel rounded-3xl p-6 glow-accent border border-zinc-800/80">
                 {/* Visual Neural Core Sphere */}
-                <AICoreCanvas />
+                <Suspense fallback={<div className="h-[200px] flex items-center justify-center text-zinc-500 font-mono text-[10px] uppercase tracking-widest">Core Synchronizing...</div>}>
+                  <AICoreCanvas />
+                </Suspense>
                 
                 <div className="mt-4 p-4 rounded-xl bg-black/40 border border-zinc-900">
                   <div className="flex items-center gap-2 mb-2">
@@ -1413,7 +1430,8 @@ export default function App() {
 
           {/* TAB CONTENT PANEL AREA */}
           <div role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`} className="outline-none space-y-6">
-            {/* TAB CONTENT 1: Dashboard (Primary UI Overview with AI prediction widgets) */}
+            <Suspense fallback={<LoadingFallback />}>
+              {/* TAB CONTENT 1: Dashboard (Primary UI Overview with AI prediction widgets) */}
             {activeTab === "overview" && (
               <div className="space-y-6">
               
@@ -1460,39 +1478,15 @@ export default function App() {
                       TREND
                     </div>
                     <div className="w-full h-20">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={taskTrendData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
-                          <defs>
-                            <linearGradient id="colorCompletions" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor={isLowSuccess ? "#f59e0b" : "#10b981"} stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor={isLowSuccess ? "#f59e0b" : "#10b981"} stopOpacity={0}/>
-                            </linearGradient>
-                          </defs>
-                          <Tooltip 
-                            content={({ active, payload }) => {
-                              if (active && payload && payload.length) {
-                                return (
-                                  <div className="bg-zinc-950 border border-zinc-800 px-2 py-1 rounded shadow-lg text-[9px] font-mono text-zinc-300">
-                                    <div className="font-semibold text-zinc-400">{payload[0].payload.day}</div>
-                                    <div className={`font-bold mt-0.5 ${isLowSuccess ? "text-amber-400" : "text-emerald-400"}`}>{payload[0].value} done</div>
-                                  </div>
-                                );
-                              }
-                              return null;
-                            }}
-                            cursor={{ stroke: 'rgba(255, 255, 255, 0.05)' }}
-                          />
-                          <Area 
-                            type="monotone" 
-                            dataKey="completions" 
-                            stroke={isLowSuccess ? "#f59e0b" : "#10b981"} 
-                            strokeWidth={1.5} 
-                            fillOpacity={1} 
-                            fill="url(#colorCompletions)" 
-                            isAnimationActive={true}
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
+                      <Suspense fallback={<SparklineFallback />}>
+                        <DashboardSparkline 
+                          data={taskTrendData} 
+                          dataKey="completions" 
+                          color={isLowSuccess ? "#f59e0b" : "#10b981"} 
+                          gradientId="colorCompletions" 
+                          unit=" done"
+                        />
+                      </Suspense>
                     </div>
                   </div>
                 </div>
@@ -1527,39 +1521,15 @@ export default function App() {
                       FATIGUE
                     </div>
                     <div className="w-full h-20">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={burnoutTrendData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
-                          <defs>
-                            <linearGradient id="colorBurnout" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor={(osResponse ? osResponse.burnoutRisk : 18) > 60 ? "#ef4444" : "#f59e0b"} stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor={(osResponse ? osResponse.burnoutRisk : 18) > 60 ? "#ef4444" : "#f59e0b"} stopOpacity={0}/>
-                            </linearGradient>
-                          </defs>
-                          <Tooltip 
-                            content={({ active, payload }) => {
-                              if (active && payload && payload.length) {
-                                return (
-                                  <div className="bg-zinc-950 border border-zinc-800 px-2 py-1 rounded shadow-lg text-[9px] font-mono text-zinc-300">
-                                    <div className="font-semibold text-zinc-400">{payload[0].payload.day}</div>
-                                    <div className="font-bold text-amber-400 mt-0.5">{payload[0].value}% risk</div>
-                                  </div>
-                                );
-                              }
-                              return null;
-                            }}
-                            cursor={{ stroke: 'rgba(255, 255, 255, 0.05)' }}
-                          />
-                          <Area 
-                            type="monotone" 
-                            dataKey="risk" 
-                            stroke={(osResponse ? osResponse.burnoutRisk : 18) > 60 ? "#ef4444" : "#f59e0b"} 
-                            strokeWidth={1.5} 
-                            fillOpacity={1} 
-                            fill="url(#colorBurnout)" 
-                            isAnimationActive={true}
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
+                      <Suspense fallback={<SparklineFallback />}>
+                        <DashboardSparkline 
+                          data={burnoutTrendData} 
+                          dataKey="risk" 
+                          color={(osResponse ? osResponse.burnoutRisk : 18) > 60 ? "#ef4444" : "#f59e0b"} 
+                          gradientId="colorBurnout" 
+                          unit="% risk"
+                        />
+                      </Suspense>
                     </div>
                   </div>
                 </div>
@@ -2178,6 +2148,7 @@ export default function App() {
               </div>
             </div>
           )}
+            </Suspense>
           </div>
 
         </div>

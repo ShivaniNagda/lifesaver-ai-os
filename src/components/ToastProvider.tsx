@@ -218,6 +218,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ item, onDismiss }) => {
         id={`toast-close-${id}`}
         onClick={() => onDismiss(id)}
         className="absolute top-2 right-2 text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer focus:outline-none text-zinc-500 hover:text-zinc-300"
+        aria-label="Dismiss Notification"
       >
         <X size={14} />
       </button>

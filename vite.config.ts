@@ -14,10 +14,22 @@ export default defineConfig(() => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom'],
-            'chart-vendor': ['recharts'],
-            'motion-vendor': ['motion'],
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+                return 'react-vendor';
+              }
+              if (id.includes('recharts') || id.includes('d3')) {
+                return 'chart-vendor';
+              }
+              if (id.includes('motion')) {
+                return 'motion-vendor';
+              }
+              if (id.includes('lucide-react')) {
+                return 'icons-vendor';
+              }
+              return 'vendor';
+            }
           }
         }
       },
