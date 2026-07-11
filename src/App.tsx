@@ -176,6 +176,7 @@ export default function App() {
 
   // AI Response States
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSparklineLoading, setIsSparklineLoading] = useState(true);
   const [osResponse, setOsResponse] = useState<AgentOSResponse | null>(null);
 
   const successRate = osResponse ? osResponse.successProbability : 84;
@@ -469,6 +470,7 @@ export default function App() {
   useEffect(() => {
     if (!userEmail) return;
     const syncTasks = async () => {
+      setIsSparklineLoading(true);
       try {
         const res = await fetchWithAuth("/api/tasks");
         if (res.ok) {
@@ -489,6 +491,10 @@ export default function App() {
       } catch (err) {
         console.error("Failed to fetch user tasks:", err);
         setTasks(INITIAL_TASKS);
+      } finally {
+        setTimeout(() => {
+          setIsSparklineLoading(false);
+        }, 400);
       }
     };
     syncTasks();
@@ -497,6 +503,7 @@ export default function App() {
   // Trigger main OS cognitive alignment engine
   const runLifeOSEngine = async () => {
     setIsProcessing(true);
+    setIsSparklineLoading(true);
     try {
       const res = await fetchWithAuth("/api/agent/process", {
         method: "POST",
@@ -522,6 +529,7 @@ export default function App() {
       console.error("Network error running OS engine:", err);
     } finally {
       setIsProcessing(false);
+      setIsSparklineLoading(false);
     }
   };
 
@@ -1489,6 +1497,7 @@ export default function App() {
                           color={isLowSuccess ? "#f59e0b" : "#10b981"} 
                           gradientId="colorCompletions" 
                           unit=" done"
+                          isLoading={isSparklineLoading}
                         />
                       </Suspense>
                     </div>
@@ -1532,6 +1541,7 @@ export default function App() {
                           color={(osResponse ? osResponse.burnoutRisk : 18) > 60 ? "#ef4444" : "#f59e0b"} 
                           gradientId="colorBurnout" 
                           unit="% risk"
+                          isLoading={isSparklineLoading}
                         />
                       </Suspense>
                     </div>
