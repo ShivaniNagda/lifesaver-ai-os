@@ -45,31 +45,34 @@ export default function ExecutiveOverview({
   const loadAllAnalyticsData = async () => {
     setLoading(true);
     try {
-      // Load Goals
-      const goalsRes = await fetchWithAuth("/api/goals");
-      if (goalsRes.ok) {
-        const goalsData = await goalsRes.json();
+      const [goalsResult, habitsResult, calendarResult, notificationsResult] = await Promise.allSettled([
+        fetchWithAuth("/api/goals"),
+        fetchWithAuth("/api/habits"),
+        fetchWithAuth("/api/calendar"),
+        fetchWithAuth("/api/notifications")
+      ]);
+
+      // Parse Goals
+      if (goalsResult.status === "fulfilled" && goalsResult.value.ok) {
+        const goalsData = await goalsResult.value.json();
         setGoals(goalsData);
       }
 
-      // Load Habits
-      const habitsRes = await fetchWithAuth("/api/habits");
-      if (habitsRes.ok) {
-        const habitsData = await habitsRes.json();
+      // Parse Habits
+      if (habitsResult.status === "fulfilled" && habitsResult.value.ok) {
+        const habitsData = await habitsResult.value.json();
         setHabits(habitsData);
       }
 
-      // Load Calendar Events
-      const calendarRes = await fetchWithAuth("/api/calendar");
-      if (calendarRes.ok) {
-        const calendarData = await calendarRes.json();
+      // Parse Calendar Events
+      if (calendarResult.status === "fulfilled" && calendarResult.value.ok) {
+        const calendarData = await calendarResult.value.json();
         setCalendarEvents(calendarData);
       }
 
-      // Load Notifications
-      const notificationsRes = await fetchWithAuth("/api/notifications");
-      if (notificationsRes.ok) {
-        const notificationsData = await notificationsRes.json();
+      // Parse Notifications
+      if (notificationsResult.status === "fulfilled" && notificationsResult.value.ok) {
+        const notificationsData = await notificationsResult.value.json();
         setNotifications(notificationsData);
       }
     } catch (err) {

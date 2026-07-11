@@ -163,6 +163,10 @@ export default function App() {
 
   // Core App State
   const [tasks, setTasks] = useState<Task[]>([]);
+  const tasksRef = useRef<Task[]>(tasks);
+  useEffect(() => {
+    tasksRef.current = tasks;
+  }, [tasks]);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskUrgency, setNewTaskUrgency] = useState<"low" | "medium" | "high" | "critical">("medium");
   const [newTaskDueDate, setNewTaskDueDate] = useState("2026-06-29");
@@ -257,7 +261,7 @@ export default function App() {
 
   // Smart notification system state & hooks
   const [notifications, setNotifications] = useState<any[]>([]);
-  const [processedInAppIds, setProcessedInAppIds] = useState<string[]>([]);
+  const processedInAppIdsRef = useRef<string[]>([]);
   const [showBellDropdown, setShowBellDropdown] = useState(false);
 
   // Play a beautiful, professional, double-chime sound using Web Audio API
@@ -364,8 +368,8 @@ export default function App() {
             const notifId = notification.id || notification._id;
             const isAlert = notification.type === "deadline_alert" || notification.type === "missed_alert";
             
-            if (isAlert && !notification.read && !processedInAppIds.includes(notifId)) {
-              setProcessedInAppIds(prev => [...prev, notifId]);
+            if (isAlert && !notification.read && !processedInAppIdsRef.current.includes(notifId)) {
+              processedInAppIdsRef.current.push(notifId);
 
               if (settings.soundAlertsEnabled !== false && !notification.soundPlayed) {
                 playSoftBeep();
@@ -415,7 +419,7 @@ export default function App() {
                   {
                     label: "Snooze",
                     onClick: async () => {
-                      const currentTask = tasks.find(t => t.id === notification.taskId || (t as any)._id === notification.taskId);
+                      const currentTask = tasksRef.current.find(t => t.id === notification.taskId || (t as any)._id === notification.taskId);
                       if (currentTask) {
                         const curDue = new Date(currentTask.dueDate);
                         const newDue = new Date(curDue.getTime() + 15 * 60 * 1000);
@@ -459,7 +463,7 @@ export default function App() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [userEmail, processedInAppIds, tasks]);
+  }, [userEmail]);
 
   // Sync tasks on auth
   useEffect(() => {

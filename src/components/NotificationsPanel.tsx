@@ -109,10 +109,14 @@ export default function NotificationsPanel({ tasks, onRefreshTasks }: Notificati
     setLoadingSettings(true);
     setLoadingHistory(true);
     try {
-      // 1. Load preferences from global settings
-      const settingsRes = await fetch("/api/settings", { headers: getHeaders() });
-      if (settingsRes.ok) {
-        const data = await settingsRes.json();
+      const [settingsResult, historyResult] = await Promise.allSettled([
+        fetch("/api/settings", { headers: getHeaders() }),
+        fetch("/api/notifications/history", { headers: getHeaders() })
+      ]);
+
+      // Process settings
+      if (settingsResult.status === "fulfilled" && settingsResult.value.ok) {
+        const data = await settingsResult.value.json();
         if (data) {
           setEmailNotificationsEnabled(data.emailNotificationsEnabled !== false);
           setReminder24hEnabled(data.reminder24hEnabled !== false);
@@ -125,10 +129,9 @@ export default function NotificationsPanel({ tasks, onRefreshTasks }: Notificati
         }
       }
 
-      // 2. Load sent email history
-      const historyRes = await fetch("/api/notifications/history", { headers: getHeaders() });
-      if (historyRes.ok) {
-        const data = await historyRes.json();
+      // Process history
+      if (historyResult.status === "fulfilled" && historyResult.value.ok) {
+        const data = await historyResult.value.json();
         if (Array.isArray(data)) {
           // Sort by newest sentAt
           const sorted = data.sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
