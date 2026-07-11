@@ -129,7 +129,7 @@ export default function App() {
 
   // Load settings once on auth success
   useEffect(() => {
-    if (!userEmail) {
+    if (!userEmail || view !== "dashboard") {
       setAppSettings(null);
       return;
     }
@@ -148,10 +148,10 @@ export default function App() {
       }
     };
     loadSettings();
-  }, [userEmail]);
+  }, [userEmail, view]);
 
   useEffect(() => {
-    if (!userEmail) {
+    if (!userEmail || view !== "dashboard") {
       setAvatar("");
       return;
     }
@@ -167,7 +167,7 @@ export default function App() {
       }
     };
     loadAvatar();
-  }, [userEmail]);
+  }, [userEmail, view]);
 
   // Dynamic Light/Dark Theme State
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -370,7 +370,7 @@ export default function App() {
 
   // Poll notifications every 10 seconds and trigger toasts / sounds
   useEffect(() => {
-    if (!userEmail) return;
+    if (!userEmail || view !== "dashboard") return;
     
     fetchNotifications();
 
@@ -470,8 +470,8 @@ export default function App() {
                           body: JSON.stringify({ dueDate: newDue.toISOString() })
                         });
                         if (resTask.ok) {
-                          setTasks(prev => prev.map(t => (t.id === notification.taskId || (t as any)._id === notification.taskId) ? { ...t, dueDate: newDue.toISOString() } : t));
-                          showSuccess("Task Snoozed ⏰", `"${currentTask.title}" postponed by 15 minutes.`);
+                           setTasks(prev => prev.map(t => (t.id === notification.taskId || (t as any)._id === notification.taskId) ? { ...t, dueDate: newDue.toISOString() } : t));
+                           showSuccess("Task Snoozed ⏰", `"${currentTask.title}" postponed by 15 minutes.`);
                         }
                       }
                       await fetchWithAuth(`/api/notifications/${notifId}/read`, { method: "PUT" });
@@ -505,11 +505,11 @@ export default function App() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [userEmail]);
+  }, [userEmail, view]);
 
   // Sync tasks on auth
   useEffect(() => {
-    if (!userEmail) return;
+    if (!userEmail || view !== "dashboard") return;
     const syncTasks = async () => {
       setIsSparklineLoading(true);
       try {
@@ -539,7 +539,7 @@ export default function App() {
       }
     };
     syncTasks();
-  }, [userEmail]);
+  }, [userEmail, view]);
 
   // Trigger main OS cognitive alignment engine
   const runLifeOSEngine = async () => {
@@ -816,8 +816,9 @@ export default function App() {
     }
   };
 
-  // If no user email, enforce secure login flow
-  if (!userEmail) {
+  // If trying to access dashboard and not logged in, enforce secure login flow.
+  // The public landing page does not require active session state or authenticated initialization.
+  if (view !== "landing" && !userEmail) {
     return (
       <div className="relative min-h-screen bg-brand-bg text-zinc-100 flex items-center justify-center overflow-hidden select-none">
         <div className="absolute inset-0 moving-grid pointer-events-none opacity-20" />
