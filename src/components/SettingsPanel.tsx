@@ -9,6 +9,7 @@ interface SettingsPanelProps {
   onUpdateRole: (role: string) => void;
   avatar?: string;
   onAvatarUpdated?: (newUrl: string) => void;
+  onSettingsUpdated?: (settings: any) => void;
 }
 
 export default function SettingsPanel({ 
@@ -16,7 +17,8 @@ export default function SettingsPanel({
   userRole, 
   onUpdateRole, 
   avatar: propAvatar, 
-  onAvatarUpdated 
+  onAvatarUpdated,
+  onSettingsUpdated
 }: SettingsPanelProps) {
   const { success: showSuccess, error: showError } = useToast();
 
@@ -228,6 +230,30 @@ export default function SettingsPanel({
         if (data && data.isMongoConnected !== undefined) {
           setIsMongoConnected(data.isMongoConnected);
         }
+        
+        onSettingsUpdated?.({
+          workHoursStart,
+          workHoursEnd,
+          focusLevel,
+          pushEnabled,
+          emailAlerts,
+          burnoutTriggers,
+          browserNotificationsEnabled,
+          soundAlertsEnabled,
+          aiSuggestionsEnabled,
+          snoozeDuration,
+          modelType,
+          disruptionGrade,
+          pacingInterval,
+          name,
+          weeklyProgressReports,
+          dailyWorkspaceSummaries,
+          reminderFrequency,
+          aiResponseStyle,
+          creativityLevel,
+          scheduleStyle
+        });
+
         showSuccess("Settings updated successfully", "Your profile and configuration has been updated.");
       } else {
         showError("Failed to Save Settings", "Server rejected settings synchronization.");

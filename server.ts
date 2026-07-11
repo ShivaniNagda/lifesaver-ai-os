@@ -271,7 +271,15 @@ async function startServer() {
 
   const distPath = path.join(process.cwd(), "dist");
 
-  if (process.env.NODE_ENV !== "production") {
+  // Prefer serving the optimized static production build if it exists
+  if (fs.existsSync(path.join(distPath, "index.html"))) {
+    console.log("[Server Initialization] Found production build in /dist. Serving static optimized assets.");
+    app.use(express.static(distPath));
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  } else if (process.env.NODE_ENV !== "production") {
+    console.log("[Server Initialization] Starting Vite Development Server Middleware...");
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -279,6 +287,7 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
+    console.log("[Server Initialization] Serving static assets in standard production mode...");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));

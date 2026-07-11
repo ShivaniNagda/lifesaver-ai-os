@@ -118,6 +118,30 @@ export default function App() {
   const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem("lifeos_email") || null);
   const [userRole, setUserRole] = useState<string>(() => localStorage.getItem("lifeos_role") || "Executive Officer");
   const [avatar, setAvatar] = useState<string>("");
+  const [appSettings, setAppSettings] = useState<{ soundAlertsEnabled: boolean; browserNotificationsEnabled: boolean } | null>(null);
+
+  // Load settings once on auth success
+  useEffect(() => {
+    if (!userEmail) {
+      setAppSettings(null);
+      return;
+    }
+    const loadSettings = async () => {
+      try {
+        const res = await fetchWithAuth("/api/settings");
+        if (res.ok) {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await res.json();
+            setAppSettings(data);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load settings once on auth:", err);
+      }
+    };
+    loadSettings();
+  }, [userEmail]);
 
   useEffect(() => {
     if (!userEmail) {
@@ -355,13 +379,23 @@ export default function App() {
           const data = await res.json();
           setNotifications(data);
           
-          const settingsRes = await fetchWithAuth("/api/settings");
-          let settings = { soundAlertsEnabled: true, browserNotificationsEnabled: true };
-          if (settingsRes.ok) {
-            const settingsContentType = settingsRes.headers.get("content-type");
-            if (settingsContentType && settingsContentType.includes("application/json")) {
-              const settingsData = await settingsRes.json();
-              if (settingsData) settings = settingsData;
+          // Use cached appSettings or load them if not yet fetched, but do not poll settings aggressively
+          let settings = appSettings || { soundAlertsEnabled: true, browserNotificationsEnabled: true };
+          if (!appSettings) {
+            try {
+              const settingsRes = await fetchWithAuth("/api/settings");
+              if (settingsRes.ok) {
+                const settingsContentType = settingsRes.headers.get("content-type");
+                if (settingsContentType && settingsContentType.includes("application/json")) {
+                  const settingsData = await settingsRes.json();
+                  if (settingsData) {
+                    settings = settingsData;
+                    setAppSettings(settingsData);
+                  }
+                }
+              }
+            } catch (settingsErr) {
+              console.error("[Notifications Poller] Failed to load settings fallback inside interval:", settingsErr);
             }
           }
 
@@ -2148,6 +2182,7 @@ export default function App() {
                   onUpdateRole={(role) => setUserRole(role)} 
                   avatar={avatar}
                   onAvatarUpdated={(newUrl) => setAvatar(newUrl)}
+                  onSettingsUpdated={setAppSettings}
                 />
               </div>
               <div className="md:col-span-4">
