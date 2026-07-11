@@ -119,6 +119,12 @@ export default function App() {
   const [userRole, setUserRole] = useState<string>(() => localStorage.getItem("lifeos_role") || "Executive Officer");
   const [avatar, setAvatar] = useState<string>("");
   const [appSettings, setAppSettings] = useState<{ soundAlertsEnabled: boolean; browserNotificationsEnabled: boolean } | null>(null);
+  
+  const appSettingsRef = useRef<{ soundAlertsEnabled: boolean; browserNotificationsEnabled: boolean } | null>(null);
+  
+  useEffect(() => {
+    appSettingsRef.current = appSettings;
+  }, [appSettings]);
 
   // Load settings once on auth success
   useEffect(() => {
@@ -380,8 +386,8 @@ export default function App() {
           setNotifications(data);
           
           // Use cached appSettings or load them if not yet fetched, but do not poll settings aggressively
-          let settings = appSettings || { soundAlertsEnabled: true, browserNotificationsEnabled: true };
-          if (!appSettings) {
+          let settings = appSettingsRef.current || { soundAlertsEnabled: true, browserNotificationsEnabled: true };
+          if (!appSettingsRef.current) {
             try {
               const settingsRes = await fetchWithAuth("/api/settings");
               if (settingsRes.ok) {
