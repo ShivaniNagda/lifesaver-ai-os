@@ -548,4 +548,20 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   opacity: 0.15 !important;
 }
 
+/* WCAG Contrast Enhancements for Dark Mode */
+.text-zinc-500 {
+  color: #a1a1aa !important; /* Zinc 400 - Over 4.5:1 ratio on #09090b */
+}
 
+.text-zinc-600 {
+  color: #cbd5e1 !important; /* Zinc 300 - Over 7:1 ratio on #09090b */
+}
+
+/* Keep Light Mode distinct overrides for muted text */
+:root.light .text-zinc-500 {
+  color: #475569 !important; /* Slate 600 - High contrast on light */
+}
+
+:root.light .text-zinc-600 {
+  color: #334155 !important; /* Slate 700 - High contrast on light */
+}

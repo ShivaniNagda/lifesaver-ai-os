@@ -14,8 +14,18 @@ export default defineConfig(() => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom'],
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('lucide-react')) {
+                return 'lucide-vendor';
+              }
+              if (id.includes('motion') || id.includes('framer-motion') || id.includes('@motionone')) {
+                return 'motion-vendor';
+              }
+              if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler') || id.includes('object-assign')) {
+                return 'react-vendor';
+              }
+            }
           }
         }
       },
