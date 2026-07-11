@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Sparkles, Shield, AlertTriangle, CheckCircle, Brain, Terminal, 
@@ -9,6 +9,7 @@ import {
   BarChart3
 } from "lucide-react";
 import GeminiBadgeTooltip from "./components/GeminiBadgeTooltip";
+import TaskItem from "./components/TaskItem";
 import { 
   Task, TimelineNode, AgentLog, FutureSelfDialog, AgentOSResponse, 
   NegotiationResult, PreparationPlan, TwinChatResponse, ChatMessage 
@@ -613,8 +614,8 @@ export default function App() {
   };
 
   // Toggle task status
-  const toggleTaskStatus = async (id: string) => {
-    const task = tasks.find(t => t.id === id || (t as any)._id === id);
+  const toggleTaskStatus = useCallback(async (id: string) => {
+    const task = tasksRef.current.find(t => t.id === id || (t as any)._id === id);
     if (!task) return;
     const newStatus = task.status === "completed" ? "pending" : "completed";
     
@@ -637,11 +638,11 @@ export default function App() {
       console.error("Failed to toggle task:", err);
       showError("Server Error", "Could not synchronize task completion state.", "task");
     }
-  };
+  }, [showSuccess, showError, showInfo]);
 
   // Remove task
-  const removeTask = async (id: string) => {
-    const task = tasks.find(t => t.id === id || (t as any)._id === id);
+  const removeTask = useCallback(async (id: string) => {
+    const task = tasksRef.current.find(t => t.id === id || (t as any)._id === id);
     const title = task ? task.title : "Task";
     try {
       const res = await fetchWithAuth(`/api/tasks/${id}`, {
@@ -657,7 +658,7 @@ export default function App() {
       console.error("Failed to delete task:", err);
       showError("Server Error", "Could not complete task removal.", "task");
     }
-  };
+  }, [showSuccess, showError]);
 
   const programmaticAddTask = async (title: string, urgency: "low" | "medium" | "high" | "critical", dueDate: string) => {
     try {
@@ -1387,37 +1388,12 @@ export default function App() {
                   </div>
                 ) : (
                   tasks.map((task) => (
-                    <div 
-                      key={task.id} 
-                      className="flex items-center justify-between p-2.5 rounded-lg bg-black/40 border border-zinc-900/60 hover:border-zinc-800/80 transition-colors"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <input
-                          type="checkbox"
-                          checked={task.status === "completed"}
-                          onChange={() => toggleTaskStatus(task.id)}
-                          className="w-3.5 h-3.5 rounded border-zinc-800 bg-zinc-950 text-white focus:ring-0 focus:ring-offset-0 cursor-pointer"
-                        />
-                        <div className="min-w-0">
-                          <p className={`text-xs font-sans truncate ${task.status === "completed" ? "line-through text-zinc-500" : "text-zinc-200"}`}>
-                            {task.title}
-                          </p>
-                          <p className="text-[9px] font-mono text-zinc-500 mt-0.5">Due: {task.dueDate}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className={`px-1.5 py-0.5 rounded border text-[8px] font-mono uppercase tracking-wider ${getUrgencyBadgeClass(task.urgency)}`}>
-                          {task.urgency}
-                        </span>
-                        <button 
-                          onClick={() => removeTask(task.id)} 
-                          className="text-zinc-600 hover:text-red-400 p-0.5 transition-colors"
-                          aria-label="Delete Task"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
+                    <TaskItem
+                      key={task.id}
+                      task={task}
+                      onToggleStatus={toggleTaskStatus}
+                      onRemove={removeTask}
+                    />
                   ))
                 )}
               </div>

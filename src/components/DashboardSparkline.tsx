@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 interface SparklineProps {
   data: any[];
@@ -19,11 +19,27 @@ function DashboardSparkline({
 }: SparklineProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  if (isLoading || !data || data.length === 0) {
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  if (isLoading || !data || data.length === 0 || !isVisible) {
     return (
-      <div className="w-full h-full flex flex-col justify-end animate-pulse" id="sparkline-skeleton">
+      <div ref={containerRef} className="w-full h-full flex flex-col justify-end animate-pulse" id="sparkline-skeleton">
         <svg viewBox="0 0 100 40" className="w-full h-full" preserveAspectRatio="none">
           <defs>
             <linearGradient id={`skeleton-grad-${gradientId}`} x1="0" y1="0" x2="0" y2="1">

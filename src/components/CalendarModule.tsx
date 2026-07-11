@@ -19,15 +19,38 @@ interface CalendarModuleProps {
   onAutoScheduleTasks?: (scheduledTimeline: any[]) => void;
 }
 
+const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const LONG_MONTHS = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+
 const getMonthDays = () => {
   const dates = [];
-  const startDay = 21; // Sun
+  const startYear = 2026;
+  const startMonth = 5; // June is 5 (0-indexed)
+  const startDay = 21;
   for (let i = 0; i < 14; i++) {
-    const dayNum = startDay + i;
-    const dateStr = `2026-06-${dayNum < 10 ? '0' + dayNum : dayNum}`;
-    dates.push({ dayNum, dateStr });
+    const d = new Date(startYear, startMonth, startDay + i);
+    const y = d.getFullYear();
+    const m = d.getMonth();
+    const dateNum = d.getDate();
+    const dateStr = `${y}-${String(m + 1).padStart(2, "0")}-${String(dateNum).padStart(2, "0")}`;
+    dates.push({
+      date: d,
+      dayNum: dateNum,
+      month: m,
+      year: y,
+      dateStr
+    });
   }
   return dates;
+};
+
+const getActiveMonthYearLabel = (dateStr: string) => {
+  const parts = dateStr.split("-");
+  if (parts.length < 3) return "JUNE 2026";
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // 0-indexed
+  const monthName = LONG_MONTHS[month] || "JUNE";
+  return `${monthName} ${year}`;
 };
 
 export default function CalendarModule({ tasks }: CalendarModuleProps) {
@@ -496,7 +519,9 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
           
           {/* Month Day strip visualizer */}
           <div className="glass-panel p-4 rounded-xl border border-zinc-900">
-            <span className="text-[9px] font-mono text-zinc-500 block mb-2 uppercase">June 2026 Calendar Grid</span>
+            <span className="text-[9px] font-mono text-zinc-500 block mb-2 uppercase">
+              {getActiveMonthYearLabel(selectedDate)} Calendar Grid
+            </span>
             <div className="grid grid-cols-7 gap-2">
               {monthDays.map((day) => {
                 const isSelected = day.dateStr === selectedDate;
@@ -518,7 +543,9 @@ export default function CalendarModule({ tasks }: CalendarModuleProps) {
                     }`}
                   >
                     <span className="text-[10px] font-bold block">{day.dayNum}</span>
-                    <span className="text-[8px] font-mono opacity-60 block mt-0.5">Jun</span>
+                    <span className="text-[8px] font-mono opacity-60 block mt-0.5">
+                      {SHORT_MONTHS[day.month]}
+                    </span>
                     
                     <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
                       {dailyEvts.length > 0 && (
